@@ -1,0 +1,63 @@
+# Elite PMU Luxury Showcase: Master Implementation Plan
+
+This plan outlines the transformation of the MEKA platform into a premium, luxury e-commerce experience that exceeds the standards of `meka999.com`. We will implement a high-fidelity "Dark Luxury" design system, a bespoke Admin Panel, and a fully functional Firebase-backed store.
+
+## Phase 1: Luxury Design System & Foundation
+Setting the "Cinematic" stage for the brand experience.
+
+- **[MODIFY] [globals.css](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/app/globals.css)**: Set explicit color variables for Charcoal (#0D0D0D), Rose Gold (#C9956C), and Blush White (#FAF5F2). Configure `Playfair Display` for headings and `Inter` for body.
+- **[NEW] [Cursor.tsx](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/components/ui/Cursor.tsx)**: Implement a magnetic cursor with Framer Motion that interacts with buttons and product cards.
+- **Dependency Installation**: Install `framer-motion` for fluid transitions.
+
+## Phase 2: The Cinematic Homepage
+Moving beyond a simple hero to a full storytelling landing page.
+
+- **[MODIFY] [ModernHero.tsx](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/components/home/ModernHero.tsx)**: Refine with cinematic typography, magnetic CTA, and scroll-triggered entrance animations.
+- **[NEW] [BrandMarquee.tsx](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/components/home/BrandMarquee.tsx)**: Infinite scrolling logo list (Mast, Perma Blend, Doreme, etc.).
+- **[NEW] [TechniqueGrid.tsx](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/components/home/TechniqueGrid.tsx)**: "Shop by Technique" section with glass-morphism cards and technique-specific icons (Microblading, Lip Blush, etc.).
+- **[NEW] [BeforeAfterGallery.tsx](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/components/home/BeforeAfterGallery.tsx)**: Tabbed gallery with professional result imagery.
+
+## Phase 3: E-commerce Experience (PLP/PDP)
+High-performance shopping and product discovery.
+
+- **[NEW] [ProductListingPage](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/app/products/page.tsx)**: 
+  - Sidebar with Technique & Professional filters.
+  - Sorting logic for "Artist Choice", "Newest", and "Best Rated".
+  - Premium `ProductCard` with multi-image hover and low-stock indicators.
+- **[NEW] [ProductDetailPage](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/app/products/[id]/page.tsx)**: 
+  - Visual shade swatches for pigments.
+  - Sticky Add-to-Cart bar for mobile/desktop.
+  - "Frequently Bought Together" bundle logic.
+
+## Phase 4: Custom Admin Panel (/admin)
+A full-scale internal management system with role-based access.
+
+- **[NEW] [AdminLayout](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/app/admin/layout.tsx)**: Sidebar navigation for Products, Orders, Referrals, and Analytics.
+- **[NEW] [AdminDashboard](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/app/admin/page.tsx)**: Real-time Revenue & Conversion KPI cards.
+- **[NEW] [InventoryManager](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/app/admin/products/page.tsx)**: Full CRUD for products with variant management and Firebase Storage upload integration.
+
+## Phase 5: Education & Conversion
+Building trust through expertise and custom tools.
+
+- **[NEW] [ShadeFinder](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/app/shade-finder/page.tsx)**: Multi-step quiz logic to match skin undertones with pigments.
+- **[NEW] [EducationHub](file:///c:/Users/Lenovo/Desktop/Three%20Atoms/meka/src/app/education/page.tsx)**: Professional technique guides and healing timelines.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> - I will be installing `framer-motion` to handle the requested animations.
+> - I will strictly overwrite the existing color variables with the requested Charcoal/Rose Gold/Blush palette.
+> - I will utilize the `generate_image` tool to create luxury beauty photography for the new sections.
+
+## Verification Plan
+
+### Automated Tests
+- Unit tests for the "Shade Finder" logic.
+- Firebase integration verification (CRUD on products).
+
+### Manual Verification
+- Visual audit of "Magnetic Cursor" and scroll reveals.
+- Testing the multi-step checkout flow.
+- Admin Panel: Create a mock product and verify its appearance on the PLP.

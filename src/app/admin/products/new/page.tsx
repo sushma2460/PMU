@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ArrowLeft, ImagePlus, Loader2, X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Select,
@@ -18,6 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductCategory } from "@/lib/types";
+import { db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
+import { createProductAction } from "../actions";
 
 const CATEGORIES: ProductCategory[] = [
   "Machines & Power Supplies",
@@ -33,6 +37,7 @@ const CATEGORIES: ProductCategory[] = [
 
 export default function AddProductPage() {
   const { uploadImage, isUploading } = useImageUpload();
+  const router = useRouter();
   
   const [formData, setFormData] = useState({
     name: "",
@@ -77,16 +82,34 @@ export default function AddProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.category) {
+      toast.error("Please select a category.");
+      return;
+    }
     setIsSubmitting(true);
     
-    // In a real scenario, this will call Firebase Firestore collection 'products'
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Submitting:", { ...formData, imageUrls });
+      // Use Server Action to bypass Firestore Client Security Rules
+      const result = await createProductAction({
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        salePrice: formData.salePrice,
+        sku: formData.sku,
+        category: formData.category,
+        stock: formData.stock,
+        imageUrls,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
       toast.success("Product created successfully!");
-    } catch (err) {
-      toast.error("Failed to create product");
+      router.push("/admin/products");
+    } catch (err: any) {
+      console.error("Failed to create product:", err);
+      toast.error(err.message || "Failed to create product. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

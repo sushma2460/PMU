@@ -1,46 +1,108 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShoppingCart, User, Search, Menu } from "lucide-react";
+import { ShoppingCart, User, Search, Menu, LogOut, ChevronDown } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
 
 export function Navbar() {
   const { getCartCount, setIsOpen } = useCartStore();
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully");
+      router.push("/");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to logout");
+    }
+  };
   
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <button className="lg:hidden p-2">
+        {/* Left: Mobile Menu + Logo */}
+        <div className="flex items-center gap-4">
+          <button className="lg:hidden p-2 hover:bg-zinc-100 rounded-md transition-colors">
             <Menu className="h-6 w-6" />
           </button>
-          <Link href="/" className="font-bold text-2xl tracking-wider uppercase">
-            MEKA.999
+          <Link href={user ? "/home" : "/"} className="font-heading font-bold text-2xl tracking-tighter text-brand-black uppercase">
+            PMU<span className="text-brand-gold pl-1">SUPPLY</span>
           </Link>
-          <nav className="hidden xl:flex items-center gap-4 text-[13px] font-semibold ml-4 tracking-wide">
-            <Link href="/products" className="hover:text-amber-500 transition-colors whitespace-nowrap">SHOP ALL</Link>
-            <Link href="/products?category=on-my-tray" className="hover:text-amber-500 transition-colors whitespace-nowrap">ON MY TRAY</Link>
-            <Link href="/products?category=machines" className="hover:text-amber-500 transition-colors whitespace-nowrap">MACHINES & POWER</Link>
-            <Link href="/products?category=needles" className="hover:text-amber-500 transition-colors whitespace-nowrap">NEEDLES</Link>
-            <Link href="/products?category=pigments" className="hover:text-amber-500 transition-colors whitespace-nowrap">PIGMENTS</Link>
-            <Link href="/products?category=numbing" className="hover:text-amber-500 transition-colors whitespace-nowrap">NUMBING</Link>
-            <Link href="/products?category=practice" className="hover:text-amber-500 transition-colors whitespace-nowrap">PRACTICE</Link>
-            <Link href="/products?category=lashes" className="hover:text-amber-500 transition-colors whitespace-nowrap">LASHES</Link>
-          </nav>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button className="p-2 hover:text-amber-500 transition-colors">
-            <Search className="h-5 w-5" />
+        {/* Center: Navigation - Condensed with Dropdown */}
+        <nav className="hidden lg:flex items-center gap-8 text-[11px] font-bold tracking-[0.2em] text-zinc-800">
+          <Link href="/products" className="hover:text-brand-gold transition-colors whitespace-nowrap uppercase">Shop All</Link>
+          
+          {/* Categories Dropdown */}
+          <div className="relative group py-4">
+            <button className="flex items-center gap-2 hover:text-brand-gold transition-colors whitespace-nowrap uppercase">
+              Product Categories
+              <ChevronDown className="h-3 w-3 group-hover:rotate-180 transition-transform duration-300" />
+            </button>
+            <div className="absolute top-full left-0 w-64 bg-white border border-zinc-100 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-[100] rounded-xl overflow-hidden">
+              <div className="py-2">
+                {[
+                  { label: "Machines & Power", href: "/products?category=machines" },
+                  { label: "Needles", href: "/products?category=needles" },
+                  { label: "Pigments", href: "/products?category=pigments" },
+                  { label: "Numbing", href: "/products?category=numbing" },
+                  { label: "Practice", href: "/products?category=practice" },
+                  { label: "Lashes", href: "/products?category=lashes" },
+                ].map((item) => (
+                  <Link 
+                    key={item.label}
+                    href={item.href}
+                    className="block px-6 py-3 text-[10px] text-zinc-600 hover:bg-brand-rose hover:text-brand-black transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <Link href="/products?category=on-my-tray" className="hover:text-brand-gold transition-colors whitespace-nowrap uppercase">On My Tray</Link>
+          <Link href="/pages/international" className="hover:text-brand-gold transition-colors whitespace-nowrap uppercase">International</Link>
+          <Link href="/pages/contact" className="hover:text-brand-gold transition-colors whitespace-nowrap uppercase">Contact</Link>
+        </nav>
+
+        {/* Right: Icons */}
+        <div className="flex items-center gap-2 md:gap-4">
+          <button className="p-2 hover:text-brand-gold transition-colors group">
+            <Search className="h-5 w-5 group-hover:scale-110 transition-transform" />
           </button>
-          <Link href="/login" className="hidden sm:flex items-center p-2 hover:text-amber-500 transition-colors">
-            <User className="h-5 w-5" />
-          </Link>
-          <button onClick={() => setIsOpen(true)} className="relative p-2 hover:text-amber-500 transition-colors">
-            <ShoppingCart className="h-5 w-5" />
-            {getCartCount() > 0 && (
-              <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-amber-500 text-black text-[10px] font-bold flex items-center justify-center">
+          
+          {user ? (
+            <button 
+              onClick={handleLogout}
+              className="flex items-center p-2 hover:text-red-500 transition-colors group"
+              title="Logout"
+            >
+              <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
+            </button>
+          ) : (
+            <Link href="/login" className="flex items-center p-2 hover:text-brand-gold transition-colors group">
+              <User className="h-5 w-5 group-hover:scale-110 transition-transform" />
+            </Link>
+          )}
+          <button onClick={() => setIsOpen(true)} className="relative p-2 hover:text-brand-gold transition-colors group">
+            <ShoppingCart className="h-5 w-5 group-hover:scale-110 transition-transform" />
+            {mounted && getCartCount() > 0 && (
+              <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-brand-gold text-white text-[10px] font-bold flex items-center justify-center">
                 {getCartCount()}
               </span>
             )}

@@ -9,65 +9,107 @@ export type ProductCategory =
   | "Lashes"
   | "Other";
 
+export interface ProductVariant {
+  id: string;
+  name: string;      // e.g. "Pink", "0.30mm"
+  type: string;      // e.g. "Color", "Size"
+  priceModifier: number;
+  stock: number;
+  sku: string;
+}
+
 export interface Product {
   id?: string;
   name: string;
+  slug: string;
   description: string;
+  shortDescription?: string;
   price: number;
   salePrice?: number;
-  sku?: string;
   category: ProductCategory | string;
-  stock: number;
+  stock: number;     // Total stock if no variants, otherwise sum of variants
   imageUrls: string[];
   tags?: string[];
+  isFeatured?: boolean;
+  isActive?: boolean;
+  variants?: ProductVariant[];
   createdAt: number;
   updatedAt: number;
 }
 
-export interface User {
+export interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
   role: 'admin' | 'customer';
   points: number;
+  storeCredit: number;
   referralCode: string;
-  referredBy?: string; // UID or referral code of the person who referred them
+  referredBy?: string; // UID of the person who referred them
+  totalReferralEarnings: number;
   createdAt: number;
-}
-
-export interface Category {
-  id?: string;
-  name: string;
-  description?: string;
-  slug: string;
 }
 
 export interface Coupon {
   id?: string;
   code: string;
-  type: 'percentage' | 'flat';
-  value: number; // e.g., 10 for 10% or 10 for $10
+  description?: string;
+  type: 'percentage' | 'flat' | 'free_shipping';
+  value: number; 
   expiryDate: number;
-  usageLimit: number;
+  usageLimit?: number;
   usageCount: number;
+  userUsageLimit?: number;
   minimumOrderValue?: number;
   isActive: boolean;
+  applicableCategories?: string[]; // category slugs or IDs
+}
+
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  variantId?: string;
+  variantName?: string;
+  quantity: number;
+  priceAtPurchase: number;
+  totalPrice: number;
 }
 
 export interface Order {
   id?: string;
   userId: string;
-  products: {
-    productId: string;
-    quantity: number;
-    priceAtPurchase: number;
-  }[];
+  items: OrderItem[];
   subtotal: number;
-  discount: number;
+  discountAmount: number;
+  shippingAmount: number;
+  taxAmount: number;
   total: number;
-  couponApplied?: string;
+  couponId?: string;
+  referralCodeUsed?: string;
   pointsEarned: number;
   pointsUsed: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  storeCreditUsed: number;
+  status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  shippingAddress: {
+    firstName: string;
+    lastName: string;
+    address: string;
+    city: string;
+    zipCode: string;
+    country: string;
+    phone: string;
+  };
+  stripePaymentIntentId?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Referral {
+  id: string;
+  referrerId: string;
+  refereeId: string;
+  status: 'pending' | 'qualified' | 'rewarded';
+  rewardAmount: number;
+  qualifyingOrderId?: string;
   createdAt: number;
 }

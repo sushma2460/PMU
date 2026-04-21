@@ -1,208 +1,272 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/useCartStore";
-import { ArrowLeft, Minus, Plus, ShieldCheck, Truck, RotateCcw } from "lucide-react";
+import { 
+  ArrowLeft, Minus, Plus, ShieldCheck, Truck, 
+  RotateCcw, Info, Droplet, Zap, Target 
+} from "lucide-react";
 import Link from "next/link";
 import { Product } from "@/lib/types";
 
-// Temporarily keep mock products here for demonstration
+// Unified Mock Data specifically for Phase 3 - Cinematic Experience
 const MOCK_PRODUCTS: Product[] = [
   {
     id: "p1",
-    name: "MEKA Needle Cartridge V3 (NEW)",
+    name: "PMU SUPPLY Precision V3 Cartridge",
+    slug: "pmu-supply-v3-cartridge",
     price: 29.00,
     category: "Needles",
-    imageUrls: ["https://meka999.com/cdn/shop/files/mekav3cartridges.png?v=1710461623&width=823"],
-    description: "Ultra Precision Needle Cartridges designed for precise PMU or traditional tattooing.",
-    stock: 100,
-    createdAt: Date.now(),
-    updatedAt: Date.now()
+    imageUrls: ["/images/landing/v3-cartridges.png"],
+    description: "The V3 series represents the pinnacle of PMU needle technology. Engineered with a custom medical-grade membrane and ultra-sharp 316 surgical stainless steel, the V3 provides unparalleled stability and pigment flow.",
+    stock: 120,
+    variants: [
+      { id: "v1-1", name: "0.20mm Nano", type: "Size", priceModifier: 0, stock: 60, sku: "M-V3-N20" },
+      { id: "v1-2", name: "0.25mm Light", type: "Size", priceModifier: 0, stock: 40, sku: "M-V3-L25" },
+      { id: "v1-3", name: "0.30mm HD", type: "Size", priceModifier: 0, stock: 20, sku: "M-V3-H30" }
+    ],
+    createdAt: 1713391851,
+    updatedAt: 1713391851
   },
   {
     id: "p2",
-    name: "MEKA Needle Cartridges V2 (RLLT)",
-    price: 29.00,
-    category: "Needles",
-    imageUrls: ["https://meka999.com/cdn/shop/files/mekav2needles.png?v=1713391851&width=823"],
-    description: "High-quality universal cartridges with US regulation membrane to prevent ink leakage.",
-    stock: 85,
-    createdAt: Date.now(),
-    updatedAt: Date.now()
-  },
-  {
-    id: "p3",
-    name: "MEKA Nano Organic Pigment",
-    price: 36.00,
-    category: "Pigments",
-    imageUrls: ["https://meka999.com/cdn/shop/files/mekapigments.png?v=1710461623&width=823"],
-    description: "Waterbase oxide free organic pigments, ideal for ombre brow and hair stroke.",
-    stock: 50,
-    createdAt: Date.now(),
-    updatedAt: Date.now()
-  },
-  {
-    id: "p7",
-    name: "Organic Smoothie Skin Treatment",
-    price: 35.00,
-    category: "Aftercare",
-    imageUrls: ["https://meka999.com/cdn/shop/files/IMG_4131.jpg?v=1695668682&width=823"],
-    description: "Petroleum Free! Made for professional PMU artists and the general public alike.",
-    stock: 200,
-    createdAt: Date.now(),
-    updatedAt: Date.now()
-  },
-  {
-    id: "p8",
-    name: "Signature Practice Skins (Pack of 5)",
-    price: 20.00,
-    category: "Practice Materials",
-    imageUrls: ["https://meka999.com/cdn/shop/files/IMG-4013.jpg?v=1776421429&width=823"],
-    description: "Designers of newest versions of latex practice skin, designed for easier practice.",
-    stock: 300,
-    createdAt: Date.now(),
-    updatedAt: Date.now()
+    name: "PMU SUPPLY E95 Precision Machine",
+    slug: "pmu-supply-e95-machine",
+    price: 495.00,
+    category: "Machines",
+    imageUrls: ["/images/landing/precision-machine.png"],
+    description: "The E95 is a masterpiece of precision engineering. Designed for the artist who demands perfection, it features a custom coreless motor that delivers consistent power without the heat, even during 8-hour sessions.",
+    stock: 15,
+    variants: [
+      { id: "v2-1", name: "Champagne Gold", type: "Finish", priceModifier: 0, stock: 10, sku: "M-E95-GLD" },
+      { id: "v2-2", name: "Satin Pink", type: "Finish", priceModifier: 0, stock: 5, sku: "M-E95-PNK" }
+    ],
+    createdAt: 1713391851,
+    updatedAt: 1713391852
   }
 ];
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
+  const setIsOpen = useCartStore((state) => state.setIsOpen);
 
-  // In real app, fetch from Firestore. Here we use mock data.
-  const product = MOCK_PRODUCTS.find(p => p.id === unwrappedParams.id) || MOCK_PRODUCTS[1];
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Use the ID from params, fallback to p1 for demo
+  const product = MOCK_PRODUCTS.find(p => p.id === unwrappedParams.id) || MOCK_PRODUCTS[0];
+  
+  const currentVariant = product.variants?.find(v => v.id === selectedVariant) || null;
+  const currentPrice = product.price + (currentVariant?.priceModifier || 0);
 
   const handleAddToCart = () => {
-    addItem(product, quantity);
+    addItem(product, quantity, selectedVariant || undefined, currentVariant?.name);
+    setIsOpen(true);
   };
+
+  if (!mounted) return null;
 
   return (
     <main className="min-h-screen bg-white">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Link href="/products" className="text-zinc-500 hover:text-amber-600 inline-flex items-center text-sm font-medium transition-colors">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Products
+      <div className="relative">
+        {/* Cinematic Product Header */}
+        <div className="container mx-auto px-4 pt-12">
+          <Link href="/products" className="group inline-flex items-center gap-3 text-[10px] font-bold tracking-[0.4em] uppercase text-zinc-400 hover:text-brand-gold transition-all duration-500 mb-12">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Archive
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-24 mb-20">
-          
-          {/* Image Gallery Column */}
-          <div className="space-y-4">
-            <div className="relative aspect-square w-full bg-zinc-50 rounded-xl overflow-hidden border border-zinc-100">
-              <div 
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url("${product.imageUrls[0]}")` }}
-              />
-              {product.salePrice && (
-                <span className="absolute top-4 left-4 bg-amber-500 text-black px-3 py-1 font-bold text-sm tracking-wide uppercase rounded-sm">
-                  SALE
-                </span>
-              )}
-            </div>
+        <div className="container mx-auto px-4 pb-32">
+          <div className="grid lg:grid-cols-2 gap-16 xl:gap-32 items-start">
             
-            {/* Thumbnail Gallery */}
-            {product.imageUrls.length > 1 && (
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {product.imageUrls.map((url, i) => (
-                  <button key={i} className="relative w-24 h-24 rounded-md overflow-hidden border-2 border-transparent focus:border-amber-500 shrink-0">
-                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${url}")` }} />
-                  </button>
-                ))}
+            {/* Gallery Column */}
+            <div className="space-y-8 sticky top-32">
+              <div className="relative aspect-[4/5] rounded-[4rem] overflow-hidden bg-zinc-50 border border-zinc-100 shadow-2xl group">
+                <div 
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-[4s] group-hover:scale-105"
+                  style={{ backgroundImage: `url("${product.imageUrls[0]}")` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                
+                {/* Floating Elements */}
+                <div className="absolute bottom-12 left-12 right-12 flex justify-between items-end">
+                   <div className="p-6 bg-white/20 backdrop-blur-md rounded-3xl border border-white/30 text-white">
+                     <p className="text-[10px] font-bold tracking-widest uppercase">Certified Professional</p>
+                     <h4 className="font-heading italic text-xl leading-tight">Master Grade Supply</h4>
+                   </div>
+                   <div className="w-16 h-16 rounded-full border border-white/50 flex items-center justify-center text-white backdrop-blur-md">
+                     <Target className="w-6 h-6 animate-pulse" />
+                   </div>
+                </div>
               </div>
-            )}
-          </div>
 
-          {/* Product Details Column */}
-          <div className="flex flex-col pt-4">
-            <div className="mb-2">
-              <span className="text-xs font-bold text-amber-500 tracking-wider uppercase">
-                {product.category}
-              </span>
+              {/* Minimalist Tech Bar */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-6 rounded-3xl border border-zinc-100 bg-zinc-50/50 flex flex-col items-center gap-3 text-center">
+                   <Zap className="w-5 h-5 text-brand-gold" />
+                   <span className="text-[8px] font-bold tracking-[0.2em] uppercase text-zinc-400">High Precision</span>
+                </div>
+                <div className="p-6 rounded-3xl border border-zinc-100 bg-zinc-50/50 flex flex-col items-center gap-3 text-center">
+                   <ShieldCheck className="w-5 h-5 text-brand-gold" />
+                   <span className="text-[8px] font-bold tracking-[0.2em] uppercase text-zinc-400">Sterilized</span>
+                </div>
+                <div className="p-6 rounded-3xl border border-zinc-100 bg-zinc-50/50 flex flex-col items-center gap-3 text-center">
+                   <Droplet className="w-5 h-5 text-brand-gold" />
+                   <span className="text-[8px] font-bold tracking-[0.2em] uppercase text-zinc-400">Optimized Flow</span>
+                </div>
+              </div>
             </div>
-            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-zinc-900 mb-4">
-              {product.name}
-            </h1>
-            
-            <div className="flex items-end gap-3 mb-6">
-              {product.salePrice ? (
-                <>
-                  <span className="text-3xl font-bold text-zinc-900">${product.salePrice.toFixed(2)}</span>
-                  <span className="text-xl text-zinc-400 line-through mb-1">${product.price.toFixed(2)}</span>
-                </>
-              ) : (
-                <span className="text-3xl font-bold text-zinc-900">${product.price.toFixed(2)}</span>
+
+            {/* Information Column */}
+            <div className="space-y-12">
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-px w-10 bg-brand-gold" />
+                  <span className="text-brand-gold text-[10px] font-bold tracking-[0.5em] uppercase">{product.category}</span>
+                </div>
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading leading-tight italic text-zinc-900">
+                  {product.name}
+                </h1>
+                <div className="flex items-baseline gap-6">
+                  <span className="text-3xl font-light tracking-tight text-zinc-900">${currentPrice.toFixed(2)}</span>
+                  <span className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">Includes Sales Tax</span>
+                </div>
+              </div>
+
+              <div className="prose prose-zinc max-w-none text-zinc-500 font-light leading-loose text-lg italic">
+                <p>{product.description}</p>
+              </div>
+
+              {/* Variant Switcher - Modern Cards */}
+              {product.variants && product.variants.length > 0 && (
+                <div className="space-y-6">
+                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-zinc-400">Custom Specification</span>
+                  <div className="grid grid-cols-2 gap-4">
+                    {product.variants.map((v) => (
+                      <button
+                        key={v.id}
+                        onClick={() => setSelectedVariant(v.id)}
+                        className={`p-6 text-left rounded-3xl border transition-all duration-500 ${
+                          selectedVariant === v.id 
+                          ? 'bg-brand-black border-brand-black text-white shadow-xl translate-x-1' 
+                          : 'bg-white border-zinc-100 text-zinc-400 hover:border-brand-gold hover:text-brand-gold'
+                        }`}
+                      >
+                         <p className="text-[8px] font-bold tracking-widest uppercase opacity-60 mb-2">{v.type}</p>
+                         <p className="font-bold tracking-widest text-xs uppercase">{v.name}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
-            </div>
 
-            <div className="prose prose-zinc text-zinc-600 mb-8 max-w-none">
-              <p>{product.description}</p>
-            </div>
-
-            <div className="space-y-6 pt-6 border-t border-zinc-100 mt-auto">
-              <div>
-                <span className="text-sm font-medium text-zinc-900 uppercase tracking-wide">Quantity</span>
-                <div className="flex items-center gap-4 mt-2">
-                  <div className="flex items-center border border-zinc-300 rounded-md">
+              {/* Action Area */}
+              <div className="pt-12 border-t border-zinc-100 space-y-8">
+                <div className="flex flex-col sm:flex-row gap-6">
+                  <div className="flex items-center bg-zinc-50 rounded-full px-6 h-16 border border-zinc-100">
                     <button 
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="p-3 text-zinc-500 hover:text-black transition-colors"
-                      disabled={quantity <= 1}
+                      className="p-2 text-zinc-400 hover:text-brand-black transition-colors"
                     >
-                      <Minus size={18} />
+                      <Minus size={16} />
                     </button>
-                    <span className="w-12 text-center font-medium">{quantity}</span>
+                    <span className="w-12 text-center font-bold text-sm tracking-widest">{quantity}</span>
                     <button 
                       onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                      className="p-3 text-zinc-500 hover:text-black transition-colors"
-                      disabled={quantity >= product.stock}
+                      className="p-2 text-zinc-400 hover:text-brand-black transition-colors"
                     >
-                      <Plus size={18} />
+                      <Plus size={16} />
                     </button>
                   </div>
                   
-                  <div className="flex-1">
-                    <Button 
-                      onClick={handleAddToCart}
-                      className="w-full h-[50px] bg-amber-500 hover:bg-amber-600 text-black font-semibold text-base"
-                    >
-                      ADD TO CART
-                    </Button>
+                  <Button 
+                    onClick={handleAddToCart}
+                    disabled={product.variants && product.variants.length > 0 && !selectedVariant}
+                    className="flex-1 h-16 bg-brand-black text-white hover:bg-brand-gold rounded-full font-bold tracking-[0.4em] text-[10px] transition-all duration-700 shadow-2xl disabled:opacity-30"
+                  >
+                    ACQUIRE FOR — ${(currentPrice * quantity).toFixed(2)}
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8 text-zinc-400">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center">
+                      <Truck className="w-4 h-4 text-brand-gold" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[8px] font-bold tracking-widest uppercase text-zinc-900">Priority Transit</p>
+                      <p className="text-[8px] font-medium tracking-widest uppercase">Global Master Network</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center">
+                      <RotateCcw className="w-4 h-4 text-brand-gold" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[8px] font-bold tracking-widest uppercase text-zinc-900">Artist Support</p>
+                      <p className="text-[8px] font-medium tracking-widest uppercase">Expert Consultation</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Trust Badges */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-zinc-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-700">
-                    <ShieldCheck size={20} />
-                  </div>
-                  <span className="text-xs font-medium text-zinc-600">Secure<br/>Checkout</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-700">
-                    <Truck size={20} />
-                  </div>
-                  <span className="text-xs font-medium text-zinc-600">Fast<br/>Shipping</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-700">
-                    <RotateCcw size={20} />
-                  </div>
-                  <span className="text-xs font-medium text-zinc-600">Easy<br/>Returns</span>
-                </div>
+              {/* Usage / Pro Tips Accordion-style Area */}
+              <div className="p-8 bg-zinc-50 rounded-[3rem] border border-zinc-100 flex items-start gap-4 space-y-1">
+                 <Info className="w-5 h-5 text-brand-gold mt-1" />
+                 <div>
+                   <h4 className="font-bold text-[10px] tracking-widest uppercase text-zinc-900">Master's Guide</h4>
+                   <p className="text-zinc-500 text-sm font-light leading-relaxed italic">
+                      For optimal pigment retention, ensure the angle of entry is consistent at 90° for {product.category === 'Needles' ? 'pixelated shaders' : 'machine strokes'}. 
+                      Recommended for professional use only.
+                   </p>
+                 </div>
               </div>
             </div>
-
           </div>
         </div>
+
+        {/* Curation Rail */}
+        <section className="py-32 bg-zinc-50 border-t border-zinc-100">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16 px-4">
+              <div className="space-y-4">
+                <span className="text-brand-gold text-[10px] font-bold tracking-[0.5em] uppercase">The Narrative</span>
+                <h2 className="text-4xl md:text-5xl font-heading italic">Recommended <br/>by the <span className="text-brand-gold not-italic font-sans font-black tracking-widest uppercase">Curators</span></h2>
+              </div>
+              <Link href="/products" className="text-[10px] font-bold tracking-[0.3em] uppercase border-b border-brand-gold pb-1 hover:opacity-70 transition-opacity">
+                VIEW FULL ARCHIVE
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+              {MOCK_PRODUCTS.map((item) => (
+                <Link key={item.id} href={`/products/${item.id}`} className="group block space-y-6">
+                  <div className="relative aspect-[4/5] bg-white rounded-[2.5rem] overflow-hidden transition-all duration-700 hover:shadow-2xl hover:-translate-y-2 border border-zinc-100">
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-[3s] group-hover:scale-110"
+                      style={{ backgroundImage: `url("${item.imageUrls[0]}")` }}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                  </div>
+                  <div className="space-y-2 text-center">
+                    <h3 className="text-[10px] font-bold tracking-widest uppercase group-hover:text-brand-gold transition-colors">{item.name}</h3>
+                    <p className="text-zinc-400 font-light italic">${item.price.toFixed(2)}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
