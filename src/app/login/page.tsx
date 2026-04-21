@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import { Suspense } from "react";
 import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -32,22 +33,26 @@ async function getRedirectForUser(uid: string): Promise<string> {
   return "/home";
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { loginWithGoogle, user, isAdmin, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
 
   // After Google login, once AuthContext resolves the role, redirect accordingly
   useEffect(() => {
     if (!loading && user) {
       if (isAdmin) {
         router.replace("/admin/dashboard");
+      } else if (returnUrl) {
+        router.replace(returnUrl);
       }
-      // For regular users, the login handler already pushed to /home
+      // For regular users without returnUrl, the login handler already pushes to /home
     }
-  }, [user, isAdmin, loading]);
+  }, [user, isAdmin, loading, returnUrl]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +60,11 @@ export default function LoginPage() {
     try {
       const { user: loggedInUser } = await signInWithEmailAndPassword(auth, email, password);
       const redirectPath = await getRedirectForUser(loggedInUser.uid);
+      
+      const finalRedirect = (redirectPath === "/home" && returnUrl) ? returnUrl : redirectPath;
+      
       toast.success(redirectPath === "/admin/dashboard" ? "Admin Console unlocked." : "Logged in successfully.");
-      router.push(redirectPath);
+      router.push(finalRedirect);
     } catch (error: any) {
       toast.error(error.message || "Failed to login");
     } finally {
@@ -68,10 +76,11 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await loginWithGoogle();
-      // Redirect is handled in the useEffect above once isAdmin resolves
-      // Fallback for regular users
+      // Redirect is handled in the useEffect above
       toast.success("Logged in with Google");
-      router.push("/home");
+      if (!isAdmin && !returnUrl) {
+        router.push("/home");
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to login with Google");
     } finally {
@@ -167,5 +176,17 @@ export default function LoginPage() {
         </Card>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-brand-cream flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-gold"></div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

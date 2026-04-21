@@ -8,11 +8,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { useState, useEffect } from "react";
-import { getProducts } from "@/lib/services/admin";
-import { Product } from "@/lib/types";
+import { getProducts, getShopAllSettings, DEFAULT_SHOP_ALL_SETTINGS } from "@/lib/services/admin";
+import { Product, ShopAllSettings } from "@/lib/types";
 
 // Normalized Category Mapping
-// URL Param -> Data Category
 const CATEGORY_MAP: Record<string, string> = {
   "machines": "Machines & Power Supplies",
   "needles": "Needles",
@@ -27,20 +26,30 @@ function ProductGrid() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
   const [products, setProducts] = useState<Product[]>([]);
+  const [settings, setSettings] = useState<ShopAllSettings>(DEFAULT_SHOP_ALL_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
+      // Fetch products first so they appear immediately
       try {
-        const data = await getProducts();
-        setProducts(data);
+        const productsData = await getProducts();
+        setProducts(productsData);
       } catch (error) {
         console.error("Failed to fetch products:", error);
+      }
+
+      // Fetch settings independently
+      try {
+        const settingsData = await getShopAllSettings();
+        setSettings(settingsData);
+      } catch (error) {
+        console.warn("Using default settings due to fetch error:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   const filteredProducts = useMemo(() => {
@@ -59,6 +68,17 @@ function ProductGrid() {
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-gold"></div>
     </div>;
   }
+
+  // Dynamic grid classes
+  const gridColsDesktop = {
+    2: 'lg:grid-cols-2',
+    3: 'lg:grid-cols-3',
+    4: 'lg:grid-cols-4',
+    5: 'lg:grid-cols-5',
+    6: 'lg:grid-cols-6',
+  }[settings.grid.desktop] || 'lg:grid-cols-4';
+
+  const gridColsMobile = settings.grid.mobile === 2 ? 'grid-cols-2' : 'grid-cols-1';
 
   return (
     <>
@@ -90,40 +110,62 @@ function ProductGrid() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12 mb-24">
+      <div 
+        className={`grid ${gridColsMobile} sm:grid-cols-2 ${gridColsDesktop} mb-24`}
+        style={{ 
+          gap: `${settings.grid.gap}px`,
+        }}
+      >
         {filteredProducts.map((product) => (
           <Link key={product.id} href={`/products/${product.id}`} className="group cursor-pointer flex flex-col space-y-4">
-            <div className="relative aspect-square overflow-hidden bg-white border border-zinc-100 rounded-lg p-4">
+            <div 
+              className="relative overflow-hidden bg-white border border-zinc-100 flex items-center justify-center p-0"
+              style={{ 
+                aspectRatio: '1/1', // Enforced Square Fit
+                borderRadius: `${settings.card.borderRadius}px`
+              }}
+            >
               {product.imageUrls?.[0] ? (
-                <div 
-                  className="absolute inset-0 bg-contain bg-no-repeat bg-center transition-transform duration-700 group-hover:scale-105"
+                <img 
+                  src={product.imageUrls[0]}
+                  alt={product.name}
+                  className="w-full h-full transition-transform duration-700 group-hover:scale-105"
                   style={{ 
-                    backgroundImage: `url("${product.imageUrls[0]}")`,
-                    backgroundPosition: 'center',
-                    backgroundSize: 'contain',
-                    margin: '1rem'
+                    objectFit: 'cover' // Forced Cover Fit
                   }}
+                  loading="lazy"
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-zinc-200">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 </div>
               )}
-              <div className="absolute top-4 left-4">
-                 <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-[8px] font-bold tracking-widest text-brand-gold border border-brand-gold shadow-sm">
-                    {product.name.includes('Mosha') ? 'MOSHA' : 'PMU SUPPLY'}
-                 </div>
-              </div>
+              {settings.card.showBadge && (
+                <div className="absolute top-4 left-4 z-10">
+                   <div className="bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-[4px] text-[7px] font-black tracking-[0.3em] uppercase text-zinc-900 border border-zinc-200/50 shadow-sm">
+                      {product.name.toLowerCase().includes('mosha') ? 'MOSHA STUDIO' : 'PMU SUPPLY'}
+                   </div>
+                </div>
+              )}
             </div>
-            <div className="space-y-1 text-left">
-               <h3 className="text-[11px] font-normal leading-snug text-zinc-900 group-hover:text-brand-gold transition-colors line-clamp-2">
-                 {product.name}
+            <div 
+              className="space-y-1"
+              style={{ textAlign: settings.card.textAlignment as any }}
+            >
+               <h3 
+                 className="font-normal leading-snug text-zinc-900 group-hover:text-brand-gold transition-colors line-clamp-2"
+                 style={{ fontSize: settings.card.titleSize === 'xs' ? '11px' : settings.card.titleSize === 'sm' ? '12px' : '14px' }}
+               >
+                 {product.name.startsWith('*') || product.name.startsWith('.') ? product.name : `*${product.name}`}
                </h3>
-               <p className="text-[12px] font-bold text-zinc-900">
+               <p 
+                 className="font-bold text-zinc-900 mt-1"
+                 style={{ fontSize: settings.card.priceSize === 'xs' ? '11px' : settings.card.priceSize === 'sm' ? '13px' : '15px' }}
+               >
                   {product.salePrice && product.salePrice > 0 ? (
-                    <span className="flex gap-2 items-center">
+                    <span className={`flex gap-2 items-center ${settings.card.textAlignment === 'center' ? 'justify-center' : settings.card.textAlignment === 'right' ? 'justify-end' : ''}`}>
                       <span className="text-green-600">${product.salePrice.toFixed(2)}</span>
-                      <span className="line-through text-zinc-400">${product.price.toFixed(2)}</span>
+                      <span className="line-through text-zinc-400 font-normal text-[0.8em]">${product.price.toFixed(2)}</span>
                     </span>
                   ) : (
                     `$${product.price.toFixed(2)}`

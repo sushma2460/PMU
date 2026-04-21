@@ -93,15 +93,14 @@ export default function AdminDashboard() {
           <p className="text-zinc-500 text-sm mt-1">Real-time performance metrics and system health.</p>
         </div>
         <div className="flex gap-2">
-          {!hasProducts && (
-            <Button 
-              onClick={handleSeed} 
-              disabled={isInitializing}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-[10px] font-bold tracking-widest uppercase"
-            >
-              {isInitializing ? "Initializing..." : "Initialize System Data"}
-            </Button>
-          )}
+          <Button 
+            onClick={handleSeed} 
+            disabled={isInitializing}
+            variant="outline"
+            className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 rounded-full text-[10px] font-bold tracking-widest uppercase"
+          >
+            {isInitializing ? "Seeding..." : "Refresh Seed Data"}
+          </Button>
           <Button variant="outline" size="sm" className="rounded-full text-[10px] font-bold tracking-widest uppercase">Export CSV</Button>
           <Button size="sm" className="bg-brand-gold hover:bg-brand-black text-white rounded-full text-[10px] font-bold tracking-widest uppercase">Live View</Button>
         </div>
@@ -111,7 +110,7 @@ export default function AdminDashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KPICard 
           title="Total Revenue" 
-          value={stats ? `₹${stats.totalRevenue.toLocaleString()}` : "₹0"} 
+          value={stats ? `$${stats.totalRevenue.toLocaleString()}` : "$0"} 
           trend="+20.1%" 
           trendUp={true} 
           icon={<DollarSign className="w-4 h-4" />} 

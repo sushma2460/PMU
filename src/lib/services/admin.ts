@@ -13,9 +13,51 @@ import {
   Timestamp,
   updateDoc,
   increment,
-  writeBatch
+  writeBatch,
+  getDoc
 } from "firebase/firestore";
-import { Product, Order, Coupon, UserProfile, Referral } from "@/lib/types";
+import { Product, Order, Coupon, UserProfile, Referral, ShopAllSettings } from "@/lib/types";
+
+// --- SHOP ALL DESIGN SETTINGS ---
+
+export const DEFAULT_SHOP_ALL_SETTINGS: ShopAllSettings = {
+  grid: {
+    desktop: 4,
+    tablet: 2,
+    mobile: 1,
+    gap: 24
+  },
+  card: {
+    aspectRatio: 'square',
+    imageFit: 'cover',
+    textAlignment: 'left',
+    showBadge: true,
+    titleSize: 'xs',
+    priceSize: 'sm',
+    padding: 0,
+    borderRadius: 0
+  }
+};
+
+export const getShopAllSettings = async (): Promise<ShopAllSettings> => {
+  try {
+    const settingsRef = doc(db, "siteSettings", "shopAll");
+    const settingsDoc = await getDoc(settingsRef);
+    
+    if (settingsDoc.exists()) {
+      return settingsDoc.data() as ShopAllSettings;
+    }
+  } catch (error) {
+    console.warn("🔐 Guest Mode: Using default design settings (Read-only access).");
+  }
+  
+  return DEFAULT_SHOP_ALL_SETTINGS;
+};
+
+export const updateShopAllSettings = async (settings: ShopAllSettings) => {
+  const settingsRef = doc(db, "siteSettings", "shopAll");
+  await setDoc(settingsRef, settings, { merge: true });
+};
 
 // --- INVENTORY SERVICE ---
 
@@ -98,12 +140,100 @@ export const seedDatabase = async () => {
   console.log("Starting Database Seed...");
   
   const PRODUCTS = [
-    { name: "PMU SUPPLY Gentle Cleansing Scrub Gel (Before service)", price: 19.00, category: "Aftercare", imageUrls: ["https://images.unsplash.com/photo-1556228578-8d91b1a4d530?auto=format&fit=crop&q=80"] },
-    { name: '"Nov" Mosha Original Practice Latex with Eyes', price: 8.00, category: "Practice Materials", imageUrls: ["https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80"] },
-    { name: "Signature Practice Skins by Mosha Studio", price: 6.50, category: "Practice Materials", imageUrls: ["https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80"] },
-    { name: "Ambition Tattoo Machine", price: 155.00, category: "Machines & Power Supplies", imageUrls: ["https://images.unsplash.com/photo-1611558709798-e009c8fd7706?auto=format&fit=crop&q=80"] },
-    { name: "Aurora Power Supply", price: 49.00, category: "Machines & Power Supplies", imageUrls: ["https://images.unsplash.com/photo-1588613437303-9d8a5538c8be?auto=format&fit=crop&q=80"] },
-    { name: "Nano Precision Needles Box", price: 45.00, category: "Needles", imageUrls: ["https://images.unsplash.com/photo-1611558709798-e009c8fd7706?auto=format&fit=crop&q=80"] },
+    // --- NEEDLES ---
+    { 
+      name: "V3 Nano Precision Cartridge (20pcs)", 
+      price: 55.00, 
+      category: "Needles", 
+      imageUrls: ["https://images.unsplash.com/photo-1611558709798-e009c8fd7706?auto=format&fit=crop&q=80&w=800"],
+      description: "Ultra-sharp nano needles for extreme precision in hairstrokes and shading."
+    },
+    { 
+      name: "Master Shader 1RL 0.25mm", 
+      price: 48.00, 
+      category: "Needles", 
+      imageUrls: ["https://images.unsplash.com/photo-1598300046647-5296761abbc8?auto=format&fit=crop&q=80&w=800"],
+      description: "Perfect for delicate lip shading and fine eyeliner work."
+    },
+    
+    // --- PIGMENTS ---
+    { 
+      name: "Midnight Black Eyeliner Pigment", 
+      price: 35.00, 
+      category: "Pigments", 
+      imageUrls: ["https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=800"],
+      description: "Rich, carbon-black pigment that stays true without turning blue."
+    },
+    { 
+      name: "Dusty Rose Lip Blush Liquid", 
+      price: 32.00, 
+      category: "Pigments", 
+      imageUrls: ["https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=800"],
+      description: "A soft, romantic rose shade perfect for natural lip enhancement."
+    },
+    { 
+      name: "Organic Cocoa Brow Pigment", 
+      price: 32.00, 
+      category: "Pigments", 
+      imageUrls: ["https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=800"],
+      description: "Warm brown organic pigment for dark brunette brows."
+    },
+
+    // --- MACHINES ---
+    { 
+      name: "Ambition Pro Wireless Pen (Rose Gold)", 
+      price: 299.00, 
+      salePrice: 249.00,
+      category: "Machines & Power Supplies", 
+      imageUrls: ["https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&q=80&w=800"], // Better Machine Image
+      description: "Freedom of movement with 8+ hours of battery life and ergonomic grip."
+    },
+    { 
+      name: "Elite Digital Power Unit", 
+      price: 185.00, 
+      category: "Machines & Power Supplies", 
+      imageUrls: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"],
+      description: "Precise voltage control with digital touch-screen interface."
+    },
+
+    // --- AFTERCARE ---
+    { 
+      name: "Booms Butter Aftercare Balm", 
+      price: 15.00, 
+      category: "Aftercare", 
+      imageUrls: ["https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&q=80&w=800"], // Better Jar Image
+      description: "Soothing botanical butter for intensive healing after PMU procedures."
+    },
+    { 
+      name: "Gentle Cleansing Foam (Before & After)", 
+      price: 19.00, 
+      category: "Aftercare", 
+      imageUrls: ["https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&q=80&w=800"],
+      description: "Sulfate-free cleanser designed to protect pigment retention."
+    },
+
+    // --- PRACTICE ---
+    { 
+      name: "Signature Practice Latex with Eyes", 
+      price: 9.50, 
+      category: "Practice Materials", 
+      imageUrls: ["https://images.unsplash.com/photo-1583241801142-113b9f5bbde5?auto=format&fit=crop&q=80&w=800"], // Better Square Practice Image
+      description: "Realistic skin-like texture for practicing hairstroke patterns."
+    },
+    { 
+      name: "Breast Reconstruction Practice 3D Skin", 
+      price: 14.00, 
+      category: "Practice Materials", 
+      imageUrls: ["https://images.unsplash.com/photo-1616391182219-e080b4d1043a?auto=format&fit=crop&q=80&w=800"],
+      description: "3D contoured latex for medical tattooing and areola practice."
+    },
+    { 
+      name: "White Mapping Pencil Duo", 
+      price: 8.00, 
+      category: "Practice Materials", 
+      imageUrls: ["https://images.unsplash.com/photo-1596704017254-9b12106ec127?auto=format&fit=crop&q=80&w=800"],
+      description: "Smudge-proof white pencils for precise brow mapping."
+    },
   ];
 
   const batch = writeBatch(db);
@@ -113,8 +243,8 @@ export const seedDatabase = async () => {
     batch.set(pRef, {
       ...p,
       slug: p.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
-      description: "Professional grade PMU equipment for elite artists.",
-      stock: 50,
+      description: p.description || "Professional grade PMU equipment for elite artists.",
+      stock: Math.floor(Math.random() * 50) + 10,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       isActive: true

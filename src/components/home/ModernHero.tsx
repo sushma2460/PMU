@@ -13,9 +13,9 @@ export function ModernHero() {
   }, []);
 
   const mosaics = [
-    { url: "/images/landing/collection-hero.png", title: "Full Collection" },
+    { url: "/images/landing/aftercare.png", title: "Full Collection" },
     { url: "/images/landing/precision-machine.png", title: "Precision Machines" },
-    { url: "/images/landing/etalon.png", title: "Organic Pigments" },
+    { url: "/images/landing/collection-hero.png", title: "Organic Pigments" },
     { url: "/images/landing/q-vision.png", title: "Q-Vision Range" },
     { url: "/images/landing/v3-cartridges.png", title: "V3 Cartridges" },
     { url: "/images/landing/shaping-tools.png", title: "Artisan Tools" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,15 +12,24 @@ import { ArrowLeft, CheckCircle2, CreditCard, ShieldCheck, Truck } from "lucide-
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { StripeWrapper } from "@/components/checkout/StripeWrapper";
-import { PaymentForm } from "@/components/checkout/PaymentForm";
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const { items, getCartTotal, clearCart } = useCartStore();
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
+  
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login?returnUrl=/checkout");
+    }
+  }, [user, loading, router]);
+
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [razorpayOrder, setRazorpayOrder] = useState<any>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   
   const [formData, setFormData] = useState({
     email: user?.email || "",
@@ -34,35 +43,69 @@ export default function CheckoutPage() {
   });
 
   const subtotal = getCartTotal();
-  const shippingAmount = subtotal > 150 ? 0 : 15;
-  const taxAmount = subtotal * 0.08;
+  
+  const discountAmount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    if (appliedCoupon.type === 'percentage') {
+      return subtotal * (appliedCoupon.value / 100);
+    }
+    return appliedCoupon.value;
+  }, [appliedCoupon, subtotal]);
+
+  const shippingAmount = (subtotal - discountAmount) > 150 ? 0 : 15;
+  const taxAmount = (subtotal - discountAmount) * 0.08;
   const storeCreditUsed = 0; 
-  const total = subtotal + shippingAmount + taxAmount - storeCreditUsed;
-  const pointsEarned = Math.floor(subtotal);
+  const total = subtotal - discountAmount + shippingAmount + taxAmount - storeCreditUsed;
+  const pointsEarned = Math.floor(subtotal - discountAmount);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return;
+    setIsApplyingCoupon(true);
+    try {
+      const res = await fetch("/api/validate-coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode, cartTotal: subtotal, userId: user?.uid }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppliedCoupon(data.coupon);
+        toast.success(`Coupon "${data.coupon.code}" applied!`);
+      } else {
+        toast.error(data.error || "Invalid coupon code");
+      }
+    } catch (err) {
+      toast.error("Failed to validate coupon");
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
 
   const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
     try {
-      // Create Payment Intent on the server
-      const response = await fetch("/api/create-payment-intent", {
+      // Create Razorpay Order on the server
+      const response = await fetch("/api/create-razorpay-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           items, 
-          userId: user?.uid 
+          userId: user?.uid,
+          couponCode: appliedCoupon?.code,
+          shippingAddress: formData
         }),
       });
 
       const data = await response.json();
       
-      if (data.clientSecret) {
-        setClientSecret(data.clientSecret);
+      if (data.orderId) {
+        setRazorpayOrder(data);
         setStep(2);
         window.scrollTo(0, 0);
       } else {
-        toast.error("Unable to initialize secure payment. Please try again.");
+        toast.error(data.error || "Unable to initialize secure payment. Please try again.");
       }
     } catch (err) {
       toast.error("Connection error. Please check your internet.");
@@ -75,6 +118,57 @@ export default function CheckoutPage() {
     setStep(3);
     clearCart();
     toast.success("Payment Received. Your PMU SUPPLY package is being prepared.");
+    
+    // Redirect to profile after a short delay
+    setTimeout(() => {
+      router.push("/profile");
+    }, 3000);
+  };
+
+  const initiatePayment = () => {
+    if (!razorpayOrder) return;
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_Sbim4q0IXwMzAD", // Ideally from env
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      name: "PMU SUPPLY",
+      description: "Elite Professional Equipment",
+      order_id: razorpayOrder.orderId,
+      handler: async function (response: any) {
+        // Verify payment on the server
+        try {
+          const verifyRes = await fetch("/api/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+          
+          const verifyData = await verifyRes.json();
+          if (verifyData.verified) {
+            handlePaymentSuccess();
+          } else {
+            toast.error("Payment verification failed. Please contact support.");
+          }
+        } catch (err) {
+          toast.error("Error verifying payment.");
+        }
+      },
+      prefill: {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+      },
+      theme: {
+        color: "#C9A84C", // PMU Gold
+      },
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
   };
 
   if (items.length === 0 && step !== 3) {
@@ -226,13 +320,17 @@ export default function CheckoutPage() {
                         <ArrowLeft className="w-3 h-3 mr-2" />
                         REVISE DETAILS
                       </button>
+                      
+                      {razorpayOrder && (
+                        <Button 
+                          onClick={initiatePayment}
+                          size="lg" 
+                          className="bg-brand-black text-white hover:bg-brand-gold px-12 h-14 rounded-none font-bold tracking-[0.2em] uppercase transition-all shadow-xl shadow-brand-gold/10"
+                        >
+                          PROCEED TO SECURE PAYMENT
+                        </Button>
+                      )}
                     </div>
-
-                    {clientSecret && (
-                      <StripeWrapper clientSecret={clientSecret}>
-                        <PaymentForm total={total} onSuccess={handlePaymentSuccess} />
-                      </StripeWrapper>
-                    )}
                   </div>
                 )}
               </>
@@ -266,19 +364,54 @@ export default function CheckoutPage() {
                     ))}
                   </div>
 
-                  <div className="pt-8 border-t border-brand-gold/10 space-y-4 font-light text-sm">
-                    <div className="flex justify-between tracking-widest uppercase text-[10px]">
-                      <span className="text-zinc-400">Inventory Total</span>
-                      <span className="font-bold text-zinc-800">${subtotal.toFixed(2)}</span>
+                  <div className="pt-8 border-t border-brand-gold/10 space-y-6">
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-bold tracking-widest uppercase opacity-60">Promo Code</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          placeholder="ENTER CODE" 
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                          disabled={!!appliedCoupon || isApplyingCoupon}
+                          className="h-10 rounded-none border-zinc-200 bg-zinc-50/50 text-[10px] font-bold tracking-widest uppercase focus:border-brand-gold" 
+                        />
+                        <Button 
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={!couponCode || !!appliedCoupon || isApplyingCoupon}
+                          variant="outline" 
+                          className="h-10 px-6 rounded-none text-[10px] font-bold tracking-widest uppercase border-zinc-200 hover:bg-brand-black hover:text-white transition-all shadow-sm"
+                        >
+                          {isApplyingCoupon ? "..." : "Apply"}
+                        </Button>
+                      </div>
+                      {appliedCoupon && (
+                        <div className="flex items-center justify-between text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-2 rounded-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                           <span className="tracking-widest uppercase">Discount: {appliedCoupon.code}</span>
+                           <button onClick={() => setAppliedCoupon(null)} className="opacity-60 hover:opacity-100 transition-opacity uppercase text-[8px] border-b border-emerald-600/30">Remove</button>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex justify-between tracking-widest uppercase text-[10px]">
-                      <span className="text-zinc-400">Global Logistics</span>
-                      <span className="font-bold text-zinc-800">{shippingAmount === 0 ? "Complimentary" : `$${shippingAmount.toFixed(2)}`}</span>
-                    </div>
-                    <div className="flex justify-between tracking-widest uppercase text-[10px]">
-                      <span className="text-zinc-400">State Taxation</span>
-                      <span className="font-bold text-zinc-800">${taxAmount.toFixed(2)}</span>
-                    </div>
+
+                    <div className="space-y-4 font-light text-sm pt-4 border-t border-zinc-50">
+                      <div className="flex justify-between tracking-widest uppercase text-[10px]">
+                        <span className="text-zinc-400">Inventory Total</span>
+                        <span className="font-bold text-zinc-800">${subtotal.toFixed(2)}</span>
+                      </div>
+                      {discountAmount > 0 && (
+                        <div className="flex justify-between tracking-widest uppercase text-[10px] text-emerald-600">
+                          <span>Merchant Discount</span>
+                          <span className="font-bold">-${discountAmount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between tracking-widest uppercase text-[10px]">
+                        <span className="text-zinc-400">Global Logistics</span>
+                        <span className="font-bold text-zinc-800">{shippingAmount === 0 ? "Complimentary" : `$${shippingAmount.toFixed(2)}`}</span>
+                      </div>
+                      <div className="flex justify-between tracking-widest uppercase text-[10px]">
+                        <span className="text-zinc-400">State Taxation</span>
+                        <span className="font-bold text-zinc-800">${taxAmount.toFixed(2)}</span>
+                      </div>
                     {storeCreditUsed > 0 && (
                       <div className="flex justify-between tracking-widest uppercase text-[10px] text-green-600">
                         <span>Store Credit Credit</span>
@@ -290,6 +423,7 @@ export default function CheckoutPage() {
                       <span className="text-2xl font-heading font-normal">${total.toFixed(2)}</span>
                     </div>
                   </div>
+                </div>
                 </CardContent>
                 <div className="bg-brand-black text-brand-gold py-4 text-center">
                   <p className="text-[9px] font-bold tracking-[0.5em] uppercase">★ Earn {pointsEarned} Anniversary Points ★</p>

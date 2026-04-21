@@ -103,7 +103,9 @@ export default function HomePage() {
                          href={`/products/${product.id}`}
                          className="flex items-center justify-between p-4 bg-white rounded-2xl border border-zinc-100 group hover:border-brand-gold transition-colors"
                        >
-                         <span className="text-xs font-bold tracking-wider uppercase truncate max-w-[60%]">{product.name}</span>
+                         <span className="text-xs font-bold tracking-wider uppercase truncate max-w-[60%]">
+                           {product.name.startsWith('*') || product.name.startsWith('.') ? product.name : `*${product.name}`}
+                         </span>
                          <span className="text-brand-gold font-bold text-xs">${product.price.toFixed(2)}</span>
                        </Link>
                      ))

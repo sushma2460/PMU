@@ -84,9 +84,9 @@ export function SimpleStatStrip() {
 
 export function QuickActionsGrid() {
   const actions = [
-    { label: "My Orders", icon: <ShoppingBag className="h-6 w-6" />, href: "/account/orders" },
-    { label: "Profile", icon: <User className="h-6 w-6" />, href: "/account/profile" },
-    { label: "Addresses", icon: <MapPin className="h-6 w-6" />, href: "/account/addresses" },
+    { label: "My Orders", icon: <ShoppingBag className="h-6 w-6" />, href: "/profile" },
+    { label: "Profile Settings", icon: <User className="h-6 w-6" />, href: "/profile" },
+    { label: "Shipping Info", icon: <MapPin className="h-6 w-6" />, href: "/profile" },
     { label: "Help Center", icon: <HelpCircle className="h-6 w-6" />, href: "/pages/contact" },
   ];
 

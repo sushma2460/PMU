@@ -1,6 +1,8 @@
 "use client";
 
 import { useCartStore } from "@/store/useCartStore";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -14,6 +16,8 @@ import Image from "next/image";
 
 export function CartDrawer() {
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, getCartTotal } = useCartStore();
+  const { user } = useAuth();
+  const router = useRouter();
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -89,11 +93,19 @@ export function CartDrawer() {
             </div>
             <p className="text-[9px] text-zinc-400 tracking-widest uppercase text-center italic">Complimentary luxury shipping over $150</p>
             <div className="grid gap-3">
-              <Link href="/checkout" onClick={() => setIsOpen(false)}>
-                <Button className="w-full h-14 bg-brand-rose hover:bg-brand-gold text-brand-black text-[10px] font-bold tracking-[0.3em] uppercase rounded-none transition-all duration-500 shadow-xl shadow-brand-gold/10">
-                  SECURE CHECKOUT
-                </Button>
-              </Link>
+              <Button 
+                onClick={() => {
+                  setIsOpen(false);
+                  if (user) {
+                    router.push("/checkout");
+                  } else {
+                    router.push("/login?returnUrl=/checkout");
+                  }
+                }}
+                className="w-full h-14 bg-brand-rose hover:bg-brand-gold text-brand-black text-[10px] font-bold tracking-[0.3em] uppercase rounded-none transition-all duration-500 shadow-xl shadow-brand-gold/10"
+              >
+                SECURE CHECKOUT
+              </Button>
             </div>
           </div>
         )}

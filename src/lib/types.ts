@@ -113,3 +113,22 @@ export interface Referral {
   qualifyingOrderId?: string;
   createdAt: number;
 }
+
+export interface ShopAllSettings {
+  grid: {
+    desktop: number;
+    tablet: number;
+    mobile: number;
+    gap: number;
+  };
+  card: {
+    aspectRatio: 'square' | 'portrait' | 'natural';
+    imageFit: 'contain' | 'cover';
+    textAlignment: 'left' | 'center' | 'right';
+    showBadge: boolean;
+    titleSize: 'xs' | 'sm' | 'base';
+    priceSize: 'xs' | 'sm' | 'base';
+    padding: number;
+    borderRadius: number;
+  };
+}

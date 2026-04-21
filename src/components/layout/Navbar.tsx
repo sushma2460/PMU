@@ -87,13 +87,18 @@ export function Navbar() {
           </button>
           
           {user ? (
-            <button 
-              onClick={handleLogout}
-              className="flex items-center p-2 hover:text-red-500 transition-colors group"
-              title="Logout"
-            >
-              <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
-            </button>
+            <div className="flex items-center gap-2">
+              <Link href="/profile" className="flex items-center p-2 hover:text-brand-gold transition-colors group">
+                <User className="h-5 w-5 group-hover:scale-110 transition-transform" />
+              </Link>
+              <button 
+                onClick={handleLogout}
+                className="flex items-center p-2 hover:text-red-500 transition-colors group"
+                title="Logout"
+              >
+                <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
+              </button>
+            </div>
           ) : (
             <Link href="/login" className="flex items-center p-2 hover:text-brand-gold transition-colors group">
               <User className="h-5 w-5 group-hover:scale-110 transition-transform" />

@@ -9,7 +9,8 @@ import {
   Tag, 
   Ticket, 
   Settings,
-  LogOut
+  LogOut,
+  LayoutTemplate
 } from "lucide-react";
 import { AdminGuard } from "@/components/auth/AdminGuard";
 import { usePathname, useRouter } from "next/navigation";
@@ -60,6 +61,7 @@ export default function AdminLayout({
             <NavItem href="/admin/coupons" icon={<Ticket size={20} />} label="Coupons" active={pathname === "/admin/coupons"} />
             <NavItem href="/admin/referrals" icon={<Tag size={20} />} label="Referrals" active={pathname === "/admin/referrals"} />
             <NavItem href="/admin/users" icon={<Users size={20} />} label="Users" active={pathname === "/admin/users"} />
+            <NavItem href="/admin/design" icon={<LayoutTemplate size={20} />} label="Design" active={pathname === "/admin/design"} />
           </nav>
           
           <div className="p-4 border-t border-zinc-200 space-y-1">

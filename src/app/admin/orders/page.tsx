@@ -177,13 +177,13 @@ export default function AdminOrdersPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-xs text-zinc-500">
-                    {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    {new Date(order.createdAt).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
                   </TableCell>
                   <TableCell className="text-center font-bold text-xs">
                     {order.items?.length ?? 0}
                   </TableCell>
                   <TableCell className="text-xs font-black text-zinc-900">
-                    ₹{order.total?.toLocaleString()}
+                    ${order.total?.toLocaleString()}
                   </TableCell>
                   <TableCell>
                     <Badge className={`rounded-full px-3 py-1 flex items-center gap-1.5 w-fit font-bold text-[9px] uppercase tracking-tighter border ${STATUS_CONFIG[order.status]?.color}`}>

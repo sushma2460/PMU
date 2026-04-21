@@ -179,7 +179,7 @@ export default function AdminUsersPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-xs font-black text-zinc-900">
-                    ₹{(user.storeCredit || 0).toLocaleString()}
+                    ${(user.storeCredit || 0).toLocaleString()}
                   </TableCell>
                   <TableCell className="font-mono text-[11px] text-zinc-500 font-bold tracking-widest">
                     {user.referralCode || "—"}
@@ -216,7 +216,7 @@ export default function AdminUsersPage() {
                               <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100">
                                 <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><History className="w-3 h-3" /> Joined</p>
                                 <p className="text-sm font-bold text-zinc-900">
-                                  {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString("en-IN", { month: "short", year: "numeric" }) : "—"}
+                                  {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}
                                 </p>
                               </div>
                             </div>
