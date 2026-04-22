@@ -45,6 +45,14 @@ import {
 } from "./actions";
 import { ReferralSettings } from "@/lib/types";
 
+const DEFAULT_REFERRAL_SETTINGS: ReferralSettings = {
+  referrerRewardPoints: 50,
+  refereeDiscountPercentage: 10,
+  referralRequirement: 'first_purchase',
+  maxEarningsPerUser: 1000,
+  isActive: true
+};
+
 export default function AdminReferralsPage() {
   const [settings, setSettings] = useState<ReferralSettings>(DEFAULT_REFERRAL_SETTINGS);
   const [networkData, setNetworkData] = useState<any[]>([]);

@@ -8,7 +8,9 @@ export async function getDashboardStatsAction() {
     const ordersSnapshot = await adminDb.collection("orders").orderBy("createdAt", "desc").get();
     const orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     
-    const totalRevenue = orders.reduce((acc, order: any) => acc + (order.total || 0), 0);
+    const totalRevenue = orders.reduce((acc, order: any) => {
+      return order.status === "paid" ? acc + (order.total || 0) : acc;
+    }, 0);
     const totalOrders = orders.length;
     
     // 2. Fetch Users
@@ -48,7 +50,9 @@ export async function getDashboardStatsAction() {
         const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         if (salesMap.has(dateStr)) {
           const entry = salesMap.get(dateStr);
-          entry.revenue += (order.total || 0);
+          if (order.status === "paid") {
+            entry.revenue += (order.total || 0);
+          }
           entry.orders += 1;
         }
       }
