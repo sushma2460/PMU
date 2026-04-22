@@ -63,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               points: 0,
               storeCredit: 0,
               referralCode: user.uid.slice(0, 6).toUpperCase(),
+              referralCount: 0,
               totalReferralEarnings: 0,
               createdAt: Date.now()
             };
