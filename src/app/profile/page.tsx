@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { Order } from "@/lib/types";
+import { collection, query, where, getDocs, orderBy, doc, getDoc } from "firebase/firestore";
+import { Order, Product } from "@/lib/types";
+import { getProducts } from "@/lib/services/admin";
 import { 
   Package, 
   MapPin, 
@@ -37,7 +38,21 @@ function RotateCcw(props: any) {
 export default function ProfilePage() {
   const { user, profile } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Record<string, Product>>({});
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const prodData = await getProducts();
+        const prodMap = prodData.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+        setProducts(prodMap);
+      } catch (e) {
+        console.error("Products fetch failed:", e);
+      }
+    };
+    fetchInitialData();
+  }, []);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -173,12 +188,25 @@ export default function ProfilePage() {
                         {/* Items Block */}
                         <div className="flex-1 p-8 flex flex-col justify-between">
                           <div className="flex flex-wrap gap-4">
-                            {order.items.slice(0, 3).map((item, idx) => (
-                              <div key={idx} className="flex items-center gap-3 bg-zinc-50 p-2 pr-4 rounded-xl border border-zinc-100">
-                                <span className="text-[9px] font-bold text-brand-gold">x{item.quantity}</span>
-                                <span className="text-xs font-bold text-zinc-800 uppercase tracking-tight max-w-[120px] truncate">{item.productName}</span>
-                              </div>
-                            ))}
+                            {order.items.slice(0, 3).map((item, idx) => {
+                              const product = products[item.productId];
+                              return (
+                                <div key={idx} className="flex items-center gap-3 bg-zinc-50 p-2 pr-4 rounded-xl border border-zinc-100 group/item transition-all hover:border-brand-gold/20">
+                                  <div className="w-8 h-8 rounded-lg bg-white border border-zinc-100 overflow-hidden flex-shrink-0">
+                                    {product?.imageUrls?.[0] ? (
+                                      <img src={product.imageUrls[0]} alt={item.productName} className="w-full h-full object-cover" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-[8px] text-zinc-300 font-bold uppercase">PMU</div>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <span className="text-[9px] font-bold text-brand-gold uppercase tracking-tighter">x{item.quantity}</span>
+                                    <span className="text-[10px] font-bold text-zinc-800 uppercase tracking-tight max-w-[100px] truncate">{item.productName}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+
                             {order.items.length > 3 && (
                               <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-bold uppercase tracking-widest pt-2">
                                 + {order.items.length - 3} more
