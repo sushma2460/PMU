@@ -46,6 +46,7 @@ export interface UserProfile {
   points: number;
   storeCredit: number;
   referralCode: string;
+  referralCount: number;
   referredBy?: string; // UID of the person who referred them
   totalReferralEarnings: number;
   createdAt: number;
