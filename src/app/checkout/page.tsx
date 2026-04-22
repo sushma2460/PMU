@@ -104,7 +104,8 @@ export default function CheckoutPage() {
           items, 
           userId: user?.uid,
           couponCode: appliedCoupon?.code,
-          shippingAddress: formData
+          shippingAddress: formData,
+          pointsToUse: pointsToUse
         }),
       });
 
@@ -139,7 +140,7 @@ export default function CheckoutPage() {
     if (!razorpayOrder) return;
 
     const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_Sbim4q0IXwMzAD", // Ideally from env
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
       name: "PMU SUPPLY",
@@ -319,7 +320,7 @@ export default function CheckoutPage() {
                         <CreditCard className="w-10 h-10 text-brand-black" />
                         <div className="flex-1">
                           <p className="text-sm font-bold tracking-widest uppercase">Secure Professional Checkout</p>
-                          <p className="text-[11px] font-light text-zinc-500 italic mt-1">Processed securely via Stripe Technology.</p>
+                          <p className="text-[11px] font-light text-zinc-500 italic mt-1">Processed securely via Razorpay Global Payments.</p>
                         </div>
                         <ShieldCheck className="text-brand-gold w-6 h-6" />
                       </div>

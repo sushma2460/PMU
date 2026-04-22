@@ -32,25 +32,39 @@ export async function POST(req: Request) {
         
         // 1. Calculate and award points (1 pt per $1 spent on subtotal)
         const pointsEarned = Math.floor(subtotal);
+        const pointsUsed = orderData.pointsUsed || 0;
         
         const userRef = adminDb.collection("users").doc(userId);
         const userSnap = await userRef.get();
         const userData = userSnap.data();
 
-        // Transaction for buyer
-        const buyerTx = {
+        // Update balance: add earned, subtract used
+        const currentPoints = userData?.points || 0;
+        const newBalance = currentPoints + pointsEarned - pointsUsed;
+
+        await userRef.update({
+          points: newBalance
+        });
+
+        // Points Earned Transaction
+        await userRef.collection("transactions").add({
           id: `earn_${razorpay_payment_id}`,
           amount: pointsEarned,
           reason: `Earned from Order #${razorpay_order_id.slice(-6)}`,
           createdAt: Date.now(),
           adminId: 'SYSTEM'
-        };
-
-        // Update buyer
-        await userRef.update({
-          points: (userData?.points || 0) + pointsEarned
         });
-        await userRef.collection("transactions").add(buyerTx);
+
+        // Points Used Transaction (if any)
+        if (pointsUsed > 0) {
+          await userRef.collection("transactions").add({
+            id: `spend_${razorpay_payment_id}`,
+            amount: -pointsUsed,
+            reason: `Used for Order #${razorpay_order_id.slice(-6)}`,
+            createdAt: Date.now(),
+            adminId: 'SYSTEM'
+          });
+        }
 
         // 2. Handle Referral (If first order)
         if (userData?.referredBy && !userData.hasOrderedBefore) {

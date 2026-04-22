@@ -4,10 +4,23 @@ import { adminDb } from "@/lib/firebase-admin";
 
 export async function POST(req: Request) {
   try {
-    const { items, userId, couponCode, shippingAddress } = await req.json();
+    const { items, userId, couponCode, shippingAddress, pointsToUse } = await req.json();
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "Empty cart" }, { status: 400 });
+    }
+
+    // 0. Validate Points if provided
+    let pointsDiscount = 0;
+    let validatedPointsToUse = 0;
+    if (userId && pointsToUse > 0) {
+      const userDoc = await adminDb.collection("users").doc(userId).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        const userPoints = userData?.points || 0;
+        validatedPointsToUse = Math.min(pointsToUse, userPoints);
+        pointsDiscount = validatedPointsToUse / 100; // $0.01 per point
+      }
     }
 
     // 1. Calculate Subtotal & Discount
@@ -47,7 +60,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Handle Coupon
-    let discountAmount = 0;
+    let couponDiscountAmount = 0;
     let couponId = null;
 
     if (couponCode) {
@@ -61,19 +74,20 @@ export async function POST(req: Request) {
         if (couponData.isActive && (!couponData.expiryDate || couponData.expiryDate > Date.now())) {
           couponId = couponSnapshot.docs[0].id;
           if (couponData.type === 'percentage') {
-            discountAmount = subtotal * (couponData.value / 100);
+            couponDiscountAmount = subtotal * (couponData.value / 100);
           } else if (couponData.type === 'flat') {
-            discountAmount = couponData.value;
+            couponDiscountAmount = couponData.value;
           }
         }
       }
     }
 
     // 3. Shipping & Tax
-    const finalSubtotal = subtotal - discountAmount;
+    const discountTotal = couponDiscountAmount + pointsDiscount;
+    const finalSubtotal = Math.max(0, subtotal - discountTotal);
     const shipping = finalSubtotal > 150 ? 0 : 15;
     const tax = finalSubtotal * 0.08;
-    const total = finalSubtotal + shipping + tax;
+    const total = Math.round((finalSubtotal + shipping + tax) * 100) / 100;
 
     // 4. Create Razorpay Order
     const amountInCents = Math.round(total * 100);
@@ -91,7 +105,10 @@ export async function POST(req: Request) {
       userId: userId || "guest",
       items: orderItems,
       subtotal: subtotal,
-      discountAmount: discountAmount,
+      discountAmount: discountTotal,
+      couponDiscountAmount: couponDiscountAmount,
+      pointsDiscountAmount: pointsDiscount,
+      pointsUsed: validatedPointsToUse,
       shippingAmount: shipping,
       taxAmount: tax,
       total: total,
@@ -105,8 +122,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       orderId: rzpOrder.id,
-      amount: rzpOrder.amount,
-      currency: rzpOrder.currency,
+      amount: amountInCents,
+      currency: "USD",
     });
   } catch (error: any) {
     console.error("Razorpay Order Error:", error);
