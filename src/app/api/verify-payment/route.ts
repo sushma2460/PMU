@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { adminDb } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
+import { sendOrderConfirmationEmail } from "@/lib/email";
+
 
 export async function POST(req: Request) {
   try {
@@ -20,26 +23,59 @@ export async function POST(req: Request) {
     const isMatch = expectedSignature === razorpay_signature;
 
     if (isMatch) {
-      // Update order status in Firestore
-      
+      // 1. Get the order document
       const orderRef = adminDb.collection("orders").doc(razorpay_order_id);
       const orderSnap = await orderRef.get();
+      
+      if (!orderSnap.exists) {
+        return NextResponse.json({ error: "Order context lost" }, { status: 404 });
+      }
+
       const orderData = orderSnap.data();
 
-      if (orderData && orderData.status !== 'paid') {
+      // 2. Only process if not already paid
+      if (orderData && orderData.status === 'pending') {
         const userId = orderData.userId;
+        const items = orderData.items || [];
         
-        const userRef = adminDb.collection("users").doc(userId);
-        
-        // Mark user as having ordered before to prevent duplicate referral rewards
-        await userRef.update({ hasOrderedBefore: true });
+        // 3. Begin Transaction for Stock Deduction & Status Update
+        await adminDb.runTransaction(async (transaction) => {
+          // A. Deduct Stock for each item
+          for (const item of items) {
+            if (item.productId) {
+              const productRef = adminDb.collection("products").doc(item.productId);
+              transaction.update(productRef, {
+                stock: FieldValue.increment(-(item.quantity || 1))
+              });
+            }
+          }
 
-        // Update order
-        await orderRef.update({
-          status: 'paid',
-          razorpayPaymentId: razorpay_payment_id,
-          updatedAt: Date.now()
+          // B. Update User Record
+          if (userId && userId !== "guest") {
+            const userRef = adminDb.collection("users").doc(userId);
+            transaction.update(userRef, { hasOrderedBefore: true });
+          }
+
+          // C. Finalize Order Status
+          transaction.update(orderRef, {
+            status: 'paid',
+            razorpayPaymentId: razorpay_payment_id,
+            updatedAt: Date.now(),
+            paymentVerifiedAt: Date.now()
+          });
         });
+
+        // 4. Send Confirmation Email (Async, non-blocking for response)
+        try {
+          await sendOrderConfirmationEmail({
+            id: razorpay_order_id,
+            total: orderData.total,
+            items: orderData.items,
+            shippingAddress: orderData.shippingAddress
+          });
+        } catch (emailErr) {
+          console.error("Failed to send order email:", emailErr);
+        }
       }
 
       return NextResponse.json({ verified: true });

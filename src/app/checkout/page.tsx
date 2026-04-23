@@ -54,7 +54,7 @@ export default function CheckoutPage() {
 
   const shippingAmount = (subtotal - discountAmount) > 12000 ? 0 : 150;
   const taxAmount = (subtotal - discountAmount) * 0.08;
-  const total = Math.max(0, subtotal - discountAmount + shippingAmount + taxAmount);
+  const total = Math.round(Math.max(0, subtotal - discountAmount + shippingAmount + taxAmount) * 100) / 100;
 
   const handleApplyCoupon = async () => {
     if (!couponCode) return;

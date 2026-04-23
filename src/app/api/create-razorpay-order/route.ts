@@ -77,7 +77,7 @@ export async function POST(req: Request) {
     // 3. Shipping & Tax
     const discountTotal = couponDiscountAmount + pointsDiscountAmount;
     const finalSubtotal = Math.max(0, subtotal - discountTotal);
-    const shipping = finalSubtotal > 150 ? 0 : 15;
+    const shipping = finalSubtotal > 12000 ? 0 : 150;
     const tax = finalSubtotal * 0.08;
     const total = Math.round((finalSubtotal + shipping + tax) * 100) / 100;
 

@@ -341,7 +341,7 @@ export default function OrderDetailsPage() {
                   {(order.discountAmount > 0 || (order.couponDiscountAmount || 0) > 0) && (
                     <div className="flex justify-between text-xs text-emerald-400">
                       <span className="font-light">Applied Incentives</span>
-                      <span className="font-bold font-mono">-₹{(order.discountAmount + (order.couponDiscountAmount || 0)).toFixed(2)}</span>
+                      <span className="font-bold font-mono">-₹{order.discountAmount.toFixed(2)}</span>
                     </div>
                   )}
                 </div>

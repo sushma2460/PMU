@@ -2,6 +2,8 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { Order } from "@/lib/types";
+import { sendShippingUpdateEmail } from "@/lib/email";
+
 
 export async function getOrdersAction(status?: string) {
   try {
@@ -27,10 +29,21 @@ export async function getOrdersAction(status?: string) {
 
 export async function updateOrderStatusAction(id: string, status: Order["status"]) {
   try {
-    await adminDb.collection("orders").doc(id).update({
+    const orderRef = adminDb.collection("orders").doc(id);
+    await orderRef.update({
       status,
       updatedAt: Date.now()
     });
+
+    // If status is changed to shipped, send an email
+    if (status === "shipped") {
+      const orderSnap = await orderRef.get();
+      if (orderSnap.exists) {
+        const orderData = orderSnap.data();
+        await sendShippingUpdateEmail({ id, ...orderData });
+      }
+    }
+
     return { success: true };
   } catch (err: any) {
     console.error("updateOrderStatusAction error:", err);
