@@ -26,7 +26,7 @@ import { createProductAction } from "../actions";
 import { getCategoriesAction } from "../category-actions";
 
 export default function AddProductPage() {
-  const { uploadImage, isUploading } = useImageUpload();
+  const { uploadImage, isUploading, isProcessing, progress } = useImageUpload();
   const router = useRouter();
   
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
@@ -270,7 +270,12 @@ export default function AddProductPage() {
                     disabled={isUploading}
                   />
                   {isUploading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="w-6 h-6 animate-spin text-brand-gold" />
+                      <span className="text-[10px] font-bold text-brand-gold animate-pulse">
+                        {isProcessing ? "Optimizing..." : `${Math.round(progress)}%`}
+                      </span>
+                    </div>
                   ) : (
                     <>
                       <ImagePlus className="w-6 h-6 mb-2" />

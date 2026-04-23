@@ -25,7 +25,7 @@ import { getCategoriesAction } from "../category-actions";
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
-  const { uploadImage, isUploading } = useImageUpload();
+  const { uploadImage, isUploading, isProcessing, progress } = useImageUpload();
   const router = useRouter();
   
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
@@ -288,8 +288,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     type="file" accept="image/*" className="hidden" 
                     onChange={handleFileUpload} disabled={isUploading}
                   />
-                  {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImagePlus className="w-5 h-5" />}
-                  <span className="text-[8px] font-black uppercase tracking-widest mt-2">{isUploading ? "Uploading" : "Upload"}</span>
+                  {isUploading ? (
+                    <div className="flex flex-col items-center gap-1">
+                      <Loader2 className="w-5 h-5 animate-spin text-brand-vibrant-pink" />
+                      <span className="text-[8px] font-bold text-brand-vibrant-pink animate-pulse">
+                        {isProcessing ? "Optimizing..." : `${Math.round(progress)}%`}
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <ImagePlus className="w-5 h-5" />
+                      <span className="text-[8px] font-black uppercase tracking-widest mt-2">Upload</span>
+                    </>
+                  )}
                 </label>
                 
                 <button

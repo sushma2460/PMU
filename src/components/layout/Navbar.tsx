@@ -100,6 +100,7 @@ export function Navbar() {
                 <Link onClick={() => setMobileMenuOpen(false)} href="/products?category=on-my-tray" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-rose">On My Tray</Link>
                 <Link onClick={() => setMobileMenuOpen(false)} href="/pages/international" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-rose">International</Link>
                 <Link onClick={() => setMobileMenuOpen(false)} href="/pages/contact" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-rose">Contact</Link>
+                <Link onClick={() => setMobileMenuOpen(false)} href="/pages/disclaimer" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-rose">Disclaimer</Link>
               </div>
 
               {/* Mobile Footer Area */}
@@ -120,12 +121,15 @@ export function Navbar() {
           
           {/* Categories Dropdown */}
           <div className="relative group py-4">
-            <button className="flex items-center gap-2 hover:text-brand-gold transition-colors whitespace-nowrap uppercase">
+            <button 
+              onMouseEnter={() => window.dispatchEvent(new CustomEvent('close-page-filters'))}
+              className="flex items-center gap-2 hover:text-brand-gold transition-colors whitespace-nowrap uppercase"
+            >
               Product Categories
               <ChevronDown className="h-3 w-3 group-hover:rotate-180 transition-transform duration-300" />
             </button>
             <div className="absolute top-full left-0 w-64 bg-white border border-zinc-100 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-[100] rounded-xl overflow-hidden">
-              <div className="py-2">
+              <div className="py-2 max-h-[220px] overflow-y-auto no-scrollbar">
                 {categories.map((cat) => (
                   <Link 
                     key={cat.id}
@@ -142,6 +146,7 @@ export function Navbar() {
           <Link href="/products?category=on-my-tray" className="hover:text-brand-gold transition-colors whitespace-nowrap uppercase">On My Tray</Link>
           <Link href="/pages/international" className="hover:text-brand-gold transition-colors whitespace-nowrap uppercase">International</Link>
           <Link href="/pages/contact" className="hover:text-brand-gold transition-colors whitespace-nowrap uppercase">Contact</Link>
+          <Link href="/pages/disclaimer" className="hover:text-brand-gold transition-colors whitespace-nowrap uppercase">Disclaimer</Link>
         </nav>
 
         {/* Right: Icons */}

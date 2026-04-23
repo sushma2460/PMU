@@ -77,3 +77,29 @@ export async function setUserRoleAction(userId: string, role: 'admin' | 'custome
     return { success: false, error: err.message };
   }
 }
+
+export async function registerArtistAction(data: { email: string; displayName: string; role: string }) {
+  try {
+    const { adminAuth } = await import("@/lib/firebase-admin");
+    const userRecord = await adminAuth.createUser({
+      email: data.email,
+      displayName: data.displayName,
+      password: "PMU" + Math.random().toString(36).slice(-8), // Temporary password
+    });
+
+    await adminDb.collection("users").doc(userRecord.uid).set({
+      uid: userRecord.uid,
+      email: data.email,
+      displayName: data.displayName,
+      role: data.role || "customer",
+      createdAt: Date.now(),
+      storeCredit: 0
+    });
+
+    return { success: true, uid: userRecord.uid };
+  } catch (err: any) {
+    console.error("registerArtistAction error:", err);
+    return { success: false, error: err.message };
+  }
+}
+

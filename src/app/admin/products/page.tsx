@@ -86,100 +86,112 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      <div className="border rounded-md bg-white dark:bg-zinc-950">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[72px]">Image</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Stock</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-14 text-zinc-400">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                </TableCell>
+      <div className="border rounded-[2rem] bg-white dark:bg-zinc-950 overflow-hidden shadow-sm">
+        <div className="overflow-x-auto no-scrollbar">
+          <Table>
+            <TableHeader className="bg-zinc-50/50">
+              <TableRow className="border-zinc-100 hover:bg-transparent">
+                <TableHead className="w-[80px] text-[10px] uppercase tracking-widest font-bold">Image</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest font-bold">Designation</TableHead>
+                <TableHead className="hidden md:table-cell text-[10px] uppercase tracking-widest font-bold">Category</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest font-bold">Value</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest font-bold">Supply</TableHead>
+                <TableHead className="hidden sm:table-cell text-[10px] uppercase tracking-widest font-bold">Status</TableHead>
+                <TableHead className="text-right text-[10px] uppercase tracking-widest font-bold">Actions</TableHead>
               </TableRow>
-            ) : products.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-16 text-zinc-400">
-                  <PackageOpen className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                  <p className="text-sm font-medium">No products found.</p>
-                  <p className="text-xs mt-1">Start by clicking <strong>Add Product</strong> above.</p>
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="w-12 h-12 rounded-md overflow-hidden bg-zinc-100 border border-zinc-200 flex-shrink-0">
-                      {product.imageUrls?.[0] ? (
-                        <img
-                          src={product.imageUrls[0]}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-zinc-300">
-                          <PackageOpen size={20} />
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium max-w-[200px] truncate" title={product.name}>
-                    {product.name}
-                  </TableCell>
-                  <TableCell className="text-zinc-500 text-sm">{product.category}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-semibold">₹{product.price.toFixed(2)}</span>
-                      {product.salePrice && product.salePrice > 0 && (
-                        <span className="text-xs text-green-600">Sale: ₹{product.salePrice.toFixed(2)}</span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={product.stock === 0 ? "text-red-500 font-semibold" : ""}>
-                      {product.stock}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={product.isActive !== false ? "default" : "secondary"}>
-                      {product.isActive !== false ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                    <Link href={`/admin/products/${product.id}`}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-brand-vibrant-pink transition-colors">
-                        <Pencil size={14} />
-                      </Button>
-                    </Link>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
-                        onClick={() => handleDelete(product.id!)}
-                        disabled={deletingId === product.id}
-                      >
-                        {deletingId === product.id
-                          ? <Loader2 size={14} className="animate-spin" />
-                          : <Trash2 size={14} />
-                        }
-                      </Button>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-20">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-brand-gold/40" />
+                    <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-zinc-400 mt-4">Syncing Inventory...</p>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : products.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-24 text-zinc-400">
+                    <PackageOpen className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-xs font-bold uppercase tracking-widest">No products found.</p>
+                    <p className="text-[10px] mt-2 italic">Start by clicking Add Product above.</p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedProducts.map((product) => (
+                  <TableRow key={product.id} className="border-zinc-50 hover:bg-zinc-50/50 transition-colors group">
+                    <TableCell>
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-100 flex-shrink-0 group-hover:scale-105 transition-transform">
+                        {product.imageUrls?.[0] ? (
+                          <img
+                            src={product.imageUrls[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-zinc-300">
+                            <PackageOpen size={20} />
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium max-w-[150px] md:max-w-[200px]">
+                      <div className="flex flex-col">
+                        <span className="truncate text-sm text-zinc-900" title={product.name}>{product.name}</span>
+                        <span className="md:hidden text-[9px] text-zinc-400 uppercase font-bold tracking-tighter mt-0.5">{product.category}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-zinc-500 text-xs font-medium">{product.category}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-sm text-zinc-900">₹{product.price.toFixed(2)}</span>
+                        {product.salePrice && product.salePrice > 0 && (
+                          <span className="text-[9px] text-green-600 font-bold uppercase tracking-tighter">On Sale</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`text-xs font-bold ${product.stock === 0 ? "text-red-500" : "text-zinc-600"}`}>
+                        {product.stock}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <Badge 
+                        className={`text-[9px] uppercase tracking-widest rounded-full px-2 py-0.5 border-none shadow-none ${
+                          product.isActive !== false 
+                            ? "bg-green-50 text-green-600" 
+                            : "bg-zinc-100 text-zinc-500"
+                        }`}
+                      >
+                        {product.isActive !== false ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                      <Link href={`/admin/products/${product.id}`}>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-zinc-400 hover:text-brand-gold hover:bg-zinc-100">
+                          <Pencil size={16} />
+                        </Button>
+                      </Link>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50"
+                          onClick={() => handleDelete(product.id!)}
+                          disabled={deletingId === product.id}
+                        >
+                          {deletingId === product.id
+                            ? <Loader2 size={16} className="animate-spin" />
+                            : <Trash2 size={16} />
+                          }
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <Pagination 

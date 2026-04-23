@@ -65,6 +65,17 @@ function ProductGrid() {
     };
     fetchData();
   }, []);
+  
+  // Listen for navbar interaction to close page filters
+  useEffect(() => {
+    const handleCloseFilters = () => {
+      setPriceFilterOpen(false);
+      setSortFilterOpen(false);
+    };
+    
+    window.addEventListener('close-page-filters', handleCloseFilters);
+    return () => window.removeEventListener('close-page-filters', handleCloseFilters);
+  }, []);
 
   // Reset to page 1 when category changes
   useEffect(() => {

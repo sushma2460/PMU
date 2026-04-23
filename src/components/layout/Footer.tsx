@@ -51,6 +51,7 @@ export function Footer() {
               <li><Link href="/pages/affiliate" className="text-zinc-700 hover:text-brand-black transition-colors text-xs font-light tracking-widest uppercase">Affiliate</Link></li>
               <li><Link href="/pages/contact" className="text-zinc-700 hover:text-brand-black transition-colors text-xs font-light tracking-widest uppercase">Contact Us</Link></li>
               <li><Link href="/pages/international" className="text-zinc-700 hover:text-brand-black transition-colors text-xs font-light tracking-widest uppercase">International</Link></li>
+              <li><Link href="/pages/disclaimer" className="text-zinc-700 hover:text-brand-black transition-colors text-xs font-light tracking-widest uppercase">Product Disclaimer</Link></li>
             </ul>
           </div>
 
