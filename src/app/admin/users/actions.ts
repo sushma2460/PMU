@@ -67,3 +67,13 @@ export async function getUserTransactionsAction(userId: string) {
     return { success: false, error: err.message };
   }
 }
+
+export async function setUserRoleAction(userId: string, role: 'admin' | 'customer') {
+  try {
+    await adminDb.collection("users").doc(userId).update({ role });
+    return { success: true };
+  } catch (err: any) {
+    console.error("setUserRoleAction error:", err);
+    return { success: false, error: err.message };
+  }
+}

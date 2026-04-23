@@ -68,7 +68,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     if (!order) return;
     const doc = new jsPDF();
     doc.setFont("helvetica", "bold");
-    doc.text("PMU SUPPLY USA", 20, 20);
+    doc.text("PMU SUPPLY", 20, 20);
     doc.setFont("helvetica", "normal");
     doc.text(`Invoice for ${order.id}`, 20, 30);
     doc.text(`Customer: ${order.shippingAddress?.firstName} ${order.shippingAddress?.lastName}`, 20, 40);
@@ -78,12 +78,12 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     let y = 65;
     order.items?.forEach(item => {
       doc.text(`${item.productName} x ${item.quantity}`, 20, y);
-      doc.text(`$${(item.priceAtPurchase * item.quantity).toFixed(2)}`, 160, y);
+      doc.text(`₹${(item.priceAtPurchase * item.quantity).toFixed(2)}`, 160, y);
       y += 10;
     });
     
     doc.line(20, y, 190, y);
-    doc.text(`Total Paid: $${(order.total || 0).toFixed(2)}`, 140, y + 10);
+    doc.text(`Total Paid: ₹${(order.total || 0).toFixed(2)}`, 140, y + 10);
     
     doc.save(`Invoice_${order.id}.pdf`);
   };
@@ -162,7 +162,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                     <div className="flex items-center gap-8 text-right">
                        <div className="space-y-1 text-center">
                           <p className="text-[10px] text-zinc-400 uppercase font-black">Price</p>
-                          <p className="text-xs font-bold text-zinc-900">${item.priceAtPurchase.toFixed(2)}</p>
+                          <p className="text-xs font-bold text-zinc-900">₹{item.priceAtPurchase.toFixed(2)}</p>
                        </div>
                        <div className="space-y-1 text-center">
                           <p className="text-[10px] text-zinc-400 uppercase font-black">Qty</p>
@@ -170,7 +170,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                        </div>
                        <div className="space-y-1 text-right">
                           <p className="text-[10px] text-zinc-400 uppercase font-black">Total</p>
-                          <p className="text-xs font-black text-brand-gold">${(item.priceAtPurchase * item.quantity).toFixed(2)}</p>
+                          <p className="text-xs font-black text-brand-gold">₹{(item.priceAtPurchase * item.quantity).toFixed(2)}</p>
                        </div>
                     </div>
                   </div>
@@ -179,21 +179,21 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               <div className="bg-zinc-50/50 p-10 flex flex-col items-end space-y-3">
                  <div className="flex justify-between w-64 text-xs">
                     <span className="text-zinc-400 font-medium tracking-wide uppercase">Subtotal</span>
-                    <span className="font-bold text-zinc-900">${(order.total + (order.discountAmount || 0)).toFixed(2)}</span>
+                    <span className="font-bold text-zinc-900">₹{(order.total + (order.discountAmount || 0)).toFixed(2)}</span>
                  </div>
                  {order.couponCode && (
                    <div className="flex justify-between w-64 text-xs">
                       <span className="text-zinc-400 font-medium tracking-wide uppercase">Coupon ({order.couponCode})</span>
-                      <span className="font-bold text-green-500">-${(order.couponDiscountAmount || 0).toFixed(2)}</span>
+                      <span className="font-bold text-green-500">-₹{(order.couponDiscountAmount || 0).toFixed(2)}</span>
                    </div>
                  )}
                  <div className="flex justify-between w-64 text-xs">
                     <span className="text-zinc-400 font-medium tracking-wide uppercase">Shipping</span>
-                    <span className="font-bold text-zinc-900">$0.00</span>
+                    <span className="font-bold text-zinc-900">₹0.00</span>
                  </div>
                  <div className="flex justify-between w-64 pt-4 border-t border-zinc-200 text-lg">
                     <span className="font-heading tracking-wider uppercase text-zinc-800">Total Price</span>
-                    <span className="font-black text-brand-black">${(order.total || 0).toFixed(2)}</span>
+                    <span className="font-black text-brand-black">₹{(order.total || 0).toFixed(2)}</span>
                  </div>
               </div>
             </CardContent>

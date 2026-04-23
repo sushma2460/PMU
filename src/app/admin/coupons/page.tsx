@@ -174,7 +174,7 @@ export default function AdminCouponsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="percentage">Percentage (%)</SelectItem>
-                        <SelectItem value="flat">Flat Amount ($)</SelectItem>
+                        <SelectItem value="flat">Flat Amount (₹)</SelectItem>
                         <SelectItem value="free_shipping">Free Shipping</SelectItem>
                       </SelectContent>
                     </Select>
@@ -195,7 +195,7 @@ export default function AdminCouponsPage() {
                     <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Min Order Value</Label>
                     <Input 
                       type="number" 
-                      placeholder="$0" 
+                      placeholder="₹0" 
                       className="rounded-2xl h-12 bg-zinc-50 border-zinc-100" 
                       value={newCoupon.minimumOrderValue || ""}
                       onChange={e => setNewCoupon({...newCoupon, minimumOrderValue: Number(e.target.value)})}
@@ -303,7 +303,7 @@ export default function AdminCouponsPage() {
                   <TableCell>
                     <div className="flex flex-col">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{coupon.type}</span>
-                      <span className="text-xs font-bold text-zinc-900">{coupon.type === 'free_shipping' ? 'Free Shipping' : coupon.type === 'flat' ? `$${coupon.value}` : `${coupon.value}% OFF`}</span>
+                      <span className="text-xs font-bold text-zinc-900">{coupon.type === 'free_shipping' ? 'Free Shipping' : coupon.type === 'flat' ? `₹${coupon.value}` : `${coupon.value}% OFF`}</span>
                     </div>
                   </TableCell>
                   <TableCell>

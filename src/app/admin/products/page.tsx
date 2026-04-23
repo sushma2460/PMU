@@ -138,9 +138,9 @@ export default function AdminProductsPage() {
                   <TableCell className="text-zinc-500 text-sm">{product.category}</TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-semibold">${product.price.toFixed(2)}</span>
+                      <span className="font-semibold">₹{product.price.toFixed(2)}</span>
                       {product.salePrice && product.salePrice > 0 && (
-                        <span className="text-xs text-green-600">Sale: ${product.salePrice.toFixed(2)}</span>
+                        <span className="text-xs text-green-600">Sale: ₹{product.salePrice.toFixed(2)}</span>
                       )}
                     </div>
                   </TableCell>

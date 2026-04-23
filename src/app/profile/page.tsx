@@ -120,26 +120,12 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-heading tracking-tight">{profile?.displayName || "Elite Artist"}</h2>
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{user.email}</p>
               </div>
-              <div className="pt-6 border-t border-zinc-50 grid grid-cols-2 gap-4">
+              <div className="pt-6 border-t border-zinc-50 flex justify-center">
                  <div className="text-center">
-                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Points</p>
-                   <p className="text-lg font-black text-brand-gold">{profile?.points || 0}</p>
-                 </div>
-                 <div className="text-center">
-                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Orders</p>
-                   <p className="text-lg font-black text-zinc-900">{orders.length}</p>
+                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Global Order History</p>
+                   <p className="text-lg font-black text-zinc-900">{orders.length} Records</p>
                  </div>
               </div>
-            </div>
-
-            <div className="bg-brand-black text-white p-6 rounded-[2rem] space-y-4">
-              <div className="flex items-center gap-3">
-                <Award className="w-5 h-5 text-brand-gold" />
-                <span className="text-[10px] font-bold tracking-widest uppercase">Pro Rewards Status</span>
-              </div>
-              <p className="text-xs font-light tracking-wide text-zinc-400">
-                You are currently a <span className="text-brand-gold font-bold">Gold Member</span>. Enjoy complimentary international shipping on all orders over $150.
-              </p>
             </div>
           </div>
 

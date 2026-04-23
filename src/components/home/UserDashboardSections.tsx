@@ -65,7 +65,7 @@ export function SimpleStatStrip() {
     },
     { 
       label: "DISCOUNT POWER", 
-      value: loading ? "..." : `$${((profile?.points || 0) / 100).toFixed(2)}`, 
+      value: loading ? "..." : `₹${((profile?.points || 0) / 100).toFixed(2)}`, 
       icon: <CreditCard className="h-4 w-4 text-brand-gold" /> 
     },
     { 

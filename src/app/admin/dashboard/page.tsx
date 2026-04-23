@@ -108,7 +108,7 @@ export default function AdminDashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KPICard 
           title="Total Revenue" 
-          value={stats ? `$${stats.totalRevenue.toLocaleString()}` : "$0"} 
+          value={stats ? `₹${stats.totalRevenue.toLocaleString()}` : "₹0"} 
           trend="+18.2%" 
           trendUp={true} 
           icon={<DollarSign className="w-4 h-4" />} 
@@ -173,7 +173,7 @@ export default function AdminDashboard() {
                     axisLine={false} 
                     tickLine={false} 
                     tick={{fontSize: 9, fill: '#999', fontWeight: 600}}
-                    tickFormatter={(value) => `$${value}`}
+                    tickFormatter={(value) => `₹${value}`}
                   />
                   <Tooltip 
                     contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '15px' }}
@@ -246,7 +246,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-black text-zinc-900">${(order.total || 0).toFixed(2)}</p>
+                    <p className="text-xs font-black text-zinc-900">₹{(order.total || 0).toFixed(2)}</p>
                     <span className="text-[9px] font-bold text-[#FF4D8D] uppercase tracking-tighter">{order.status}</span>
                   </div>
                 </Link>

@@ -59,7 +59,6 @@ export default function AdminLayout({
             <NavItem href="/admin/products" icon={<Package size={20} />} label="Products" active={pathname.startsWith("/admin/products")} />
             <NavItem href="/admin/orders" icon={<ShoppingCart size={20} />} label="Orders" active={pathname.startsWith("/admin/orders")} />
             <NavItem href="/admin/coupons" icon={<Ticket size={20} />} label="Coupons" active={pathname === "/admin/coupons"} />
-            <NavItem href="/admin/referrals" icon={<Tag size={20} />} label="Referrals" active={pathname === "/admin/referrals"} />
             <NavItem href="/admin/users" icon={<Users size={20} />} label="Users" active={pathname === "/admin/users"} />
             <NavItem href="/admin/design" icon={<LayoutTemplate size={20} />} label="Design" active={pathname === "/admin/design"} />
           </nav>

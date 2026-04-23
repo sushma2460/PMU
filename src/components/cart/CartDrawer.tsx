@@ -51,7 +51,7 @@ export function CartDrawer() {
                       <p className="text-[10px] font-light text-brand-gold mt-1 uppercase tracking-tighter italic">Edition: {item.variantName}</p>
                     )}
                     <p className="text-sm font-normal mt-2 text-zinc-900">
-                      ${((item.product.salePrice ?? item.product.price) + (item.product.variants?.find(v => v.id === item.variantId)?.priceModifier || 0)).toFixed(2)}
+                      ₹{((item.product.salePrice ?? item.product.price) + (item.product.variants?.find(v => v.id === item.variantId)?.priceModifier || 0)).toFixed(2)}
                     </p>
                   </div>
                   
@@ -89,9 +89,9 @@ export function CartDrawer() {
           <div className="border-t border-brand-black pt-6 space-y-6 mt-auto">
             <div className="flex justify-between items-baseline">
               <span className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-50">Subtotal</span>
-              <span className="text-2xl font-heading italic">${getCartTotal().toFixed(2)}</span>
+              <span className="text-2xl font-heading italic">₹{getCartTotal().toFixed(2)}</span>
             </div>
-            <p className="text-[9px] text-zinc-400 tracking-widest uppercase text-center italic">Complimentary luxury shipping over $150</p>
+            <p className="text-[9px] text-zinc-400 tracking-widest uppercase text-center italic">Complimentary luxury shipping over ₹12,000</p>
             <div className="grid gap-3">
               <Button 
                 onClick={() => {

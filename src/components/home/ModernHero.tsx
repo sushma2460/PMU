@@ -13,16 +13,16 @@ export function ModernHero() {
   }, []);
 
   const mosaics = [
-    { url: "/images/landing/aftercare.png", title: "Full Collection" },
-    { url: "/images/landing/precision-machine.png", title: "Precision Machines" },
-    { url: "/images/landing/collection-hero.png", title: "Organic Pigments" },
-    { url: "/images/landing/q-vision.png", title: "Q-Vision Range" },
-    { url: "/images/landing/v3-cartridges.png", title: "V3 Cartridges" },
-    { url: "/images/landing/shaping-tools.png", title: "Artisan Tools" },
+    { url: "/images/landing/aftercare.png", title: "Aftercare", href: "/products?category=aftercare" },
+    { url: "/images/landing/master-studio.png", title: "Master Studio", href: "/products" },
+    { url: "/images/landing/elite-pigments.png", title: "Elite Pigments", href: "/products?category=pigments" },
+    { url: "/images/landing/precision-machine.png", title: "Precision Machines", href: "/products?category=machines-power-supplies" },
+    { url: "/images/landing/artistry-tools.png", title: "Artistry Tools", href: "/products?category=shaping-tools" },
+    { url: "/images/landing/pro-needles.png", title: "Pro Needles", href: "/products?category=needles" },
   ];
 
   return (
-    <section className="relative w-full min-h-screen lg:h-[110vh] flex items-center bg-brand-cream overflow-hidden pt-20 lg:pt-0">
+    <section className="relative w-full min-h-screen lg:h-[110vh] flex items-center bg-brand-cream overflow-hidden pt-12 lg:pt-0">
       
       {/* Cinematic Background Layer */}
       <div className="absolute inset-0 z-0">
@@ -47,10 +47,10 @@ export function ModernHero() {
       </div>
 
       <div className="container mx-auto px-4 relative z-20">
-        <div className="grid lg:grid-cols-12 gap-16 lg:gap-8 items-center py-20 lg:py-0">
+        <div className="grid lg:grid-cols-12 gap-16 lg:gap-8 items-center py-10 lg:py-0">
           
           {/* Left Column: Editorial Content */}
-          <div className="lg:col-span-6 xl:col-span-5 space-y-12 order-2 lg:order-1">
+          <div className="lg:col-span-6 xl:col-span-5 space-y-12 order-1 lg:order-1">
             <div className="space-y-6 animate-in fade-in slide-in-from-left-8 duration-1000">
               <div className="flex items-center gap-4">
                 <span className="h-px w-12 bg-gradient-to-r from-brand-gold to-transparent" />
@@ -88,31 +88,34 @@ export function ModernHero() {
                 </Button>
               </Link>
               
-              <button className="group flex items-center gap-4 text-brand-black text-[10px] font-bold tracking-[0.4em] uppercase hover:text-brand-gold transition-all duration-500">
-                <div className="w-12 h-12 rounded-full border border-brand-black/10 flex items-center justify-center group-hover:border-brand-gold group-hover:scale-110 transition-all duration-500">
-                  <Play className="h-3 w-3 fill-brand-black group-hover:fill-brand-gold transition-colors ml-0.5" />
-                </div>
-                SHOWCASE ALL
-              </button>
+              <Link href="/products">
+                <button className="group flex items-center gap-4 text-brand-black text-[10px] font-bold tracking-[0.4em] uppercase hover:text-brand-gold transition-all duration-500">
+                  <div className="w-12 h-12 rounded-full border border-brand-black/10 flex items-center justify-center group-hover:border-brand-gold group-hover:scale-110 transition-all duration-500">
+                    <Play className="h-3 w-3 fill-brand-black group-hover:fill-brand-gold transition-colors ml-0.5" />
+                  </div>
+                  SHOWCASE ALL
+                </button>
+              </Link>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 pt-12 border-t border-brand-black/5 animate-in fade-in duration-1000 delay-500">
               <StatItem label="300+" sub="SKUs" />
               <StatItem label="100%" sub="Vegan" />
               <StatItem label="PRO" sub="Level" />
-              <StatItem label="USA" sub="Supply" />
+              <StatItem label="INDIA" sub="Supply" />
             </div>
           </div>
 
           {/* Right Column: ALL PRODUCTS Mosaic Wall */}
-          <div className="lg:col-span-6 xl:col-span-7 relative order-1 lg:order-2">
+          <div className="lg:col-span-6 xl:col-span-7 relative order-2 lg:order-2">
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 lg:gap-6 animate-in fade-in zoom-in duration-1000 delay-200">
               {mosaics.map((item, i) => (
-                <div 
+                <Link 
                   key={i} 
+                  href={item.href}
                   className={`group relative overflow-hidden bg-brand-cream border border-brand-black/5 shadow-2xl transition-all duration-700 hover:z-30 hover:scale-105 ${
-                    i === 0 ? 'md:col-span-2 md:row-span-2 aspect-[16/9]' : 'aspect-square'
+                    i === 0 ? 'md:col-span-2 md:row-span-2 aspect-square' : 'aspect-square'
                   }`}
                 >
                   <div 
@@ -124,7 +127,7 @@ export function ModernHero() {
                   <div className="absolute bottom-4 left-4 right-4 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
                     <span className="text-[8px] font-bold text-brand-gold tracking-widest uppercase">{item.title}</span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 

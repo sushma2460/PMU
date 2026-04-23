@@ -322,6 +322,29 @@ export const seedDatabase = async () => {
       imageUrls: ["https://images.unsplash.com/photo-1596704017254-9b12106ec127?auto=format&fit=crop&q=80&w=800"],
       description: "Smudge-proof white pencils for precise brow mapping."
     },
+
+    // --- NUMBING ---
+    { 
+      name: "TKTX Gold Numbing Cream (10g)", 
+      price: 25.00, 
+      category: "Anesthetic/Numbing", 
+      imageUrls: ["https://images.unsplash.com/photo-1556228515-91988a245d44?auto=format&fit=crop&q=80&w=800"],
+      description: "Fast-acting 40% deep numbing for long procedures."
+    },
+    { 
+      name: "Blue Gel Secondary Anesthetic", 
+      price: 28.00, 
+      category: "Anesthetic/Numbing", 
+      imageUrls: ["https://images.unsplash.com/photo-1616670876426-387010775681?auto=format&fit=crop&q=80&w=800"],
+      description: "Secondary numbing gel to reduce swelling and bleeding during procedures."
+    },
+    { 
+      name: "Tag #45 Numbing Gel", 
+      price: 32.00, 
+      category: "Anesthetic/Numbing", 
+      imageUrls: ["https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800"],
+      description: "High-potency secondary anesthetic for immediate comfort."
+    },
   ];
 
   const batch = writeBatch(db);

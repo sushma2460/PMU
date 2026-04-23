@@ -15,7 +15,9 @@ export function Navbar() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
+  const [categoriesExpanded, setCategoriesExpanded] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -31,8 +33,8 @@ export function Navbar() {
   const slugify = (text: string) => {
     return text
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
+      .replace(/[\s/&_-]+/g, '-') 
+      .replace(/[^\w-]/g, '')    
       .replace(/^-+|-+$/g, '');
   };
 
@@ -51,13 +53,66 @@ export function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Left: Mobile Menu + Logo */}
         <div className="flex items-center gap-4">
-          <button className="lg:hidden p-2 hover:bg-zinc-100 rounded-md transition-colors">
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 hover:bg-zinc-100 rounded-md transition-colors"
+          >
             <Menu className="h-6 w-6" />
           </button>
           <Link href={user ? "/home" : "/"} className="font-heading font-bold text-2xl tracking-tighter text-brand-black uppercase">
             PMU<span className="text-brand-gold pl-1">SUPPLY</span>
           </Link>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 top-16 z-[100] lg:hidden bg-brand-cream animate-in slide-in-from-left duration-300 overflow-y-auto h-[calc(100vh-4rem)]">
+            <div className="container mx-auto px-4 py-8 flex flex-col gap-8 pb-20">
+              <Link onClick={() => setMobileMenuOpen(false)} href="/products" className="text-2xl font-heading tracking-widest uppercase text-brand-rose border-b border-brand-gold/10 pb-4">Shop All</Link>
+              
+              <div className="space-y-4">
+                <button 
+                  onClick={() => setCategoriesExpanded(!categoriesExpanded)}
+                  className="w-full flex items-center justify-between text-lg font-bold tracking-[0.2em] uppercase text-brand-rose"
+                >
+                  Product Categories
+                  <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${categoriesExpanded ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {categoriesExpanded && (
+                  <div className="grid grid-cols-1 gap-4 pl-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    {categories.map((cat) => (
+                      <Link 
+                        key={cat.id}
+                        onClick={() => setMobileMenuOpen(false)}
+                        href={`/products?category=${slugify(cat.name)}`}
+                        className="text-sm font-bold text-brand-rose/80 hover:text-brand-black transition-colors flex items-center justify-between group uppercase tracking-widest"
+                      >
+                        {cat.name}
+                        <span className="h-px w-0 bg-brand-rose group-hover:w-8 transition-all duration-300" />
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-8 pt-4 border-t border-brand-gold/10">
+                <Link onClick={() => setMobileMenuOpen(false)} href="/products?category=on-my-tray" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-rose">On My Tray</Link>
+                <Link onClick={() => setMobileMenuOpen(false)} href="/pages/international" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-rose">International</Link>
+                <Link onClick={() => setMobileMenuOpen(false)} href="/pages/contact" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-rose">Contact</Link>
+              </div>
+
+              {/* Mobile Footer Area */}
+              <div className="mt-auto pt-12 space-y-4">
+                <p className="text-[8px] font-bold tracking-[0.5em] uppercase text-zinc-400">PMU SUPPLY INDIA</p>
+                <div className="flex gap-4">
+                   <div className="h-8 w-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-400">IG</div>
+                   <div className="h-8 w-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-400">FB</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Center: Navigation - Condensed with Dropdown */}
         <nav className="hidden lg:flex items-center gap-8 text-[11px] font-bold tracking-[0.2em] text-zinc-800">

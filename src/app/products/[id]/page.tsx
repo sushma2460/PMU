@@ -168,12 +168,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   {product.name}
                 </h1>
                 <div className="flex items-baseline gap-4 pt-2">
-                  <span className="text-2xl font-light text-zinc-900">${product.price.toFixed(2)}</span>
+                  <span className="text-2xl font-light text-zinc-900">₹{product.price.toFixed(2)}</span>
                   <span className="text-[9px] font-bold tracking-widest text-zinc-400 uppercase opacity-60">Professional Distribution</span>
                 </div>
                 <div className="pt-2">
                    <p className="text-[10px] text-zinc-500 font-light italic">
-                     Or 4 interest-free installments of ${(product.price / 4).toFixed(2)} with <span className="font-bold text-brand-gold">PMU Pay</span>
+                     Or 4 interest-free installments of ₹{(product.price / 4).toFixed(2)} with <span className="font-bold text-brand-gold">PMU Pay</span>
                    </p>
                 </div>
               </div>
@@ -279,7 +279,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   </div>
                   <div className="space-y-1 text-center">
                     <h3 className="text-[9px] font-bold tracking-widest uppercase text-zinc-800 group-hover:text-brand-gold transition-colors">{item.name}</h3>
-                    <p className="text-zinc-500 font-light italic text-xs">${item.price.toFixed(2)}</p>
+                    <p className="text-zinc-500 font-light italic text-xs">₹{item.price.toFixed(2)}</p>
                   </div>
                 </Link>
               ))}

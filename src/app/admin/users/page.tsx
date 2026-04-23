@@ -11,10 +11,9 @@ import {
   Mail,
   Award,
   History,
-  Coins,
   ArrowUpRight,
   UserPlus,
-  Calendar
+  ShieldAlert
 } from "lucide-react";
 import { 
   Table, 
@@ -36,21 +35,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { getAllUsersAction, adjustUserPointsAction, getUserTransactionsAction } from "./actions";
-import { UserProfile, PointTransaction } from "@/lib/types";
+import { getAllUsersAction, setUserRoleAction } from "./actions";
+import { UserProfile } from "@/lib/types";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [pointAdjustment, setPointAdjustment] = useState("");
-  const [adjustmentReason, setAdjustmentReason] = useState("");
-  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
-  const [isPointsLoading, setIsPointsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'details' | 'history'>('details');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -70,47 +64,25 @@ export default function AdminUsersPage() {
     fetchUsers();
   }, []);
 
-  const fetchTransactions = async (uid: string) => {
-    setIsPointsLoading(true);
-    try {
-      const res = await getUserTransactionsAction(uid);
-      if (res.success && res.transactions) {
-        setTransactions(res.transactions);
-      }
-    } catch (error) {
-      console.error("Failed to fetch transactions:", error);
-    } finally {
-      setIsPointsLoading(false);
-    }
-  };
-
-  const handleAdjustPoints = async () => {
-    if (!selectedUser || !pointAdjustment || !adjustmentReason) {
-      return toast.error("Please provide points amount and reason");
-    }
-    const delta = parseInt(pointAdjustment, 10);
-    if (isNaN(delta)) return toast.error("Enter a valid number");
+  const handleToggleRole = async () => {
+    if (!selectedUser) return;
+    const newRole = selectedUser.role === 'admin' ? 'customer' : 'admin';
     
-    setIsPointsLoading(true);
+    setIsLoading(true);
     try {
-      const res = await adjustUserPointsAction(selectedUser.uid, delta, adjustmentReason);
+      const res = await setUserRoleAction(selectedUser.uid, newRole);
       if (res.success) {
-        toast.success(`${delta > 0 ? "+" : ""}${delta} points applied.`);
-        
-        // Refresh user and history
+        toast.success(`User updated to ${newRole}.`);
         const res2 = await getAllUsersAction();
         if (res2.success && res2.users) setUsers(res2.users);
-        fetchTransactions(selectedUser.uid);
-        
-        setPointAdjustment("");
-        setAdjustmentReason("");
+        setSelectedUser(prev => prev ? { ...prev, role: newRole } : null);
       } else {
-        toast.error(res.error || "Failed to update points");
+        toast.error(res.error || "Failed to update role");
       }
     } catch (error) {
-      toast.error("Failed to update points");
+      toast.error("Failed to update role");
     } finally {
-      setIsPointsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -127,7 +99,7 @@ export default function AdminUsersPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-heading font-normal">Customer Intelligence</h1>
-          <p className="text-zinc-500 text-sm mt-1">Manage global artist network, loyalty tiers, and account security.</p>
+          <p className="text-zinc-500 text-sm mt-1">Manage global artist network and account security.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="rounded-full text-[10px] font-bold tracking-widest uppercase gap-2 px-6">
@@ -139,10 +111,9 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MetricCard title="Total Artists" value={isLoading ? "..." : users.length.toString()} icon={<UsersIcon className="w-4 h-4" />} />
-        <MetricCard title="Verified Artists" value={isLoading ? "..." : users.filter(u => u.role !== "admin").length.toString()} icon={<ShieldCheck className="w-4 h-4 text-emerald-500" />} />
-        <MetricCard title="Total Loyalty Pts" value={isLoading ? "..." : users.reduce((a, u) => a + (u.points || 0), 0).toLocaleString()} icon={<Coins className="w-4 h-4 text-brand-gold" />} />
+        <MetricCard title="Professional Artists" value={isLoading ? "..." : users.filter(u => u.role !== "admin").length.toString()} icon={<ShieldCheck className="w-4 h-4 text-emerald-500" />} />
         <MetricCard title="Admin Accounts" value={isLoading ? "..." : users.filter(u => u.role === "admin").length.toString()} icon={<ArrowUpRight className="w-4 h-4 text-emerald-500" />} />
       </div>
 
@@ -166,17 +137,15 @@ export default function AdminUsersPage() {
           <TableHeader className="bg-zinc-50/50">
             <TableRow>
               <TableHead className="px-8 text-[10px] font-bold uppercase tracking-widest">Artist Profile</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest">Role</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest">Loyalty Balance</TableHead>
+               <TableHead className="text-[10px] font-bold uppercase tracking-widest">Role</TableHead>
               <TableHead className="text-[10px] font-bold uppercase tracking-widest">Store Credit</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest">Referral Code</TableHead>
               <TableHead className="text-right px-8 text-[10px] font-bold uppercase tracking-widest">Management</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-24 text-center">
+                <TableCell colSpan={4} className="py-24 text-center">
                   <div className="flex justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-gold" />
                   </div>
@@ -184,7 +153,7 @@ export default function AdminUsersPage() {
               </TableRow>
             ) : filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-24 text-center">
+                <TableCell colSpan={4} className="py-24 text-center">
                   <p className="text-zinc-400 text-sm italic">
                     {users.length === 0 ? "No users registered yet." : "No matching users found."}
                   </p>
@@ -209,31 +178,18 @@ export default function AdminUsersPage() {
                       {user.role}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Coins className="w-3 h-3 text-brand-gold" />
-                      <span className="text-xs font-bold text-zinc-900">{(user.points || 0).toLocaleString()}</span>
-                    </div>
-                  </TableCell>
                   <TableCell className="text-xs font-black text-zinc-900">
-                    ${(user.storeCredit || 0).toLocaleString()}
-                  </TableCell>
-                  <TableCell className="font-mono text-[11px] text-zinc-500 font-bold tracking-widest text-left">
-                    {user.referralCode || "—"}
+                    ₹{(user.storeCredit || 0).toLocaleString()}
                   </TableCell>
                   <TableCell className="text-right px-8">
                     <Dialog onOpenChange={(open) => {
                       if(open) {
                         setSelectedUser(user);
-                        fetchTransactions(user.uid);
-                        setActiveTab('details');
                       }
                     }}>
-                      <DialogTrigger render={
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 text-zinc-400">
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      } />
+                    <DialogTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 text-zinc-400" />}>
+                      <MoreVertical className="w-4 h-4" />
+                    </DialogTrigger>
                       {selectedUser?.uid === user.uid && (
                         <DialogContent className="sm:max-w-[550px] rounded-[3rem] p-10 border-none shadow-2xl">
                           <DialogHeader>
@@ -248,93 +204,45 @@ export default function AdminUsersPage() {
                             </div>
                           </DialogHeader>
                           
-                          <div className="flex gap-4 border-b border-zinc-100 mb-6">
-                            <button 
-                              onClick={() => setActiveTab('details')}
-                              className={`pb-4 text-[10px] font-bold uppercase tracking-widest transition-all px-2 ${activeTab === 'details' ? 'border-b-2 border-brand-gold text-brand-black' : 'text-zinc-400'}`}
-                            >
-                              Artist Profile
-                            </button>
-                            <button 
-                              onClick={() => setActiveTab('history')}
-                              className={`pb-4 text-[10px] font-bold uppercase tracking-widest transition-all px-2 ${activeTab === 'history' ? 'border-b-2 border-brand-gold text-brand-black' : 'text-zinc-400'}`}
-                            >
-                              Points Audit
-                            </button>
+                          <div className="space-y-8 animate-in slide-in-from-left-2 duration-300">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100 text-left">
+                                <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><Award className="w-3 h-3" /> Current Role</p>
+                                <p className="text-sm font-bold text-zinc-900 capitalize">{selectedUser.role}</p>
+                              </div>
+                              <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100 text-left">
+                                <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><History className="w-3 h-3" /> Joined</p>
+                                <p className="text-sm font-bold text-zinc-900">
+                                  {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-4">
+                              <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest flex items-center gap-2 ml-1">
+                                <ShieldAlert className="w-3 h-3 text-brand-gold" /> System Permissions
+                              </Label>
+                              <Button 
+                                className={`w-full h-14 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all duration-300 ${
+                                  selectedUser.role === 'admin' 
+                                    ? "bg-zinc-100 text-zinc-900 hover:bg-zinc-200" 
+                                    : "bg-brand-black text-white hover:bg-brand-gold"
+                                }`} 
+                                onClick={handleToggleRole}
+                                disabled={isLoading}
+                              >
+                                {isLoading ? "Updating..." : selectedUser.role === 'admin' ? "Demote to Customer" : "Promote to Administrator"}
+                              </Button>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" className="flex-1 rounded-2xl h-12 text-[10px] font-black uppercase tracking-widest border-zinc-100 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all gap-2">
+                                <Ban className="w-3 h-3" /> Suspend Account
+                              </Button>
+                              <Button variant="outline" className="flex-1 rounded-2xl h-12 text-[10px] font-black uppercase tracking-widest border-zinc-100 gap-2">
+                                <Mail className="w-3 h-3" /> Professional Outbox
+                              </Button>
+                            </div>
                           </div>
-
-                          {activeTab === 'details' ? (
-                            <div className="space-y-8 animate-in slide-in-from-left-2 duration-300">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100 text-left">
-                                  <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><Award className="w-3 h-3" /> Role</p>
-                                  <p className="text-sm font-bold text-zinc-900 capitalize">{selectedUser.role}</p>
-                                </div>
-                                <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100 text-left">
-                                  <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><History className="w-3 h-3" /> Joined</p>
-                                  <p className="text-sm font-bold text-zinc-900">
-                                    {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest flex items-center gap-2 ml-1">
-                                  <Coins className="w-3 h-3 text-brand-gold" /> Force Points Adjustment
-                                </Label>
-                                <div className="space-y-3">
-                                  <Input 
-                                    type="number" 
-                                    placeholder="+/- points (e.g. 100 or -50)" 
-                                    className="rounded-2xl h-12 bg-zinc-50 border-zinc-100" 
-                                    value={pointAdjustment}
-                                    onChange={(e) => setPointAdjustment(e.target.value)}
-                                  />
-                                  <Input 
-                                    placeholder="Adjustment motive (e.g. Compensation for delay)" 
-                                    className="rounded-2xl h-12 bg-zinc-50 border-zinc-100" 
-                                    value={adjustmentReason}
-                                    onChange={(e) => setAdjustmentReason(e.target.value)}
-                                  />
-                                  <Button 
-                                    className="w-full h-12 rounded-2xl bg-zinc-900 text-white font-bold text-[10px] uppercase tracking-widest disabled:opacity-50" 
-                                    onClick={handleAdjustPoints}
-                                    disabled={isPointsLoading}
-                                  >
-                                    {isPointsLoading ? "Committing..." : "Update Artist Balance"}
-                                  </Button>
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button variant="outline" className="flex-1 rounded-2xl h-12 text-[10px] font-black uppercase tracking-widest border-zinc-100 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all gap-2">
-                                  <Ban className="w-3 h-3" /> Suspend
-                                </Button>
-                                <Button variant="outline" className="flex-1 rounded-2xl h-12 text-[10px] font-black uppercase tracking-widest border-zinc-100 gap-2">
-                                  <Mail className="w-3 h-3" /> Connect
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 animate-in slide-in-from-right-2 duration-300">
-                              {isPointsLoading ? (
-                                <div className="py-20 text-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-gold mx-auto"></div></div>
-                              ) : transactions.length === 0 ? (
-                                <div className="py-20 text-center text-zinc-400 italic text-xs">No transaction history found for this artist.</div>
-                              ) : transactions.map((tx) => (
-                                <div key={tx.id} className="p-4 rounded-2xl bg-zinc-50 border border-zinc-100 flex justify-between items-start">
-                                  <div className="text-left space-y-1">
-                                    <p className="text-xs font-bold text-zinc-900">{tx.reason}</p>
-                                    <div className="flex items-center gap-2 text-[9px] text-zinc-400 font-bold uppercase tracking-widest">
-                                      <Calendar className="w-2.5 h-2.5" /> {new Date(tx.createdAt).toLocaleDateString()}
-                                    </div>
-                                  </div>
-                                  <span className={`text-xs font-black ${tx.amount > 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                                    {tx.amount > 0 ? '+' : ''}{tx.amount}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
                         </DialogContent>
                       )}
                     </Dialog>

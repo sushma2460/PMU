@@ -28,75 +28,9 @@ export async function POST(req: Request) {
 
       if (orderData && orderData.status !== 'paid') {
         const userId = orderData.userId;
-        const total = orderData.total;
-        const subtotal = orderData.subtotal || total;
-        
-        // 1. Calculate and award points (1 pt per $1 spent on subtotal)
-        const pointsEarned = Math.floor(subtotal);
-        const pointsUsed = orderData.pointsUsed || 0;
         
         const userRef = adminDb.collection("users").doc(userId);
-        const userSnap = await userRef.get();
-        const userData = userSnap.data();
-
-        // Update balance: add earned, subtract used
-        const currentPoints = userData?.points || 0;
-        const newBalance = currentPoints + pointsEarned - pointsUsed;
-
-        await userRef.update({
-          points: newBalance
-        });
-
-        // Points Earned Transaction
-        await userRef.collection("transactions").add({
-          id: `earn_${razorpay_payment_id}`,
-          amount: pointsEarned,
-          reason: `Earned from Order #${razorpay_order_id.slice(-6)}`,
-          createdAt: Date.now(),
-          adminId: 'SYSTEM'
-        });
-
-        // Points Used Transaction (if any)
-        if (pointsUsed > 0) {
-          await userRef.collection("transactions").add({
-            id: `spend_${razorpay_payment_id}`,
-            amount: -pointsUsed,
-            reason: `Used for Order #${razorpay_order_id.slice(-6)}`,
-            createdAt: Date.now(),
-            adminId: 'SYSTEM'
-          });
-        }
-
-        // 2. Handle Referral (If first order)
-        if (userData?.referredBy && !userData.hasOrderedBefore) {
-          const referralSettingsSnap = await adminDb.collection("settings").doc("referral").get();
-          const refSettings = referralSettingsSnap.data();
-          const rewardAmount = refSettings?.referrerRewardPoints || 500;
-
-          // Find referrer by their referralCode
-          const referrersQuery = await adminDb.collection("users")
-            .where("referralCode", "==", userData.referredBy)
-            .limit(1)
-            .get();
-
-          if (!referrersQuery.empty) {
-            const referrerDoc = referrersQuery.docs[0];
-            const referrerRef = adminDb.collection("users").doc(referrerDoc.id);
-            
-            await referrerRef.update({
-              points: (referrerDoc.data().points || 0) + rewardAmount
-            });
-            
-            await referrerRef.collection("transactions").add({
-              id: `ref_${razorpay_payment_id}`,
-              amount: rewardAmount,
-              reason: `Referral Bonus: ${userData.displayName || 'A new artist'} joined`,
-              createdAt: Date.now(),
-              adminId: 'SYSTEM'
-            });
-          }
-        }
-
+        
         // Mark user as having ordered before to prevent duplicate referral rewards
         await userRef.update({ hasOrderedBefore: true });
 
@@ -104,7 +38,6 @@ export async function POST(req: Request) {
         await orderRef.update({
           status: 'paid',
           razorpayPaymentId: razorpay_payment_id,
-          pointsEarned: pointsEarned,
           updatedAt: Date.now()
         });
       }

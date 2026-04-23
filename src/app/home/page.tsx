@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
@@ -106,14 +106,14 @@ export default function HomePage() {
                          <span className="text-xs font-bold tracking-wider uppercase truncate max-w-[60%]">
                            {product.name.startsWith('*') || product.name.startsWith('.') ? product.name : `*${product.name}`}
                          </span>
-                         <span className="text-brand-gold font-bold text-xs">${product.price.toFixed(2)}</span>
+                         <span className="text-brand-gold font-bold text-xs">₹{product.price.toFixed(2)}</span>
                        </Link>
                      ))
                    ) : (
                      [
-                       { name: "V3 Nano Needles", price: "$29.00" },
-                       { name: "M90 Organic Black", price: "$36.00" },
-                       { name: "Booms Butter", price: "$24.95" }
+                       { name: "V3 Nano Needles", price: "₹29.00" },
+                       { name: "M90 Organic Black", price: "₹36.00" },
+                       { name: "Booms Butter", price: "₹24.95" }
                      ].map((item, i) => (
                        <div key={i} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-zinc-100 group hover:border-brand-gold transition-colors cursor-pointer">
                          <span className="text-xs font-bold tracking-wider uppercase">{item.name}</span>

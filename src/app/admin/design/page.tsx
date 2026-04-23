@@ -309,7 +309,7 @@ export default function AdminDesignPage() {
                        className={`flex-1 pb-2 border-b-2 transition-all ${settings.card.priceSize === size ? "border-brand-gold text-zinc-900" : "border-zinc-100 text-zinc-300"}`}
                      >
                        <span style={{ fontSize: size === 'xs' ? '12px' : size === 'sm' ? '14px' : '16px' }} className="font-bold">
-                         $99
+                         ₹99
                        </span>
                        <div className="text-[10px] mt-1 font-bold">{size.toUpperCase()}</div>
                      </button>
@@ -354,7 +354,7 @@ export default function AdminDesignPage() {
                <div style={{ fontSize: settings.card.titleSize === 'xs' ? '11px' : settings.card.titleSize === 'sm' ? '12px' : '14px' }} className="font-normal leading-tight">
                  *Product Title Example
                </div>
-               <div style={{ fontSize: settings.card.priceSize === 'xs' ? '11px' : settings.card.priceSize === 'sm' ? '13px' : '15px' }} className="font-bold text-zinc-900">$19.00</div>
+               <div style={{ fontSize: settings.card.priceSize === 'xs' ? '11px' : settings.card.priceSize === 'sm' ? '13px' : '15px' }} className="font-bold text-zinc-900">₹19.00</div>
             </div>
           </div>
       </div>

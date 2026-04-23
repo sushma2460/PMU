@@ -10,19 +10,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Empty cart" }, { status: 400 });
     }
 
-    // 0. Validate Points if provided
-    let pointsDiscount = 0;
-    let validatedPointsToUse = 0;
-    if (userId && pointsToUse > 0) {
-      const userDoc = await adminDb.collection("users").doc(userId).get();
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        const userPoints = userData?.points || 0;
-        validatedPointsToUse = Math.min(pointsToUse, userPoints);
-        pointsDiscount = validatedPointsToUse / 100; // $0.01 per point
-      }
-    }
-
     // 1. Calculate Subtotal & Discount
     let subtotal = 0;
     const orderItems = [];
@@ -59,8 +46,9 @@ export async function POST(req: Request) {
       });
     }
 
-    // 2. Handle Coupon
+    // 2. Handle Coupon & Points
     let couponDiscountAmount = 0;
+    let pointsDiscountAmount = 0;
     let couponId = null;
 
     if (couponCode) {
@@ -82,8 +70,12 @@ export async function POST(req: Request) {
       }
     }
 
+    if (pointsToUse && pointsToUse > 0) {
+      pointsDiscountAmount = pointsToUse / 100;
+    }
+
     // 3. Shipping & Tax
-    const discountTotal = couponDiscountAmount + pointsDiscount;
+    const discountTotal = couponDiscountAmount + pointsDiscountAmount;
     const finalSubtotal = Math.max(0, subtotal - discountTotal);
     const shipping = finalSubtotal > 150 ? 0 : 15;
     const tax = finalSubtotal * 0.08;
@@ -93,7 +85,7 @@ export async function POST(req: Request) {
     const amountInCents = Math.round(total * 100);
     const razorpayOptions = {
       amount: amountInCents,
-      currency: "USD",
+      currency: "INR",
       receipt: `rcpt_${Date.now()}`,
       notes: { userId: userId || "guest" }
     };
@@ -107,13 +99,13 @@ export async function POST(req: Request) {
       subtotal: subtotal,
       discountAmount: discountTotal,
       couponDiscountAmount: couponDiscountAmount,
-      pointsDiscountAmount: pointsDiscount,
-      pointsUsed: validatedPointsToUse,
+      pointsDiscountAmount: pointsDiscountAmount,
       shippingAmount: shipping,
       taxAmount: tax,
       total: total,
       couponId: couponId,
       couponCode: couponCode || null,
+      pointsUsed: pointsToUse || 0,
       status: 'pending',
       shippingAddress: shippingAddress,
       createdAt: Date.now(),
@@ -124,7 +116,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       orderId: rzpOrder.id,
       amount: amountInCents,
-      currency: "USD",
+      currency: "INR",
     });
   } catch (error: any) {
     console.error("Razorpay Order Error:", error);

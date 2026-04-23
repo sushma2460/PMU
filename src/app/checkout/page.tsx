@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuth } from "@/context/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, CheckCircle2, CreditCard, ShieldCheck, Truck } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -52,21 +52,9 @@ export default function CheckoutPage() {
     return appliedCoupon.value;
   }, [appliedCoupon, subtotal]);
 
-  const [pointsToUse, setPointsToUse] = useState(0);
-  const pointsDiscount = useMemo(() => {
-    const maxUsablePoints = Math.floor((subtotal - discountAmount) * 100);
-    const cappedPoints = Math.min(pointsToUse, profile?.points || 0, maxUsablePoints);
-    return cappedPoints / 100;
-  }, [pointsToUse, profile?.points, subtotal, discountAmount]);
-
-  const shippingAmount = (subtotal - discountAmount - pointsDiscount) > 150 ? 0 : 15;
-  const taxAmount = (subtotal - discountAmount - pointsDiscount) * 0.08;
-  const total = Math.max(0, subtotal - discountAmount - pointsDiscount + shippingAmount + taxAmount);
-  const pointsEarned = Math.max(0, Math.floor(subtotal - discountAmount - pointsDiscount));
-
-  const handleApplyPoints = (amount: number) => {
-    setPointsToUse(amount);
-  };
+  const shippingAmount = (subtotal - discountAmount) > 150 ? 0 : 15;
+  const taxAmount = (subtotal - discountAmount) * 0.08;
+  const total = Math.max(0, subtotal - discountAmount + shippingAmount + taxAmount);
 
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
@@ -96,7 +84,6 @@ export default function CheckoutPage() {
     setIsProcessing(true);
     
     try {
-      // Create Razorpay Order on the server
       const response = await fetch("/api/create-razorpay-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,8 +91,7 @@ export default function CheckoutPage() {
           items, 
           userId: user?.uid,
           couponCode: appliedCoupon?.code,
-          shippingAddress: formData,
-          pointsToUse: pointsToUse
+          shippingAddress: formData
         }),
       });
 
@@ -130,7 +116,6 @@ export default function CheckoutPage() {
     clearCart();
     toast.success("Payment Received. Your PMU SUPPLY package is being prepared.");
     
-    // Redirect to profile after a short delay
     setTimeout(() => {
       router.push("/profile");
     }, 3000);
@@ -147,7 +132,6 @@ export default function CheckoutPage() {
       description: "Elite Professional Equipment",
       order_id: razorpayOrder.orderId,
       handler: async function (response: any) {
-        // Verify payment on the server
         try {
           const verifyRes = await fetch("/api/verify-payment", {
             method: "POST",
@@ -174,7 +158,7 @@ export default function CheckoutPage() {
         email: formData.email,
       },
       theme: {
-        color: "#C9A84C", // PMU Gold
+        color: "#C9A84C",
       },
     };
 
@@ -208,7 +192,6 @@ export default function CheckoutPage() {
       <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col lg:flex-row gap-16">
           
-          {/* Main Checkout Section */}
           <div className="flex-1 space-y-12">
             
             {step === 3 ? (
@@ -220,7 +203,7 @@ export default function CheckoutPage() {
                 </div>
                 <h1 className="text-4xl md:text-5xl font-heading tracking-tight italic">Order Confirmed</h1>
                 <p className="text-lg text-zinc-500 max-w-xl mx-auto font-light leading-relaxed">
-                  Your order is being prepared with clinical care. You've earned <span className="text-brand-gold font-bold tracking-widest">{pointsEarned} PMU SUPPLY POINTS</span>.
+                  Your order is being prepared with clinical care. We appreciate your professional trust.
                 </p>
                 <div className="pt-10">
                   <Link href="/products">
@@ -348,7 +331,6 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* Luxury Order Summary Sidebar */}
           <div className="w-full lg:w-[450px]">
             <div className="sticky top-24 space-y-6">
               <Card className="rounded-none border-brand-gold/10 shadow-2xl relative overflow-hidden">
@@ -369,42 +351,13 @@ export default function CheckoutPage() {
                         <div className="flex-1 space-y-1 py-1">
                           <h4 className="text-xs font-bold tracking-wider leading-relaxed text-zinc-800 uppercase">{item.product.name}</h4>
                           <p className="text-[10px] font-light text-zinc-400 italic mb-2">{item.product.category}</p>
-                          <p className="text-sm font-normal tracking-wider">${((item.product.salePrice ?? item.product.price) * item.quantity).toFixed(2)}</p>
+                          <p className="text-sm font-normal tracking-wider">₹{((item.product.salePrice ?? item.product.price) * item.quantity).toFixed(2)}</p>
                         </div>
                       </div>
                     ))}
                   </div>
 
                   <div className="pt-8 border-t border-brand-gold/10 space-y-6">
-                    {/* Loyalty Points Section */}
-                    <div className="space-y-3 p-5 bg-brand-cream/10 border border-brand-gold/20 rounded-2xl relative overflow-hidden group">
-                       <div className="absolute top-0 right-0 w-24 h-24 bg-brand-gold/5 rounded-full blur-2xl -translate-x-4 -translate-y-4" />
-                       <div className="flex justify-between items-center relative z-10">
-                          <Label className="text-[10px] font-bold tracking-widest uppercase opacity-60">Loyalty Balance</Label>
-                          <span className="text-[10px] font-black text-brand-gold tracking-widest">{(profile?.points || 0).toLocaleString()} PTS</span>
-                       </div>
-                      <div className="flex gap-2 relative z-10">
-                        <Input 
-                          type="number"
-                          placeholder="Points to burn" 
-                          value={pointsToUse === 0 ? "" : pointsToUse}
-                          onChange={(e) => handleApplyPoints(Math.max(0, parseInt(e.target.value) || 0))}
-                          className={`h-10 rounded-xl border-zinc-200 bg-white text-[10px] font-bold tracking-widest uppercase focus:border-brand-gold ${pointsToUse > (profile?.points || 0) ? 'border-red-300 text-red-500' : ''}`} 
-                        />
-                        <Button 
-                          onClick={() => handleApplyPoints(profile?.points || 0)}
-                          variant="outline" 
-                          className="h-10 px-4 rounded-xl text-[10px] font-bold tracking-widest uppercase border-brand-gold text-brand-gold hover:bg-brand-gold hover:text-white transition-all shadow-sm"
-                        >
-                          MAX
-                        </Button>
-                      </div>
-                      {pointsToUse > (profile?.points || 0) && (
-                        <p className="text-[9px] text-red-500 font-bold italic animate-pulse">Insufficient points (Max: {profile?.points})</p>
-                      )}
-                      <p className="text-[9px] text-zinc-400 italic text-center relative z-10">100 points = $1.00 Artist Credit</p>
-                    </div>
-
                     <div className="space-y-3">
                       <Label className="text-[10px] font-bold tracking-widest uppercase opacity-60">Promo Code</Label>
                       <div className="flex gap-2">
@@ -436,38 +389,29 @@ export default function CheckoutPage() {
                     <div className="space-y-4 font-light text-sm pt-4 border-t border-zinc-50">
                       <div className="flex justify-between tracking-widest uppercase text-[10px]">
                         <span className="text-zinc-400">Inventory Total</span>
-                        <span className="font-bold text-zinc-800">${subtotal.toFixed(2)}</span>
+                        <span className="font-bold text-zinc-800">₹{subtotal.toFixed(2)}</span>
                       </div>
                       {discountAmount > 0 && (
                         <div className="flex justify-between tracking-widest uppercase text-[10px] text-emerald-600">
                           <span>Merchant Discount</span>
-                          <span className="font-bold">-${discountAmount.toFixed(2)}</span>
-                        </div>
-                      )}
-                      {pointsDiscount > 0 && (
-                        <div className="flex justify-between tracking-widest uppercase text-[10px] text-brand-gold">
-                          <span>Loyalty Redemption</span>
-                          <span className="font-bold">-${pointsDiscount.toFixed(2)}</span>
+                          <span className="font-bold">-₹{discountAmount.toFixed(2)}</span>
                         </div>
                       )}
                       <div className="flex justify-between tracking-widest uppercase text-[10px]">
                         <span className="text-zinc-400">Global Logistics</span>
-                        <span className="font-bold text-zinc-800">{shippingAmount === 0 ? "Complimentary" : `$${shippingAmount.toFixed(2)}`}</span>
+                        <span className="font-bold text-zinc-800">{shippingAmount === 0 ? "Complimentary" : `₹${shippingAmount.toFixed(2)}`}</span>
                       </div>
                       <div className="flex justify-between tracking-widest uppercase text-[10px]">
                         <span className="text-zinc-400">State Taxation</span>
-                        <span className="font-bold text-zinc-800">${taxAmount.toFixed(2)}</span>
+                        <span className="font-bold text-zinc-800">₹{taxAmount.toFixed(2)}</span>
                       </div>
                     <div className="pt-6 border-t border-brand-black flex justify-between items-baseline">
                       <span className="text-[11px] font-bold tracking-[0.4em] uppercase">Total Due</span>
-                      <span className="text-2xl font-heading font-normal">${total.toFixed(2)}</span>
+                      <span className="text-2xl font-heading font-normal">₹{total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
                 </CardContent>
-                <div className="bg-brand-black text-brand-gold py-4 text-center">
-                  <p className="text-[9px] font-bold tracking-[0.5em] uppercase">★ Earn {pointsEarned} Anniversary Points ★</p>
-                </div>
               </Card>
               
               <div className="grid grid-cols-2 gap-4">

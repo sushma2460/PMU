@@ -43,12 +43,12 @@ export interface UserProfile {
   email: string;
   displayName: string;
   role: 'admin' | 'customer';
-  points: number;
-  storeCredit: number;
-  referralCode: string;
-  referralCount: number;
+  points?: number;
+  storeCredit?: number;
+  referralCode?: string;
+  referralCount?: number;
   referredBy?: string; // UID of the person who referred them
-  totalReferralEarnings: number;
+  totalReferralEarnings?: number;
   createdAt: number;
 }
 

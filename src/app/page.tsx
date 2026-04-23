@@ -14,6 +14,63 @@ import { useRouter } from "next/navigation";
 
 
 import { getCouponsAction } from "@/app/admin/coupons/actions";
+import { getProducts } from "@/lib/services/admin";
+import { Product } from "@/lib/types";
+
+function FeaturedProductsGrid() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await getProducts();
+        // Show only the 4 most recent products as featured
+        setProducts(data.slice(0, 4));
+      } catch (error) {
+        console.error("Error loading featured products:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="aspect-square bg-zinc-100 animate-pulse rounded-2xl" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      {products.map((product) => (
+        <Link key={product.id} href={`/products/${product.id}`} className="group space-y-4">
+          <div className="relative aspect-square rounded-2xl overflow-hidden bg-brand-cream border border-brand-gold/10">
+            {product.imageUrls?.[0] && (
+              <img 
+                src={product.imageUrls[0]} 
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            )}
+            <div className="absolute inset-0 bg-brand-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-[11px] font-bold tracking-widest uppercase text-zinc-900 group-hover:text-brand-gold transition-colors line-clamp-1">
+              {product.name}
+            </h3>
+            <p className="text-sm font-light text-zinc-500">₹{product.price.toFixed(2)}</p>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
 
 export default function Home() {
   const { user, profile, isAdmin, loading } = useAuth();
@@ -96,9 +153,9 @@ export default function Home() {
               <p className="text-zinc-600 text-lg font-light italic max-w-sm">
                 Elevate your artistry with our comprehensive nano brow techniques. Level up your career today.
               </p>
-              <Link href="/products?category=classes" className="inline-block pt-4">
+              <Link href="/register" className="inline-block pt-4">
                 <Button size="lg" className="bg-brand-gold text-white hover:bg-brand-black px-12 h-16 rounded-full tracking-[0.2em] text-[10px] font-bold transition-all duration-500 shadow-xl shadow-brand-gold/20">
-                  REGISTER NOW — $599
+                  REGISTER NOW — ₹599
                 </Button>
               </Link>
             </div>
@@ -130,13 +187,13 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <CollectionCard 
             title="Practice Materials" 
-            href="/products?category=practice" 
+            href="/products?category=practice-materials" 
             image="/images/landing/practice-skins.png"
             count="12 Products"
           />
           <CollectionCard 
             title="Machines & Power" 
-            href="/products?category=machines" 
+            href="/products?category=machines-power-supplies" 
             image="/images/landing/precision-machine.png"
             count="12 Products"
           />
@@ -154,19 +211,19 @@ export default function Home() {
           />
           <CollectionCard 
             title="Q Vision Pigments" 
-            href="/products?category=q-vision" 
+            href="/products?category=q-vision-pigments" 
             image="/images/landing/q-vision.png"
             count="7 Products"
           />
           <CollectionCard 
             title="Etalon Hybrid & Mineral" 
-            href="/products?category=etalon" 
+            href="/products?category=etalon-hybrid-mineral" 
             image="/images/landing/etalon.png"
             count="15 Products"
           />
           <CollectionCard 
             title="Numbing & Anesthetic" 
-            href="/products?category=numbing" 
+            href="/products?category=anesthetic-numbing" 
             image="/images/landing/numbing.png"
             count="4 Products"
           />
@@ -182,6 +239,23 @@ export default function Home() {
             image="/images/landing/shaping-tools.png"
             count="8 Products"
           />
+        </div>
+      </section>
+
+      {/* Featured Products Section */}
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+            <div className="space-y-2">
+              <span className="text-brand-gold text-[10px] font-bold tracking-[0.4em] uppercase">Artist Selection</span>
+              <h2 className="text-4xl md:text-5xl font-heading">Featured <span className="italic text-brand-gold">Products</span></h2>
+            </div>
+            <Link href="/products" className="text-[10px] font-bold tracking-[0.3em] uppercase border-b border-brand-gold pb-1 hover:opacity-70 transition-opacity">
+              Shop All Collection
+            </Link>
+          </div>
+
+          <FeaturedProductsGrid />
         </div>
       </section>
       
@@ -338,10 +412,10 @@ export default function Home() {
       {/* Featured Artist / Testimonial - New */}
       <section className="py-24 bg-brand-cream overflow-hidden relative">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto grid lg:grid-cols-2 items-center gap-16 lg:gap-24">
+          <div className="max-w-6xl mx-auto grid lg:grid-cols-2 items-stretch gap-16 lg:gap-24">
             <div className="relative group ring-1 ring-zinc-200 p-2 rounded-[2.5rem]">
-              <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden">
-                <img src="/images/landing/brow-class.png" alt="Featured Artist" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
+              <div className="relative h-full rounded-[2rem] overflow-hidden">
+                <img src="/images/landing/featured-master.png" alt="Featured Artist" className="w-full h-full object-cover transition-all duration-1000" />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-black/80 via-transparent to-transparent" />
                 <div className="absolute bottom-8 left-8">
                   <p className="text-brand-gold text-xs font-bold tracking-widest uppercase mb-2">Featured Master</p>
@@ -380,7 +454,7 @@ export default function Home() {
               We are proud to announce our newest versions of latex practice skins, designed to make brow practice easier than ever. Featuring hair stroke patterns used by Mosha on real clients.
             </p>
             <div className="pt-4 flex gap-6">
-              <Link href="/products?category=practice">
+              <Link href="/products?category=practice-materials">
                 <Button className="bg-brand-black text-white hover:bg-brand-gold px-8 h-12 rounded-full transition-all duration-500 tracking-widest text-[10px] font-bold shadow-lg">
                   EXPLORE PRACTICE SKINS
                 </Button>
@@ -396,16 +470,27 @@ export default function Home() {
         <div className="container mx-auto px-4 max-w-2xl text-center space-y-8">
           <h2 className="text-3xl font-heading">Join the PMU SUPPLY Circle</h2>
           <p className="text-zinc-500 font-light italic">"Get 10% off your first order and exclusive access to new launches."</p>
-          <div className="flex flex-col sm:flex-row gap-0 border-b border-brand-black pb-2">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              alert("Thank you for joining the PMU SUPPLY Circle! Check your inbox for your 10% discount code.");
+              (e.target as HTMLFormElement).reset();
+            }}
+            className="flex flex-col sm:flex-row gap-0 border-b border-brand-black pb-2"
+          >
             <input 
               type="email" 
+              required
               placeholder="Enter your email address" 
-              className="flex-1 py-3 px-4 outline-none text-brand-black placeholder:text-zinc-300 placeholder:italic font-light"
+              className="flex-1 py-3 px-4 outline-none text-brand-black placeholder:text-zinc-300 placeholder:italic font-light bg-transparent"
             />
-            <button className="px-8 py-3 bg-brand-rose text-brand-black text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-brand-black hover:text-white transition-colors">
+            <button 
+              type="submit"
+              className="px-8 py-3 bg-brand-rose text-brand-black text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-brand-black hover:text-white transition-colors"
+            >
               Subscribe
             </button>
-          </div>
+          </form>
         </div>
       </section>
       
