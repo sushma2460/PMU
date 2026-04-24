@@ -164,26 +164,26 @@ export function Navbar() {
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <Link onClick={() => setMobileMenuOpen(false)} href="/products" className="text-2xl font-heading tracking-widest uppercase text-brand-rose border-b border-brand-gold/10 pb-4">Shop All</Link>
+            <Link onClick={() => setMobileMenuOpen(false)} href="/products" className="text-2xl font-heading tracking-widest uppercase text-brand-gold border-b border-brand-gold/10 pb-4 hover:text-brand-black transition-colors">Shop All</Link>
             <div className="space-y-6">
-              <p className="text-[10px] font-black tracking-[0.4em] uppercase text-brand-gold">Product Categories</p>
+              <p className="text-[10px] font-black tracking-[0.4em] uppercase text-zinc-400">Product Categories</p>
               <div className="grid grid-cols-1 gap-6 pl-2">
                 {categories.map((cat: any) => (
                   <Link 
                     key={cat.id}
                     onClick={() => setMobileMenuOpen(false)}
                     href={`/products?category=${slugify(cat.name)}`}
-                    className="text-sm font-bold text-brand-rose/80 hover:text-brand-black transition-colors flex items-center justify-between group uppercase tracking-widest"
+                    className="text-sm font-bold text-brand-black/60 hover:text-brand-gold transition-colors flex items-center justify-between group uppercase tracking-widest"
                   >
                     {cat.displayName || cat.name}
-                    <span className="h-px w-0 bg-brand-rose group-hover:w-8 transition-all duration-300" />
+                    <span className="h-px w-0 bg-brand-gold group-hover:w-8 transition-all duration-300" />
                   </Link>
                 ))}
               </div>
             </div>
             <div className="space-y-8 pt-8 border-t border-brand-gold/10">
-              <Link onClick={() => setMobileMenuOpen(false)} href="/pages/contact" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-rose">Contact Us</Link>
-              <Link onClick={() => setMobileMenuOpen(false)} href="/pages/disclaimer" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-rose">Product Disclaimer</Link>
+              <Link onClick={() => setMobileMenuOpen(false)} href="/pages/contact" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-gold hover:text-brand-black transition-colors">Contact Us</Link>
+              <Link onClick={() => setMobileMenuOpen(false)} href="/pages/disclaimer" className="block text-lg font-bold tracking-[0.2em] uppercase text-brand-gold hover:text-brand-black transition-colors">Product Disclaimer</Link>
             </div>
           </div>
         </div>

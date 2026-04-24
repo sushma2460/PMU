@@ -77,10 +77,10 @@ export function ModernHero() {
 
               <div className="space-y-2">
                 <h1 className="flex flex-col py-2">
-                  <span className="text-4xl md:text-5xl xl:text-7xl font-sans font-black tracking-[0.3em] uppercase leading-[1.1] text-transparent bg-clip-text bg-gradient-to-r from-black to-zinc-400">
+                  <span className="text-3xl md:text-5xl xl:text-7xl font-sans font-black tracking-[0.2em] uppercase leading-[1.1] text-transparent bg-clip-text bg-gradient-to-r from-black to-zinc-400">
                     PRECISION
                   </span>
-                  <span className="text-8xl md:text-9xl xl:text-[11rem] font-heading font-normal italic tracking-tighter text-brand-gold leading-[0.7] mt-[-0.05em]">
+                  <span className="text-7xl md:text-9xl xl:text-[11rem] font-heading font-normal italic tracking-tighter text-brand-gold leading-[0.7] mt-[-0.05em]">
                     PMU
                   </span>
                 </h1>
@@ -111,7 +111,7 @@ export function ModernHero() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-4 gap-6 pt-10 border-t border-zinc-100 animate-in fade-in duration-1000 delay-500">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-10 border-t border-zinc-100 animate-in fade-in duration-1000 delay-500">
               <StatItem label="300+" sub="SKUs" />
               <StatItem label="100%" sub="Vegan" />
               <StatItem label="PRO" sub="Level" />

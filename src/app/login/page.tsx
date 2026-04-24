@@ -150,11 +150,13 @@ function LoginForm() {
                   <Label htmlFor="password">Password</Label>
                   
                   <Dialog>
-                    <DialogTrigger asChild>
-                      <span className="text-xs text-brand-gold hover:underline font-medium cursor-pointer">
-                        Forgot password?
-                      </span>
-                    </DialogTrigger>
+                    <DialogTrigger 
+                      render={
+                        <span className="text-xs text-brand-gold hover:underline font-medium cursor-pointer">
+                          Forgot password?
+                        </span>
+                      }
+                    />
                     <DialogContent className="sm:max-w-[425px]">
                       <DialogHeader>
                         <DialogTitle>Reset Password</DialogTitle>
