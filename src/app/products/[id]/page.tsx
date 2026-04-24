@@ -9,8 +9,10 @@ import {
   RotateCcw, Info, Droplet, Zap, Target 
 } from "lucide-react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import { Product } from "@/lib/types";
 import { getProductById, getProducts } from "@/lib/services/admin";
+import { Footer } from "@/components/layout/Footer";
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -68,7 +70,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-brand-cream flex flex-col items-center justify-center space-y-4">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center space-y-4">
         <Navbar />
         <div className="animate-pulse flex flex-col items-center">
             <div className="w-12 h-12 rounded-full border-2 border-brand-gold border-t-transparent animate-spin mb-4" />
@@ -80,7 +82,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-brand-cream flex flex-col items-center justify-center space-y-6">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center space-y-6">
         <Navbar />
         <div className="text-center space-y-4">
           <h2 className="text-4xl font-heading italic">Product Archived</h2>
@@ -94,7 +96,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <main className="min-h-screen bg-brand-cream">
+    <main className="min-h-screen bg-white">
       <Navbar />
 
       <div className="relative">
@@ -111,28 +113,55 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             
             {/* Gallery Column */}
             <div className="space-y-6 sticky top-32">
-              <div className="relative aspect-square md:aspect-[4/5] rounded-[3rem] overflow-hidden bg-white border border-brand-rose/20 shadow-xl group">
-                <div 
-                  key={activeImage}
-                  className="absolute inset-0 bg-cover bg-center animate-in fade-in zoom-in-95 duration-1000"
-                  style={{ backgroundImage: `url("${product.imageUrls[activeImage] || product.imageUrls[0]}")` }}
-                />
+              <div className="relative aspect-square md:aspect-[4/5] bg-white border border-zinc-100 overflow-hidden group">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeImage}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.4 }}
+                    className="absolute inset-0"
+                  >
+                    <img 
+                      src={product.imageUrls[activeImage] || product.imageUrls[0]} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </motion.div>
+                </AnimatePresence>
+                
+                {/* Carousel Controls */}
+                {product.imageUrls.length > 1 && (
+                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                    {product.imageUrls.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveImage(idx)}
+                        className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${
+                          activeImage === idx ? 'bg-brand-gold w-6' : 'bg-zinc-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Thumbnails */}
               {product.imageUrls.length > 1 && (
-                <div className="flex gap-4 px-2">
+                <div className="flex gap-4 px-2 overflow-x-auto pb-2 scrollbar-hide">
                   {product.imageUrls.map((url, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActiveImage(idx)}
-                      className={`relative w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all duration-500 ${
-                        activeImage === idx ? 'border-brand-gold shadow-lg scale-110' : 'border-transparent opacity-60 hover:opacity-100'
+                      className={`relative w-24 h-24 shrink-0 overflow-hidden border transition-all duration-500 ${
+                        activeImage === idx ? 'border-brand-gold' : 'border-zinc-100 opacity-60 hover:opacity-100'
                       }`}
                     >
-                      <div 
-                        className="absolute inset-0 bg-cover bg-center"
-                        style={{ backgroundImage: `url("${url}")` }}
+                      <img 
+                        src={url} 
+                        alt={`${product.name} ${idx + 1}`}
+                        className="w-full h-full object-cover"
                       />
                     </button>
                   ))}
@@ -141,15 +170,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               {/* Minimalist Tech Bar */}
               <div className="grid grid-cols-3 gap-3 pt-6">
-                <div className="p-5 rounded-2xl border border-brand-rose/10 bg-white/40 flex flex-col items-center gap-2 text-center">
+                <div className="p-5 border border-zinc-100 bg-zinc-50/50 flex flex-col items-center gap-2 text-center transition-colors hover:bg-zinc-50">
                    <Zap className="w-4 h-4 text-brand-gold" />
                    <span className="text-[7px] font-bold tracking-[0.2em] uppercase text-zinc-400">High Precision</span>
                 </div>
-                <div className="p-5 rounded-2xl border border-brand-rose/10 bg-white/40 flex flex-col items-center gap-2 text-center">
+                <div className="p-5 border border-zinc-100 bg-zinc-50/50 flex flex-col items-center gap-2 text-center transition-colors hover:bg-zinc-50">
                    <ShieldCheck className="w-4 h-4 text-brand-gold" />
                    <span className="text-[7px] font-bold tracking-[0.2em] uppercase text-zinc-400">Sterilized</span>
                 </div>
-                <div className="p-5 rounded-2xl border border-brand-rose/10 bg-white/40 flex flex-col items-center gap-2 text-center">
+                <div className="p-5 border border-zinc-100 bg-zinc-50/50 flex flex-col items-center gap-2 text-center transition-colors hover:bg-zinc-50">
                    <Droplet className="w-4 h-4 text-brand-gold" />
                    <span className="text-[7px] font-bold tracking-[0.2em] uppercase text-zinc-400">Optimized Flow</span>
                 </div>
@@ -191,10 +220,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       <button
                         key={v.id}
                         onClick={() => setSelectedVariant(v.id)}
-                        className={`p-6 text-left rounded-3xl border transition-all duration-500 ${
+                        className={`p-6 text-left border transition-all duration-500 ${
                           selectedVariant === v.id 
-                          ? 'bg-brand-gold text-white shadow-xl translate-x-1' 
-                          : 'bg-white/60 border-brand-rose/10 text-zinc-400 hover:border-brand-gold hover:text-brand-gold'
+                          ? 'bg-brand-black text-white shadow-xl' 
+                          : 'bg-white border-zinc-100 text-zinc-400 hover:border-brand-gold hover:text-brand-gold'
                         }`}
                       >
                          <p className="text-[8px] font-bold tracking-widest uppercase opacity-60 mb-2">{v.type}</p>
@@ -208,7 +237,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               {/* Action Area */}
               <div className="pt-10 border-t border-zinc-100 space-y-8">
                 <div className="flex flex-col sm:flex-row gap-5">
-                  <div className="flex items-center bg-white/40 rounded-xl px-5 h-14 border border-brand-rose/20">
+                  <div className="flex items-center bg-zinc-50 rounded-none px-5 h-14 border border-zinc-100">
                     <button 
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       className="p-2 text-zinc-400 hover:text-brand-black transition-colors"
@@ -243,18 +272,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     <span className="text-[8px] font-bold tracking-widest uppercase text-zinc-900">Artist Guarantee</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Usage / Pro Tips Area */}
-              <div className="p-8 bg-zinc-900 text-white rounded-none flex items-start gap-5 space-y-0.5">
-                 <Info className="w-4 h-4 text-brand-gold mt-1 shrink-0" />
-                 <div>
-                   <h4 className="font-bold text-[9px] tracking-[0.3em] uppercase text-brand-gold mb-1">Artist Requirement</h4>
-                   <p className="text-zinc-400 text-xs font-light leading-relaxed italic">
-                      This equipment is reserved for certified professionals. Misuse can lead to suboptimal pigment retention. 
-                      Expert consultation available for all elite members.
-                   </p>
-                 </div>
               </div>
             </div>
           </div>

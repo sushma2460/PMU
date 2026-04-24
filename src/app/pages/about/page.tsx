@@ -1,13 +1,14 @@
 "use client";
 
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Award, Heart, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
 
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-brand-cream">
       <Navbar />
-
+      
       {/* Cinematic Philosophy Hero */}
       <section className="relative py-40 bg-brand-rose overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-20">
@@ -103,6 +104,8 @@ export default function AboutPage() {
            </div>
         </div>
       </section>
+
+      <Footer />
     </main>
   );
 }

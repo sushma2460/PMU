@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 
@@ -52,7 +53,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-8">
-                  <ContactItem 
+                   <ContactItem 
                     icon={<Mail className="w-5 h-5" />} 
                     label="Email Inquiry" 
                     value="info@pmusupply.com" 
@@ -123,6 +124,8 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </main>
   );
 }

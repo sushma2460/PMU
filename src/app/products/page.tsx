@@ -151,17 +151,6 @@ function ProductGrid() {
     </div>;
   }
 
-  // Dynamic grid classes
-  const gridColsDesktop = {
-    2: 'lg:grid-cols-2',
-    3: 'lg:grid-cols-3',
-    4: 'lg:grid-cols-4',
-    5: 'lg:grid-cols-5',
-    6: 'lg:grid-cols-6',
-  }[settings.grid.desktop] || 'lg:grid-cols-4';
-
-  const gridColsMobile = settings.grid.mobile === 2 ? 'grid-cols-2' : 'grid-cols-1';
-
   return (
     <>
       {/* Filter Bar */}
@@ -244,7 +233,7 @@ function ProductGrid() {
 
       {/* Grid */}
       <div 
-        className={`grid ${gridColsMobile} sm:grid-cols-2 ${gridColsDesktop} mb-12`}
+        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12"
         style={{ 
           gap: `${settings.grid.gap}px`,
         }}

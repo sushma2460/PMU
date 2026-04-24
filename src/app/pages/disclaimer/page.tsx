@@ -1,9 +1,13 @@
 import React from 'react';
 import { ShieldAlert, AlertTriangle, FileText, CheckCircle } from 'lucide-react';
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 
 export default function DisclaimerPage() {
   return (
-    <main className="min-h-screen bg-white pt-32 pb-24">
+    <main className="min-h-screen bg-brand-cream">
+      <Navbar />
+      <div className="pt-32 pb-24">
       {/* Hero Section */}
       <div className="container mx-auto px-4 mb-20 text-center">
         <h1 className="text-6xl md:text-8xl font-heading italic mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -74,7 +78,9 @@ export default function DisclaimerPage() {
              By completing a purchase on PMU SUPPLY, you acknowledge and agree to these terms. These policies are enforced to protect our artists and maintain the integrity of the professional PMU community in India.
            </p>
         </div>
+        </div>
       </div>
+      <Footer />
     </main>
   );
 }

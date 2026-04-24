@@ -37,7 +37,7 @@ export function LoggedInHeader({ name }: { name: string | null }) {
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/products">
               <Button className="bg-brand-gold text-white hover:bg-white hover:text-brand-black px-8 h-12 rounded-none tracking-widest text-[10px] font-bold transition-all duration-500 w-full sm:w-auto">
-                RESUPPLY MY TRAY
+                BROWSE CATALOG
               </Button>
             </Link>
             <button 

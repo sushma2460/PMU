@@ -49,8 +49,8 @@ export const updateReferralSettings = async (settings: ReferralSettings) => {
 export const DEFAULT_SHOP_ALL_SETTINGS: ShopAllSettings = {
   grid: {
     desktop: 4,
-    tablet: 2,
-    mobile: 1,
+    tablet: 3,
+    mobile: 2,
     gap: 24
   },
   card: {
@@ -61,7 +61,7 @@ export const DEFAULT_SHOP_ALL_SETTINGS: ShopAllSettings = {
     titleSize: 'xs',
     priceSize: 'sm',
     padding: 0,
-    borderRadius: 0
+    borderRadius: 8
   }
 };
 

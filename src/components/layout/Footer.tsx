@@ -50,26 +50,10 @@ export function Footer() {
               <li><Link href="/pages/about" className="text-zinc-700 hover:text-brand-black transition-colors text-xs font-light tracking-widest uppercase">Our Story</Link></li>
               <li><Link href="/pages/affiliate" className="text-zinc-700 hover:text-brand-black transition-colors text-xs font-light tracking-widest uppercase">Affiliate</Link></li>
               <li><Link href="/pages/contact" className="text-zinc-700 hover:text-brand-black transition-colors text-xs font-light tracking-widest uppercase">Contact Us</Link></li>
-              <li><Link href="/pages/international" className="text-zinc-700 hover:text-brand-black transition-colors text-xs font-light tracking-widest uppercase">International</Link></li>
               <li><Link href="/pages/disclaimer" className="text-zinc-700 hover:text-brand-black transition-colors text-xs font-light tracking-widest uppercase">Product Disclaimer</Link></li>
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <div className="lg:col-span-4 space-y-8">
-            <h4 className="text-[10px] font-bold tracking-[0.3em] uppercase text-brand-gold">The Elite List</h4>
-            <p className="text-zinc-700 text-xs font-light tracking-wide uppercase">Join for exclusive product drops and professional insights.</p>
-            <form className="relative group border-b border-brand-black pb-2">
-              <input 
-                type="email" 
-                placeholder="Email Address" 
-                className="w-full bg-transparent py-2 text-xs font-light tracking-widest outline-none focus:border-brand-gold transition-colors placeholder:text-zinc-400"
-              />
-              <button className="absolute right-0 top-1/2 -translate-y-1/2 text-brand-gold hover:text-brand-black transition-colors">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-              </button>
-            </form>
-          </div>
         </div>
 
         {/* Bottom Bar */}

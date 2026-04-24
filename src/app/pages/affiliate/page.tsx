@@ -1,6 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Users, DollarSign, BarChart3, Star, ArrowRight, Shield } from "lucide-react";
 import Link from "next/link";
@@ -121,6 +122,8 @@ export default function AffiliatePage() {
            </div>
         </div>
       </section>
+
+      <Footer />
     </main>
   );
 }
