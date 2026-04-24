@@ -55,7 +55,10 @@ export function CartDrawer() {
                         <p className="text-[9px] font-bold text-brand-gold mt-1 uppercase tracking-widest">Variant: {item.variantName}</p>
                       )}
                       <p className="text-sm font-light mt-3 text-zinc-900 italic">
-                        ₹{((item.product.salePrice ?? item.product.price) + (item.product.variants?.find(v => v.id === item.variantId)?.priceModifier || 0)).toFixed(2)}
+                        ₹{(item.variantId 
+                          ? (item.product.variants?.find(v => v.id === item.variantId)?.salePrice ?? item.product.variants?.find(v => v.id === item.variantId)?.price ?? item.product.salePrice ?? item.product.price)
+                          : (item.product.salePrice ?? item.product.price)
+                        ).toFixed(2)}
                       </p>
                     </div>
                     

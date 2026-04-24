@@ -19,19 +19,17 @@ export async function POST(req: Request) {
       if (!productDoc.exists) continue;
       
       const productData = productDoc.data();
-      const basePrice = productData?.salePrice ?? productData?.price;
-      
-      let variantPriceAdjustment = 0;
+      let priceAtPurchase = productData?.salePrice ?? productData?.price;
       let variantName = "";
+      
       if (item.variantId && productData?.variants) {
         const variant = productData.variants.find((v: any) => v.id === item.variantId);
         if (variant) {
-          variantPriceAdjustment = variant.priceModifier || 0;
-          variantName = variant.name;
+          priceAtPurchase = variant.salePrice ?? variant.price;
+          variantName = Object.values(variant.combination || {}).join(' / ');
         }
       }
       
-      const priceAtPurchase = basePrice + variantPriceAdjustment;
       const itemTotal = priceAtPurchase * item.quantity;
       subtotal += itemTotal;
 
