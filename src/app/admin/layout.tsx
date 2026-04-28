@@ -54,10 +54,10 @@ export default function AdminLayout({
     { href: "/admin/analytics", icon: <BarChart2 size={20} />, label: "Analytics", active: pathname.startsWith("/admin/analytics") },
     { href: "/admin/products", icon: <Package size={20} />, label: "Products", active: pathname.startsWith("/admin/products") },
     { href: "/admin/banners", icon: <ImageIcon size={20} />, label: "Banners", active: pathname.startsWith("/admin/banners") },
+    { href: "/admin/results", icon: <Grid3X3 size={20} />, label: "Results Banner", active: pathname.startsWith("/admin/results") },
     { href: "/admin/orders", icon: <ShoppingCart size={20} />, label: "Orders", active: pathname.startsWith("/admin/orders") },
     { href: "/admin/coupons", icon: <Ticket size={20} />, label: "Coupons", active: pathname === "/admin/coupons" },
     { href: "/admin/users", icon: <Users size={20} />, label: "Users", active: pathname === "/admin/users" },
-    { href: "/admin/results", icon: <Grid3X3 size={20} />, label: "Results", active: pathname.startsWith("/admin/results") },
     { href: "/admin/design", icon: <LayoutTemplate size={20} />, label: "Design", active: pathname === "/admin/design" },
   ];
 

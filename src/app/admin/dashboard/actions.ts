@@ -5,11 +5,14 @@ import { adminDb } from "@/lib/firebase-admin";
 // Orders in these statuses represent confirmed revenue
 const REVENUE_STATUSES = new Set(["paid", "processing", "shipped", "delivered"]);
 
-export type DashboardPeriod = "7d" | "30d" | "90d" | "12m" | "all";
+export type DashboardPeriod = "today" | "7d" | "30d" | "90d" | "12m" | "all";
 
 function getPeriodConfig(period: DashboardPeriod) {
   const now = Date.now();
   switch (period) {
+    case "today":
+      const todayStart = new Date(now).setHours(0, 0, 0, 0);
+      return { start: todayStart, prevStart: todayStart - 24 * 60 * 60 * 1000, label: "vs yesterday" };
     case "7d":
       return { start: now - 7 * 24 * 60 * 60 * 1000, prevStart: now - 14 * 24 * 60 * 60 * 1000, label: "vs prev week" };
     case "30d":
@@ -26,7 +29,22 @@ function getPeriodConfig(period: DashboardPeriod) {
 function buildChartData(orders: any[], period: DashboardPeriod, now: number, periodStart: number) {
   const salesMap = new Map<string, { date: string; revenue: number; orders: number }>();
 
-  if (period === "7d") {
+  if (period === "today") {
+    for (let i = 0; i <= 23; i++) {
+      const key = `${i}:00`;
+      salesMap.set(key, { date: key, revenue: 0, orders: 0 });
+    }
+    orders.forEach((o: any) => {
+      if (o.createdAt >= periodStart) {
+        const key = `${new Date(o.createdAt).getHours()}:00`;
+        if (salesMap.has(key)) {
+          const e = salesMap.get(key)!;
+          if (REVENUE_STATUSES.has(o.status)) e.revenue += o.total || 0;
+          e.orders += 1;
+        }
+      }
+    });
+  } else if (period === "7d") {
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now - i * 24 * 60 * 60 * 1000);
       const key = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -103,7 +121,7 @@ function buildChartData(orders: any[], period: DashboardPeriod, now: number, per
   return Array.from(salesMap.values());
 }
 
-export async function getDashboardStatsAction(period: DashboardPeriod = "30d") {
+export async function getDashboardStatsAction(period: DashboardPeriod = "today") {
   try {
     const now = Date.now();
     const { start: periodStart, prevStart, label: trendLabel } = getPeriodConfig(period);

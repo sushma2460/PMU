@@ -38,7 +38,7 @@ async function getRedirectForUser(uid: string): Promise<string> {
   } catch {
     // Firestore not yet accessible (locked rules) — fallback to home
   }
-  return "/home";
+  return "/products";
 }
 
 function LoginForm() {
@@ -60,7 +60,7 @@ function LoginForm() {
       } else if (returnUrl) {
         router.replace(returnUrl);
       } else {
-        router.replace("/home");
+        router.replace("/products");
       }
     }
   }, [user, isAdmin, loading, returnUrl, router]);
@@ -78,7 +78,7 @@ function LoginForm() {
         return;
       }
       
-      const finalRedirect = (redirectPath === "/home" && returnUrl) ? returnUrl : redirectPath;
+      const finalRedirect = (redirectPath === "/products" && returnUrl) ? returnUrl : redirectPath;
       
       toast.success("Logged in successfully.");
       router.push(finalRedirect);

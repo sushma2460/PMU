@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, orderBy, doc, getDoc } from "firebase/firestore";
@@ -16,7 +17,8 @@ import {
   ChevronRight,
   ExternalLink,
   ShieldCheck,
-  Award
+  Award,
+  LogOut
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +50,8 @@ function RotateCcw(props: any) {
 }
 
 export default function ProfilePage() {
-  const { user, profile } = useAuth();
+  const { user, profile, logout } = useAuth();
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Record<string, Product>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -152,6 +155,16 @@ export default function ProfilePage() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully");
+      router.push("/");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to logout");
+    }
+  };
+
   if (!user) {
     return (
       <main className="min-h-screen bg-white">
@@ -194,7 +207,14 @@ export default function ProfilePage() {
               <div className="pt-6 border-t border-zinc-50 flex justify-center">
                  <div className="text-center">
                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Successful Order History</p>
-                   <p className="text-lg font-black text-zinc-900">{orders.length} Records</p>
+                   <p className="text-lg font-black text-zinc-900 mb-6">{orders.length} Records</p>
+                   <button 
+                     onClick={handleLogout}
+                     className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-red-50 text-red-600 hover:bg-red-100 transition-all font-black text-[10px] uppercase tracking-[0.2em]"
+                   >
+                     <LogOut className="w-4 h-4" />
+                     Logout Session
+                   </button>
                  </div>
               </div>
             </div>

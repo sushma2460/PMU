@@ -17,6 +17,7 @@ import {
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const PERIODS = [
+  { label: "Today", value: "today" },
   { label: "7 Days", value: "7d" },
   { label: "30 Days", value: "30d" },
   { label: "90 Days", value: "90d" },
@@ -91,7 +92,7 @@ const fmtPct = (n: number) => `${n.toFixed(1)}%`;
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function AdminAnalyticsPage() {
-  const [period, setPeriod] = useState("all");
+  const [period, setPeriod] = useState("today");
   const [loading, setLoading] = useState(true);
 
   const [aov, setAov] = useState<any>(null);

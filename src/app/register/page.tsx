@@ -59,7 +59,7 @@ export default function RegisterPage() {
     try {
       await loginWithGoogle();
       toast.success("Authenticated with Google successfully.");
-      router.push("/home");
+      router.push("/products");
     } catch (error: any) {
       toast.error(error.message || "Google authentication failed");
     } finally {

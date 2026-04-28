@@ -35,6 +35,7 @@ import { seedDatabase, getProducts } from "@/lib/services/admin";
 import { toast } from "sonner";
 
 const PERIOD_OPTIONS: { label: string; short: string; value: DashboardPeriod }[] = [
+  { label: "Today", short: "1D", value: "today" },
   { label: "Last Week", short: "7D", value: "7d" },
   { label: "Last Month", short: "30D", value: "30d" },
   { label: "Last Quarter", short: "90D", value: "90d" },
@@ -47,7 +48,7 @@ export default function AdminDashboard() {
   const [hasProducts, setHasProducts] = useState(true);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [period, setPeriod] = useState<DashboardPeriod>("30d");
+  const [period, setPeriod] = useState<DashboardPeriod>("today");
   const [isPeriodLoading, setIsPeriodLoading] = useState(false);
 
   const [stockAlertPage, setStockAlertPage] = useState(1);
@@ -219,8 +220,8 @@ export default function AdminDashboard() {
               onClick={() => handlePeriodChange(opt.value)}
               disabled={isPeriodLoading}
               className={`shrink-0 px-3 md:px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${period === opt.value
-                  ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
-                  : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400 hover:text-zinc-800"
+                ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
+                : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400 hover:text-zinc-800"
                 } ${isPeriodLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {isPeriodLoading && period === opt.value ? (
@@ -272,11 +273,9 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Chart + Side Panels ── stacked on mobile, 7-col grid on desktop */}
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-7">
-
-        {/* Revenue Chart */}
-        <Card className="lg:col-span-4 border-zinc-200 shadow-sm rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white self-start">
+      {/* ── Main Performance Chart: Full Width ── */}
+      <div className="mt-6">
+        <Card className="border-zinc-200 shadow-sm rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white">
           <CardHeader className="p-4 md:p-6 pb-2">
             <div className="flex justify-between items-center">
               <div>
@@ -317,106 +316,114 @@ export default function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
+      </div>
 
-        {/* Side Panels */}
-        <div className="lg:col-span-3 space-y-4 md:space-y-6">
-
-          {/* Low Stock Alerts */}
-          <Card className="border-red-50 bg-red-50/10 rounded-2xl md:rounded-[2.5rem] overflow-hidden">
-            <CardHeader className="p-4 md:p-8 pb-3 md:pb-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-500" />
-                <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-red-600">
-                  Critical Stock Alerts
-                </CardTitle>
+      {/* ── Secondary Panels Grid: Full Width ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        
+        {/* Low Stock Alerts: Now Horizontal-Ready */}
+        <Card className="border-red-50 bg-red-50/10 rounded-2xl md:rounded-[2.5rem] overflow-hidden flex flex-col">
+          <CardHeader className="p-6 md:p-8 pb-3 md:pb-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-500" />
+              <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-red-600">
+                Critical Stock Alerts
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 md:p-8 pt-0 space-y-3 flex-1">
+            {paginatedStockAlerts.length > 0 ? paginatedStockAlerts.map((item: any) => (
+              <div key={item.sku} className="flex items-center justify-between p-4 bg-white border border-red-50 rounded-2xl shadow-sm transition-all hover:border-red-200">
+                <div className="space-y-0.5 min-w-0 flex-1 mr-4">
+                  <p className="text-sm font-bold text-zinc-900 truncate">{item.name}</p>
+                  <p className="text-[10px] text-zinc-400 font-mono uppercase tracking-widest truncate">{item.sku}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-black text-red-600 uppercase">{item.stock} LEFT</p>
+                  <Link href="/admin/products" className="text-[10px] font-bold text-zinc-400 hover:text-brand-gold underline underline-offset-4 tracking-widest uppercase">
+                    Manage Stock
+                  </Link>
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="p-4 md:p-8 pt-0 space-y-3">
-              {paginatedStockAlerts.length > 0 ? paginatedStockAlerts.map((item: any) => (
-                <div key={item.sku} className="flex items-center justify-between p-3 md:p-4 bg-white border border-red-50 rounded-xl md:rounded-2xl shadow-sm">
-                  <div className="space-y-0.5 min-w-0 flex-1 mr-2">
-                    <p className="text-xs font-bold text-zinc-900 truncate">{item.name}</p>
-                    <p className="text-[9px] text-zinc-400 font-mono uppercase truncate">{item.sku}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-black text-red-600 uppercase">{item.stock} LEFT</p>
-                    <Link href="/admin/products" className="text-[9px] font-bold text-zinc-400 hover:text-brand-gold underline underline-offset-4 tracking-widest uppercase">
-                      Manage
-                    </Link>
-                  </div>
+            )) : (
+              <div className="py-12 text-center bg-white border border-dashed border-zinc-200 rounded-2xl flex flex-col items-center justify-center space-y-2">
+                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                  <Eye className="w-5 h-5 text-green-400" />
                 </div>
-              )) : (
-                <div className="py-6 text-center bg-white border border-dashed border-zinc-200 rounded-xl">
-                  <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Inventory Healthy</p>
-                </div>
-              )}
-              {totalStockAlertPages > 1 && (
-                <div className="flex items-center justify-between pt-1">
-                  <Button variant="ghost" size="sm" onClick={() => setStockAlertPage(p => Math.max(1, p - 1))}
-                    disabled={stockAlertPage === 1} className="h-7 px-2 text-[10px] font-bold tracking-widest uppercase">
-                    <ChevronLeft className="w-3 h-3 mr-1" /> Prev
-                  </Button>
-                  <span className="text-[10px] text-zinc-400 font-bold">{stockAlertPage}/{totalStockAlertPages}</span>
-                  <Button variant="ghost" size="sm" onClick={() => setStockAlertPage(p => Math.min(totalStockAlertPages, p + 1))}
-                    disabled={stockAlertPage === totalStockAlertPages} className="h-7 px-2 text-[10px] font-bold tracking-widest uppercase">
-                    Next <ChevronRight className="w-3 h-3 ml-1" />
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                <p className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest">Inventory Healthy</p>
+              </div>
+            )}
+            {totalStockAlertPages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-red-50/50">
+                <Button variant="ghost" size="sm" onClick={() => setStockAlertPage(p => Math.max(1, p - 1))}
+                  disabled={stockAlertPage === 1} className="h-8 px-3 text-[10px] font-bold tracking-widest uppercase hover:bg-white">
+                  <ChevronLeft className="w-3.5 h-3.5 mr-1" /> Prev
+                </Button>
+                <span className="text-[10px] text-zinc-400 font-bold tracking-widest">{stockAlertPage} OF {totalStockAlertPages}</span>
+                <Button variant="ghost" size="sm" onClick={() => setStockAlertPage(p => Math.min(totalStockAlertPages, p + 1))}
+                  disabled={stockAlertPage === totalStockAlertPages} className="h-8 px-3 text-[10px] font-bold tracking-widest uppercase hover:bg-white">
+                  Next <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Recent Activity */}
-          <Card className="rounded-2xl md:rounded-[2.5rem] border-zinc-100 shadow-sm overflow-hidden bg-white">
-            <CardHeader className="p-4 md:p-8 pb-3 md:pb-4">
-              <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-zinc-800">Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 md:p-8 pt-0 space-y-3">
-              {paginatedRecentActivity.length > 0 ? paginatedRecentActivity.map((activity: any) => (
-                <div key={`${activity.type}-${activity.id}`}
-                  className="flex items-center justify-between p-3 md:p-4 bg-zinc-50 rounded-xl md:rounded-2xl border border-zinc-100 hover:border-pink-200 hover:bg-pink-50/30 transition-all cursor-pointer gap-2">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className={`w-8 h-8 md:w-10 md:h-10 shrink-0 rounded-full bg-white flex items-center justify-center text-[10px] font-bold border border-zinc-200 uppercase ${activity.type === "order" ? "text-zinc-400" : "text-brand-gold"}`}>
-                      {activity.initials}
-                    </div>
-                    <div className="space-y-0.5 min-w-0">
-                      <p className="text-xs font-bold text-zinc-900 truncate">{activity.title}</p>
-                      <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
-                        <Clock className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{new Date(activity.timestamp).toLocaleDateString([], { month: "short", day: "numeric" })}</span>
-                      </div>
+        {/* Recent Activity: Expanded View */}
+        <Card className="rounded-2xl md:rounded-[2.5rem] border-zinc-100 shadow-sm overflow-hidden bg-white flex flex-col">
+          <CardHeader className="p-6 md:p-8 pb-3 md:pb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-brand-gold" />
+              <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-zinc-800">Operational Pulse</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 md:p-8 pt-0 space-y-3 flex-1">
+            {paginatedRecentActivity.length > 0 ? paginatedRecentActivity.map((activity: any) => (
+              <div key={`${activity.type}-${activity.id}`}
+                className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-100 hover:border-brand-gold/30 hover:bg-brand-cream/10 transition-all cursor-pointer gap-4">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <div className={`w-10 h-10 md:w-12 md:h-12 shrink-0 rounded-full bg-white shadow-sm flex items-center justify-center text-xs font-black border border-zinc-100 uppercase ${activity.type === "order" ? "text-zinc-400" : "text-brand-gold"}`}>
+                    {activity.initials}
+                  </div>
+                  <div className="space-y-1 min-w-0">
+                    <p className="text-sm font-bold text-zinc-900 truncate">{activity.title}</p>
+                    <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-medium tracking-wide">
+                      <Clock className="w-3 h-3" />
+                      <span>{new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {new Date(activity.timestamp).toLocaleDateString([], { month: "short", day: "numeric" })}</span>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-black text-zinc-900">{activity.subtitle.split(" - ")[0]}</p>
-                    <span className={`text-[9px] font-bold uppercase tracking-tighter ${activity.type === "order" ? "text-[#FF4D8D]" : "text-emerald-500"}`}>
-                      {activity.type === "order" ? activity.subtitle.split(" - ")[1] : "MEMBER"}
-                    </span>
+                </div>
+                <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                  <p className="text-sm font-black text-zinc-900">{activity.subtitle.split(" - ")[0]}</p>
+                  <div className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${activity.type === "order" ? "bg-pink-50 text-[#FF4D8D]" : "bg-emerald-50 text-emerald-600"}`}>
+                    {activity.type === "order" ? activity.subtitle.split(" - ")[1] : "NEW USER"}
                   </div>
                 </div>
-              )) : (
-                <div className="py-6 text-center text-[10px] font-bold text-zinc-300 uppercase tracking-widest">No Recent Activity</div>
-              )}
-              {totalRecentActivityPages > 1 && (
-                <div className="flex items-center justify-between pt-1">
-                  <Button variant="ghost" size="sm" onClick={() => setRecentActivityPage(p => Math.max(1, p - 1))}
-                    disabled={recentActivityPage === 1} className="h-7 px-2 text-[10px] font-bold tracking-widest uppercase">
-                    <ChevronLeft className="w-3 h-3 mr-1" /> Prev
-                  </Button>
-                  <span className="text-[10px] text-zinc-400 font-bold">{recentActivityPage}/{totalRecentActivityPages}</span>
-                  <Button variant="ghost" size="sm" onClick={() => setRecentActivityPage(p => Math.min(totalRecentActivityPages, p + 1))}
-                    disabled={recentActivityPage === totalRecentActivityPages} className="h-7 px-2 text-[10px] font-bold tracking-widest uppercase">
-                    Next <ChevronRight className="w-3 h-3 ml-1" />
-                  </Button>
-                </div>
-              )}
-              <Link href="/admin/orders" className="flex items-center justify-center gap-2 text-[10px] font-black text-zinc-400 hover:text-zinc-900 transition-colors pt-2 uppercase tracking-widest">
-                View All Activity <ExternalLink className="w-3 h-3" />
-              </Link>
-            </CardContent>
-          </Card>
-
-        </div>
+              </div>
+            )) : (
+              <div className="py-12 text-center text-[11px] font-bold text-zinc-300 uppercase tracking-widest flex flex-col items-center justify-center">
+                <RefreshCw className="w-6 h-6 mb-2 animate-spin-slow text-zinc-200" />
+                Awaiting Activity...
+              </div>
+            )}
+            {totalRecentActivityPages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-zinc-50">
+                <Button variant="ghost" size="sm" onClick={() => setRecentActivityPage(p => Math.max(1, p - 1))}
+                  disabled={recentActivityPage === 1} className="h-8 px-3 text-[10px] font-bold tracking-widest uppercase">
+                  <ChevronLeft className="w-3.5 h-3.5 mr-1" /> Prev
+                </Button>
+                <span className="text-[10px] text-zinc-400 font-bold tracking-widest">{recentActivityPage} OF {totalRecentActivityPages}</span>
+                <Button variant="ghost" size="sm" onClick={() => setRecentActivityPage(p => Math.min(totalRecentActivityPages, p + 1))}
+                  disabled={recentActivityPage === totalRecentActivityPages} className="h-7 px-2 text-[10px] font-bold tracking-widest uppercase">
+                  Next <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </div>
+            )}
+            <Link href="/admin/orders" className="flex items-center justify-center gap-2 text-[10px] font-black text-brand-gold hover:opacity-70 transition-all pt-4 uppercase tracking-[0.2em] border-t border-zinc-50 mt-1">
+              Analyze Full Stream <ExternalLink className="w-3 h-3" />
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

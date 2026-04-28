@@ -72,6 +72,7 @@ export interface EventCounts {
 function periodStart(period: string): number {
   const now = Date.now();
   switch (period) {
+    case "today": return new Date().setHours(0, 0, 0, 0);
     case "7d":  return now - 7   * 86400000;
     case "30d": return now - 30  * 86400000;
     case "90d": return now - 90  * 86400000;

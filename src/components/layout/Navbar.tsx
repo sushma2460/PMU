@@ -112,7 +112,7 @@ export function Navbar() {
 
             {/* Logo - Centered for Premium Look */}
             <div className="flex-shrink-0 flex justify-center lg:absolute lg:left-1/2 lg:-translate-x-1/2">
-              <Link href={user ? "/home" : "/"} className="font-heading font-bold text-lg md:text-4xl tracking-tighter text-brand-black uppercase">
+              <Link href={user ? "/products" : "/"} className="font-heading font-bold text-lg md:text-4xl tracking-tighter text-brand-black uppercase">
                 PMU<span className="text-brand-gold pl-1">SUPPLY</span>
               </Link>
             </div>
@@ -123,14 +123,9 @@ export function Navbar() {
                 <Search className="h-4 w-4 md:h-5 md:h-5 group-hover:scale-110 transition-transform" />
               </button>
               {user ? (
-                <div className="flex items-center gap-0.5 md:gap-2">
-                  <Link href="/profile" className="p-1.5 md:p-2 hover:text-brand-gold transition-colors group">
-                    <User className="h-4 w-4 md:h-5 md:h-5 group-hover:scale-110 transition-transform" />
-                  </Link>
-                  <button onClick={handleLogout} className="p-1.5 md:p-2 hover:text-red-500 transition-colors group">
-                    <LogOut className="h-4 w-4 md:h-5 md:h-5 group-hover:scale-110 transition-transform" />
-                  </button>
-                </div>
+                <Link href="/profile" className="p-1.5 md:p-2 hover:text-brand-gold transition-colors group">
+                  <User className="h-4 w-4 md:h-5 md:h-5 group-hover:scale-110 transition-transform" />
+                </Link>
               ) : (
                 <Link href="/login" className="p-1.5 md:p-2 hover:text-brand-gold transition-colors group">
                   <User className="h-4 w-4 md:h-5 md:h-5 group-hover:scale-110 transition-transform" />

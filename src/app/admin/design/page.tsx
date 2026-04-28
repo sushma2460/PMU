@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getShopAllSettings, updateShopAllSettings, DEFAULT_SHOP_ALL_SETTINGS } from "@/lib/services/admin";
-import { ShopAllSettings } from "@/lib/types";
+import { getShopAllSettings, updateShopAllSettings, DEFAULT_SHOP_ALL_SETTINGS, getSocialLinks, updateSocialLinks } from "@/lib/services/admin";
+import { ShopAllSettings, SocialLinks } from "@/lib/types";
 import { toast } from "sonner";
 import { 
   Grid3X3, 
@@ -15,19 +15,48 @@ import {
   Save,
   RotateCcw,
   Smartphone,
-  Monitor
+  Monitor,
+  MessageCircle
 } from "lucide-react";
+
+const SocialIcons = {
+  Instagram: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+    </svg>
+  ),
+  Facebook: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+    </svg>
+  ),
+  Youtube: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>
+    </svg>
+  )
+};
 
 export default function AdminDesignPage() {
   const [settings, setSettings] = useState<ShopAllSettings | null>(null);
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>({
+    instagram: "",
+    facebook: "",
+    whatsapp: "",
+    youtube: ""
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getShopAllSettings();
-        setSettings(data);
+        const [designData, socialData] = await Promise.all([
+          getShopAllSettings(),
+          getSocialLinks()
+        ]);
+        setSettings(designData);
+        setSocialLinks(socialData);
       } catch (error) {
         toast.error("Failed to load settings");
         console.error(error);
@@ -35,15 +64,18 @@ export default function AdminDesignPage() {
         setIsLoading(false);
       }
     };
-    fetchSettings();
+    fetchData();
   }, []);
 
   const handleSave = async () => {
     if (!settings) return;
     setIsSaving(true);
     try {
-      await updateShopAllSettings(settings);
-      toast.success("Design settings updated successfully");
+      await Promise.all([
+        updateShopAllSettings(settings),
+        updateSocialLinks(socialLinks)
+      ]);
+      toast.success("Design & Social settings updated");
     } catch (error) {
       toast.error("Failed to save settings");
       console.error(error);
@@ -90,6 +122,75 @@ export default function AdminDesignPage() {
           </button>
         </div>
       </div>
+
+      {/* Live Preview - Now a standard section at the top to avoid covering any fields */}
+      <section className="bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm space-y-6">
+        <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
+          <div className="p-2 bg-brand-cream rounded-lg text-brand-gold">
+            <Monitor size={20} />
+          </div>
+          <h2 className="font-bold text-lg uppercase tracking-tight">Live Aesthetic Preview</h2>
+          <div className="ml-auto flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full border border-green-100">
+            <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Active Live Preview</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-12 items-center justify-center py-8">
+          <div className="w-full max-w-[280px] space-y-4 group">
+            <div 
+              style={{ 
+                aspectRatio: settings.card.aspectRatio === 'square' ? '1/1' : '4/5',
+                borderRadius: `${settings.card.borderRadius}px`,
+                backgroundColor: '#ffffff'
+              }}
+              className="border border-zinc-100 relative overflow-hidden flex items-center justify-center shadow-md transition-all duration-500 group-hover:shadow-xl"
+            >
+               <img 
+                 src="https://images.unsplash.com/photo-1556228578-8d91b1a4d530?auto=format&fit=crop&q=80"
+                 className="w-full h-full transition-transform duration-700 group-hover:scale-105"
+                 style={{ 
+                   objectFit: settings.card.imageFit as any,
+                   padding: `${settings.card.padding}px`
+                 }}
+               />
+               {settings.card.showBadge && (
+                 <div className="absolute top-3 left-3 px-2 py-1 bg-white border border-brand-gold text-[8px] font-black text-brand-gold z-10 uppercase tracking-widest shadow-sm">
+                   PMU SUPPLY
+                 </div>
+               )}
+            </div>
+            
+            <div 
+              style={{ textAlign: settings.card.textAlignment as any }}
+              className="space-y-1 px-1"
+            >
+               <div 
+                 style={{ fontSize: settings.card.titleSize === 'xs' ? '12px' : settings.card.titleSize === 'sm' ? '14px' : '16px' }} 
+                 className="font-bold text-zinc-900 leading-tight tracking-tight uppercase"
+               >
+                 Elite Microblade Tool
+               </div>
+               <div 
+                 style={{ fontSize: settings.card.priceSize === 'xs' ? '12px' : settings.card.priceSize === 'sm' ? '14px' : '16px' }} 
+                 className="font-medium text-brand-gold italic"
+               >
+                 ₹2,499.00
+               </div>
+            </div>
+          </div>
+
+          <div className="max-w-xs space-y-4 text-center md:text-left">
+            <h3 className="text-zinc-900 font-bold italic">Real-time Visualization</h3>
+            <p className="text-sm text-zinc-500 leading-relaxed">
+              This preview reflects exactly how your products will appear in the shop. Adjust the layout, typography, and card styling below to see the results instantly.
+            </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-50 rounded-xl border border-zinc-100 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+              Reference Sample
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Grid Settings */}
@@ -320,44 +421,70 @@ export default function AdminDesignPage() {
         </section>
       </div>
 
-      {/* Live Preview Sticker */}
-      <div className="fixed bottom-6 right-6 bg-white border border-zinc-200 p-4 rounded-2xl shadow-2xl w-72 h-auto space-y-4 hidden xl:block">
-         <div className="flex justify-between items-center border-b pb-2">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Desktop Preview</span>
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-         </div>
-          <div className="flex flex-col gap-3 group">
-            <div 
-              style={{ 
-                aspectRatio: settings.card.aspectRatio === 'square' ? '1/1' : '4/5',
-                borderRadius: `${settings.card.borderRadius}px`,
-                backgroundColor: '#ffffff'
-              }}
-              className="border border-zinc-100 relative overflow-hidden flex items-center justify-center p-0"
-            >
-               <img 
-                 src="https://images.unsplash.com/photo-1556228578-8d91b1a4d530?auto=format&fit=crop&q=80"
-                 className="w-full h-full"
-                 style={{ 
-                   objectFit: settings.card.imageFit as any,
-                   padding: `${settings.card.padding}px`
-                 }}
-               />
-               {settings.card.showBadge && (
-                 <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-white border border-brand-gold text-[8px] font-bold text-brand-gold z-10">PMU SUPPLY</div>
-               )}
-            </div>
-            <div 
-              style={{ textAlign: settings.card.textAlignment as any }}
-              className="space-y-1"
-            >
-               <div style={{ fontSize: settings.card.titleSize === 'xs' ? '11px' : settings.card.titleSize === 'sm' ? '12px' : '14px' }} className="font-normal leading-tight">
-                 *Product Title Example
-               </div>
-               <div style={{ fontSize: settings.card.priceSize === 'xs' ? '11px' : settings.card.priceSize === 'sm' ? '13px' : '15px' }} className="font-bold text-zinc-900">₹19.00</div>
-            </div>
+      {/* Social Links Section */}
+      <section className="bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm space-y-6">
+        <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
+          <div className="p-2 bg-brand-cream rounded-lg text-brand-gold">
+            <MessageCircle size={20} />
           </div>
-      </div>
+          <h2 className="font-bold text-lg uppercase tracking-tight">Social Presence</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+              <SocialIcons.Instagram /> Instagram URL
+            </label>
+            <input 
+              type="text"
+              value={socialLinks.instagram || ""}
+              onChange={(e) => setSocialLinks({ ...socialLinks, instagram: e.target.value })}
+              placeholder="https://instagram.com/your-handle"
+              className="w-full h-12 px-4 rounded-xl border border-zinc-100 bg-zinc-50/50 text-sm focus:ring-2 focus:ring-brand-gold outline-none"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+              <SocialIcons.Facebook /> Facebook URL
+            </label>
+            <input 
+              type="text"
+              value={socialLinks.facebook || ""}
+              onChange={(e) => setSocialLinks({ ...socialLinks, facebook: e.target.value })}
+              placeholder="https://facebook.com/your-page"
+              className="w-full h-12 px-4 rounded-xl border border-zinc-100 bg-zinc-50/50 text-sm focus:ring-2 focus:ring-brand-gold outline-none"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+              <MessageCircle size={14} /> WhatsApp Number
+            </label>
+            <input 
+              type="text"
+              value={socialLinks.whatsapp || ""}
+              onChange={(e) => setSocialLinks({ ...socialLinks, whatsapp: e.target.value })}
+              placeholder="+91 98765 43210"
+              className="w-full h-12 px-4 rounded-xl border border-zinc-100 bg-zinc-50/50 text-sm focus:ring-2 focus:ring-brand-gold outline-none"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+              <SocialIcons.Youtube /> YouTube URL
+            </label>
+            <input 
+              type="text"
+              value={socialLinks.youtube || ""}
+              onChange={(e) => setSocialLinks({ ...socialLinks, youtube: e.target.value })}
+              placeholder="https://youtube.com/@your-channel"
+              className="w-full h-12 px-4 rounded-xl border border-zinc-100 bg-zinc-50/50 text-sm focus:ring-2 focus:ring-brand-gold outline-none"
+            />
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

@@ -95,6 +95,24 @@ export const updateShopAllSettings = async (settings: ShopAllSettings) => {
   await setDoc(settingsRef, settings, { merge: true });
 };
 
+// --- SOCIAL LINKS SERVICE ---
+
+export const getSocialLinks = async (): Promise<SocialLinks> => {
+  try {
+    const settingsRef = doc(db, "siteSettings", "social");
+    const settingsDoc = await getDoc(settingsRef);
+    if (settingsDoc.exists()) return settingsDoc.data() as SocialLinks;
+  } catch (error) {
+    console.warn("Using default social links.");
+  }
+  return {};
+};
+
+export const updateSocialLinks = async (links: SocialLinks) => {
+  const settingsRef = doc(db, "siteSettings", "social");
+  await setDoc(settingsRef, links, { merge: true });
+};
+
 // --- USER & POINTS SERVICE ---
 
 // --- INVENTORY SERVICE ---

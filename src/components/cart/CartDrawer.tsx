@@ -101,7 +101,7 @@ export function CartDrawer() {
                 </div>
                 <div className="flex justify-between items-baseline">
                   <span className="text-[10px] font-bold tracking-[0.4em] uppercase text-zinc-400">Shipping</span>
-                  <span className="text-[10px] font-bold tracking-[0.4em] uppercase text-brand-gold">Calculated at Checkout</span>
+                  <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-brand-gold text-right">Calculated at Checkout</span>
                 </div>
               </div>
 

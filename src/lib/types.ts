@@ -180,9 +180,17 @@ export interface ReferralSettings {
 
 export interface PointTransaction {
   id: string;
+  userId: string;
   amount: number;
-  type: 'earn' | 'redeem' | 'admin_adjust' | 'referral_bonus';
+  type: 'earn' | 'redeem' | 'refund';
   reason: string;
-  adminId?: string;
+  orderId?: string;
   createdAt: number;
+}
+
+export interface SocialLinks {
+  instagram?: string;
+  facebook?: string;
+  whatsapp?: string;
+  youtube?: string;
 }
