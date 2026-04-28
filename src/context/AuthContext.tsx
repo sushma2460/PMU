@@ -69,8 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email: user.email || "",
                 displayName: user.displayName || "Artist",
                 role: "customer",
-                points: 0,
-                storeCredit: 0,
                 createdAt: Date.now()
               };
               

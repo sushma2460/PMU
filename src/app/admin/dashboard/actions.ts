@@ -2,6 +2,9 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 
+// Orders in these statuses represent confirmed revenue
+const REVENUE_STATUSES = new Set(["paid", "processing", "shipped", "delivered"]);
+
 export type DashboardPeriod = "7d" | "30d" | "90d" | "12m" | "all";
 
 function getPeriodConfig(period: DashboardPeriod) {
@@ -34,7 +37,7 @@ function buildChartData(orders: any[], period: DashboardPeriod, now: number, per
         const key = new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
         if (salesMap.has(key)) {
           const e = salesMap.get(key)!;
-          if (o.status === "paid") e.revenue += o.total || 0;
+          if (REVENUE_STATUSES.has(o.status)) e.revenue += o.total || 0;
           e.orders += 1;
         }
       }
@@ -50,7 +53,7 @@ function buildChartData(orders: any[], period: DashboardPeriod, now: number, per
         const key = new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
         if (salesMap.has(key)) {
           const e = salesMap.get(key)!;
-          if (o.status === "paid") e.revenue += o.total || 0;
+          if (REVENUE_STATUSES.has(o.status)) e.revenue += o.total || 0;
           e.orders += 1;
         }
       }
@@ -70,7 +73,7 @@ function buildChartData(orders: any[], period: DashboardPeriod, now: number, per
           const key = `W${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
           if (salesMap.has(key)) {
             const e = salesMap.get(key)!;
-            if (o.status === "paid") e.revenue += o.total || 0;
+            if (REVENUE_STATUSES.has(o.status)) e.revenue += o.total || 0;
             e.orders += 1;
           }
         }
@@ -90,7 +93,7 @@ function buildChartData(orders: any[], period: DashboardPeriod, now: number, per
         const key = new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", year: "2-digit" });
         if (salesMap.has(key)) {
           const e = salesMap.get(key)!;
-          if (o.status === "paid") e.revenue += o.total || 0;
+          if (REVENUE_STATUSES.has(o.status)) e.revenue += o.total || 0;
           e.orders += 1;
         }
       }
@@ -138,8 +141,9 @@ export async function getDashboardStatsAction(period: DashboardPeriod = "30d") {
     const prevPeriodUsers = period === "all" ? [] : users.filter(u => u.createdAt >= prevStart && u.createdAt < periodStart);
 
     // --- KPI VALUES (scoped to selected period) ---
-    const totalRevenue = periodOrders.reduce((acc, o) => o.status === "paid" ? acc + (o.total || 0) : acc, 0);
-    const prevRevenue = prevPeriodOrders.reduce((acc, o) => o.status === "paid" ? acc + (o.total || 0) : acc, 0);
+    // Revenue = sum of all confirmed orders (paid, processing, shipped, delivered)
+    const totalRevenue = periodOrders.reduce((acc, o) => REVENUE_STATUSES.has(o.status) ? acc + (o.total || 0) : acc, 0);
+    const prevRevenue  = prevPeriodOrders.reduce((acc, o) => REVENUE_STATUSES.has(o.status) ? acc + (o.total || 0) : acc, 0);
 
     const totalOrders = periodOrders.length;
     const prevOrders = prevPeriodOrders.length;

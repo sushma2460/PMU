@@ -113,16 +113,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Loyalty Status */}
-            <div className="bg-brand-rose/30 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-8 border border-brand-rose/50 overflow-hidden">
-              <h3 className="text-xl font-heading mb-4">PMU SUPPLY Rewards</h3>
-              <p className="text-brand-black/70 text-sm font-light leading-relaxed mb-6">
-                You are <span className="font-bold">250 points</span> away from your next Artist Discount.
-              </p>
-              <div className="h-2 bg-white/50 rounded-full overflow-hidden">
-                <div className="h-full bg-brand-gold w-3/4 rounded-full" />
-              </div>
-            </div>
+
           </div>
         </div>
       </div>

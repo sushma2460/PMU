@@ -4,7 +4,7 @@ import { adminDb } from "@/lib/firebase-admin";
 
 export async function POST(req: Request) {
   try {
-    const { items, userId, couponCode, shippingAddress, pointsToUse } = await req.json();
+    const { items, userId, couponCode, shippingAddress } = await req.json();
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "Empty cart" }, { status: 400 });
@@ -44,9 +44,8 @@ export async function POST(req: Request) {
       });
     }
 
-    // 2. Handle Coupon & Points
+    // 2. Handle Coupon
     let couponDiscountAmount = 0;
-    let pointsDiscountAmount = 0;
     let couponId = null;
 
     if (couponCode) {
@@ -68,13 +67,8 @@ export async function POST(req: Request) {
       }
     }
 
-    if (pointsToUse && pointsToUse > 0) {
-      pointsDiscountAmount = pointsToUse / 100;
-    }
-
     // 3. Shipping & Tax
-    const discountTotal = couponDiscountAmount + pointsDiscountAmount;
-    const finalSubtotal = Math.max(0, subtotal - discountTotal);
+    const finalSubtotal = Math.max(0, subtotal - couponDiscountAmount);
     const shipping = finalSubtotal > 12000 ? 0 : 150;
     const tax = finalSubtotal * 0.08;
     const total = Math.round((finalSubtotal + shipping + tax) * 100) / 100;
@@ -95,15 +89,13 @@ export async function POST(req: Request) {
       userId: userId || "guest",
       items: orderItems,
       subtotal: subtotal,
-      discountAmount: discountTotal,
+      discountAmount: couponDiscountAmount,
       couponDiscountAmount: couponDiscountAmount,
-      pointsDiscountAmount: pointsDiscountAmount,
       shippingAmount: shipping,
       taxAmount: tax,
       total: total,
       couponId: couponId,
       couponCode: couponCode || null,
-      pointsUsed: pointsToUse || 0,
       status: 'pending',
       shippingAddress: shippingAddress,
       createdAt: Date.now(),

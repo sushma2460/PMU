@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/useCartStore";
 import {
@@ -11,6 +11,8 @@ import {
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Product } from "@/lib/types";
+import { trackProductView, trackAddToCart } from "@/lib/analytics";
+import { useAuth } from "@/context/AuthContext";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -33,6 +35,19 @@ export function ProductDetailClient({ product, recommended }: ProductDetailClien
 
   const addItem = useCartStore((state) => state.addItem);
   const setIsOpen = useCartStore((state) => state.setIsOpen);
+  const { user } = useAuth();
+
+  // Fire product_view once on mount
+  useEffect(() => {
+    trackProductView(user?.uid ?? "guest", {
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      price: product.salePrice && product.salePrice > 0 ? product.salePrice : product.price,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
+
 
   const currentVariant = useMemo(() => {
     if (!product.hasVariants || !product.variants) return null;
@@ -58,6 +73,13 @@ export function ProductDetailClient({ product, recommended }: ProductDetailClien
       : undefined;
     addItem(product, quantity, currentVariant?.id, variantName);
     setIsOpen(true);
+    // Track add_to_cart event
+    trackAddToCart(
+      user?.uid ?? "guest",
+      { id: product.id, name: product.name, category: product.category },
+      quantity,
+      currentPrice * quantity
+    );
   };
 
   return (

@@ -12,6 +12,7 @@ import { ArrowLeft, CheckCircle2, CreditCard, ShieldCheck, Truck } from "lucide-
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { trackCheckoutStart, trackCheckoutComplete } from "@/lib/analytics";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -101,6 +102,12 @@ export default function CheckoutPage() {
         setRazorpayOrder(data);
         setStep(2);
         window.scrollTo(0, 0);
+        // Fire checkout_start event
+        trackCheckoutStart(user?.uid ?? "guest", {
+          itemCount: items.length,
+          subtotal,
+          hasCoupon: !!appliedCoupon,
+        });
       } else {
         toast.error(data.error || "Unable to initialize secure payment. Please try again.");
       }
@@ -145,6 +152,13 @@ export default function CheckoutPage() {
           
           const verifyData = await verifyRes.json();
           if (verifyData.verified) {
+            // Track checkout_complete before clearing cart
+            trackCheckoutComplete(user?.uid ?? "guest", {
+              orderId: response.razorpay_order_id,
+              total,
+              itemCount: items.length,
+              couponCode: appliedCoupon?.code,
+            });
             handlePaymentSuccess();
           } else {
             toast.error("Payment verification failed. Please contact support.");

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Product, CartItem } from '@/lib/types';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import { trackAddToCart } from '@/lib/analytics';
 
 interface CartState {
   items: CartItem[];
@@ -22,9 +23,8 @@ const syncCartToFirestore = async (userId: string | null, items: CartItem[]) => 
   if (!userId) return;
   try {
     const userRef = doc(db, "users", userId);
-    // Firestore does not accept undefined values. We stringify/parse to strip them.
     const sanitizedItems = JSON.parse(JSON.stringify(items));
-    await updateDoc(userRef, { cart: sanitizedItems });
+    await updateDoc(userRef, { cart: sanitizedItems, cartUpdatedAt: Date.now() });
   } catch (err) {
     console.error("Failed to sync cart:", err);
   }
@@ -57,6 +57,16 @@ export const useCartStore = create<CartState>((set, get) => ({
       }
 
       syncCartToFirestore(state.userId, newItems);
+
+      // Fire analytics event
+      const price = product.salePrice ?? product.price;
+      trackAddToCart(
+        state.userId ?? "guest",
+        { id: product.id, name: product.name, category: product.category },
+        quantity,
+        price * quantity
+      );
+
       return { items: newItems, isOpen: true };
     });
   },

@@ -237,7 +237,7 @@ export const getReferralAuditData = async () => {
       displayName: referrer.displayName,
       referralCode: referrer.referralCode,
       referralCount: directReferrals.length,
-      conversionCount: directReferrals.filter(u => (u.points || 0) > 0).length, // Simplified: assume if user has points, they've been active
+      conversionCount: directReferrals.filter(u => u.hasOrderedBefore).length,
       earnings: referrer.totalReferralEarnings || 0,
       status: (referrer as any).status || 'active',
       referrals: directReferrals.map(r => ({

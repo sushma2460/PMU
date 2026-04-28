@@ -1,6 +1,6 @@
 "use client";
 
-import { User, ShoppingBag, CreditCard, MapPin, HelpCircle, Package, Star, ArrowRight } from "lucide-react";
+import { User, ShoppingBag, MapPin, HelpCircle, Package, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -59,26 +59,21 @@ export function SimpleStatStrip() {
   
   const stats = [
     { 
-      label: "PMU SUPPLY POINTS", 
-      value: loading ? "..." : (profile?.points || 0).toLocaleString(), 
-      icon: <Star className="h-4 w-4 text-brand-gold" /> 
-    },
-    { 
-      label: "DISCOUNT POWER", 
-      value: loading ? "..." : `₹${((profile?.points || 0) / 100).toFixed(2)}`, 
-      icon: <CreditCard className="h-4 w-4 text-brand-gold" /> 
-    },
-    { 
       label: "TOTAL REFERRALS", 
       value: loading ? "..." : (profile?.referralCount || 0).toString(), 
       icon: <User className="h-4 w-4 text-brand-gold" /> 
+    },
+    { 
+      label: "TOTAL ORDERS", 
+      value: loading ? "..." : profile?.hasOrderedBefore ? "Active" : "New", 
+      icon: <ShoppingBag className="h-4 w-4 text-brand-gold" /> 
     },
   ];
 
   return (
     <div className="bg-white border-b border-zinc-100 py-6 overflow-hidden">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {stats.map((stat, idx) => (
             <div key={idx} className="flex items-center gap-4 group cursor-pointer hover:bg-zinc-50 p-4 transition-colors md:border-r border-zinc-50 last:border-0">
               <div className="h-12 w-12 rounded-full bg-brand-gold/10 flex items-center justify-center group-hover:scale-110 transition-transform">

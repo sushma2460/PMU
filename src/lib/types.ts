@@ -59,12 +59,11 @@ export interface UserProfile {
   email: string;
   displayName: string;
   role: 'admin' | 'customer';
-  points?: number;
-  storeCredit?: number;
   referralCode?: string;
   referralCount?: number;
   referredBy?: string; // UID of the person who referred them
   totalReferralEarnings?: number;
+  hasOrderedBefore?: boolean;
   defaultShippingAddress?: {
     firstName: string;
     lastName: string;
@@ -75,6 +74,7 @@ export interface UserProfile {
     phone: string;
   };
   cart?: CartItem[];
+  cartUpdatedAt?: number;
   createdAt: number;
 }
 
@@ -121,11 +121,7 @@ export interface Order {
   couponId?: string;
   couponCode?: string;
   couponDiscountAmount?: number;
-  pointsDiscountAmount?: number;
   referralCodeUsed?: string;
-  pointsEarned: number;
-  pointsUsed: number;
-  storeCreditUsed: number;
   status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   history?: OrderHistoryEvent[];
   shippingAddress: {

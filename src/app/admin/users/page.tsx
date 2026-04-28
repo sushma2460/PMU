@@ -119,14 +119,13 @@ export default function AdminUsersPage() {
   };
 
   const exportToCSV = () => {
-    const headers = ["Name", "Email", "Role", "Store Credit", "UID", "Joined"];
+    const headers = ["Name", "Email", "Role", "Joined", "UID"];
     const rows = filteredUsers.map(user => [
       user.displayName || "N/A",
       user.email || "N/A",
       user.role || "customer",
-      (user.storeCredit || 0).toString(),
+      user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A",
       user.uid,
-      user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"
     ]);
 
     const csvContent = [
@@ -265,7 +264,7 @@ export default function AdminUsersPage() {
             <TableRow>
               <TableHead className="px-8 text-[10px] font-bold uppercase tracking-widest">User Profile</TableHead>
                <TableHead className="text-[10px] font-bold uppercase tracking-widest">Role</TableHead>
-              <TableHead className="text-[10px] font-bold uppercase tracking-widest">Store Credit</TableHead>
+              <TableHead className="text-[10px] font-bold uppercase tracking-widest">Joined</TableHead>
               <TableHead className="text-right px-8 text-[10px] font-bold uppercase tracking-widest">Management</TableHead>
             </TableRow>
           </TableHeader>
@@ -305,8 +304,8 @@ export default function AdminUsersPage() {
                       {user.role}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-xs font-black text-zinc-900">
-                    ₹{(user.storeCredit || 0).toLocaleString()}
+                  <TableCell className="text-xs text-zinc-500">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                   </TableCell>
                   <TableCell className="text-right px-8">
                     <Dialog onOpenChange={(open) => {

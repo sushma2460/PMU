@@ -276,7 +276,7 @@ export default function AdminDashboard() {
       <div className="grid gap-4 md:gap-6 lg:grid-cols-7">
 
         {/* Revenue Chart */}
-        <Card className="lg:col-span-4 border-zinc-200 shadow-sm rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white">
+        <Card className="lg:col-span-4 border-zinc-200 shadow-sm rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white self-start">
           <CardHeader className="p-4 md:p-6 pb-2">
             <div className="flex justify-between items-center">
               <div>

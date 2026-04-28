@@ -353,14 +353,7 @@ export default function OrderDetailsPage() {
                   <span className="text-3xl font-heading text-brand-gold">₹{order.total?.toFixed(2)}</span>
                 </div>
 
-                <div className="pt-8">
-                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl space-y-2">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Loyalty Impact</p>
-                      <p className="text-xs text-zinc-300 font-light leading-relaxed">
-                        This order accrued <span className="text-brand-gold font-bold">{Math.floor(order.total || 0)} Beauty Points</span> for your future inventory.
-                      </p>
-                   </div>
-                </div>
+
               </CardContent>
             </Card>
           </div>
