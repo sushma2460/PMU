@@ -61,7 +61,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
               
               const isAdminFromDB = data.role === "admin";
-              setIsAdmin(isAdminFromDB || user.uid === BOOTSTRAP_ADMIN_UID);
+              const isStaffFromDB = data.role === "staff";
+              setIsAdmin(isAdminFromDB || isStaffFromDB || user.uid === BOOTSTRAP_ADMIN_UID);
             } else {
               // Create default profile
               const newProfile: UserProfile = {

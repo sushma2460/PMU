@@ -40,8 +40,8 @@ export default function AdminLoginPage() {
         const userSnap = await getDoc(doc(db, "users", loggedInUser.uid));
         const role = userSnap.data()?.role;
 
-        if (role !== "admin") {
-          toast.error("Unauthorized: Administrators only.");
+        if (role !== "admin" && role !== "staff") {
+          toast.error("Unauthorized: Administrative access only.");
           await auth.signOut();
           return;
         }

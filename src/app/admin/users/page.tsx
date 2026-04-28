@@ -17,7 +17,8 @@ import {
   Download,
   Loader2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Layout
 } from "lucide-react";
 import { 
   Table, 
@@ -43,7 +44,10 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { getAllUsersAction, setUserRoleAction, registerUserAction } from "./actions";
-import { UserProfile } from "@/lib/types";
+import { getAllAdminModulesAction, updateUserPermissionsAction } from "./rbac-actions";
+import { UserProfile, UserPermissions, UserRole, ModulePermissions } from "@/lib/types";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "../../../components/ui/checkbox";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -52,7 +56,12 @@ export default function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [regForm, setRegForm] = useState({ email: "", displayName: "", role: "customer" });
+  const [regForm, setRegForm] = useState({ email: "", displayName: "", password: "", role: "customer" as UserRole });
+  
+  const [availableModules, setAvailableModules] = useState<string[]>([]);
+  const [permissions, setPermissions] = useState<UserPermissions>({});
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [editRole, setEditRole] = useState<UserRole>('customer');
   
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
@@ -75,27 +84,61 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     fetchUsers();
+    
+    // Fetch dynamic modules
+    const fetchModules = async () => {
+      const res = await getAllAdminModulesAction();
+      if (res.success && res.modules) {
+        setAvailableModules(res.modules);
+      }
+    };
+    fetchModules();
   }, []);
 
-  const handleToggleRole = async () => {
+  const handleSavePermissions = async () => {
     if (!selectedUser) return;
-    const newRole = selectedUser.role === 'admin' ? 'customer' : 'admin';
     
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
-      const res = await setUserRoleAction(selectedUser.uid, newRole);
+      const res = await updateUserPermissionsAction(
+        selectedUser.uid, 
+        editRole, 
+        permissions, 
+        isSuperAdmin
+      );
+      
       if (res.success) {
-        toast.success(`User updated to ${newRole}.`);
+        toast.success("Permissions updated successfully.");
         await fetchUsers();
-        setSelectedUser(prev => prev ? { ...prev, role: newRole } : null);
+        setSelectedUser(null);
       } else {
-        toast.error(res.error || "Failed to update role");
+        toast.error(res.error || "Failed to update permissions");
       }
     } catch (error) {
-      toast.error("Failed to update role");
+      toast.error("An error occurred while saving permissions");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
+  };
+
+  const togglePermission = (module: string, action: keyof ModulePermissions) => {
+    setPermissions(prev => {
+      const current = prev[module] || { view: false, create: false, edit: false, delete: false };
+      return {
+        ...prev,
+        [module]: {
+          ...current,
+          [action]: !current[action]
+        }
+      };
+    });
+  };
+
+  const handleUserSelect = (user: UserProfile) => {
+    setSelectedUser(user);
+    setEditRole(user.role);
+    setIsSuperAdmin(user.isSuperAdmin || false);
+    setPermissions(user.permissions || {});
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -106,7 +149,7 @@ export default function AdminUsersPage() {
       if (res.success) {
         toast.success("User registered successfully.");
         setIsRegisterOpen(false);
-        setRegForm({ email: "", displayName: "", role: "customer" });
+        setRegForm({ email: "", displayName: "", password: "", role: "customer" as UserRole });
         await fetchUsers();
       } else {
         toast.error(res.error || "Registration failed.");
@@ -218,14 +261,26 @@ export default function AdminUsersPage() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-500">Secure Password</Label>
+                  <Input 
+                    required
+                    type="password"
+                    className="h-12 rounded-2xl bg-zinc-50 border-zinc-100" 
+                    placeholder="Min. 6 characters"
+                    value={regForm.password}
+                    onChange={(e) => setRegForm({...regForm, password: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-500">Initial Designation</Label>
                   <select 
-                    className="w-full h-12 rounded-2xl bg-zinc-50 border border-zinc-100 px-4 text-sm font-medium"
+                    className="w-full h-12 rounded-2xl bg-zinc-50 border border-zinc-100 px-4 text-sm font-medium focus:ring-2 focus:ring-brand-gold outline-none"
                     value={regForm.role}
-                    onChange={(e) => setRegForm({...regForm, role: e.target.value})}
+                    onChange={(e) => setRegForm({...regForm, role: e.target.value as UserRole})}
                   >
                     <option value="customer">User (Customer)</option>
-                    <option value="admin">Admin (System Administrator)</option>
+                    <option value="staff">Staff (Granular Access)</option>
+                    <option value="admin">Admin (Full Access)</option>
                   </select>
                 </div>
                 <Button type="submit" disabled={isSubmitting} className="w-full h-14 bg-brand-black hover:bg-brand-gold text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-zinc-900/10">
@@ -239,8 +294,8 @@ export default function AdminUsersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MetricCard title="Total Users" value={isLoading ? "..." : users.length.toString()} icon={<UsersIcon className="w-4 h-4" />} />
-        <MetricCard title="Customers" value={isLoading ? "..." : users.filter(u => u.role !== "admin").length.toString()} icon={<ShieldCheck className="w-4 h-4 text-emerald-500" />} />
-        <MetricCard title="Admin Accounts" value={isLoading ? "..." : users.filter(u => u.role === "admin").length.toString()} icon={<ArrowUpRight className="w-4 h-4 text-emerald-500" />} />
+        <MetricCard title="Customers" value={isLoading ? "..." : users.filter(u => u.role === "customer").length.toString()} icon={<ShieldCheck className="w-4 h-4 text-emerald-500" />} />
+        <MetricCard title="Admin & Staff" value={isLoading ? "..." : users.filter(u => u.role === "admin" || u.role === "staff").length.toString()} icon={<ShieldAlert className="w-4 h-4 text-brand-gold" />} />
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
@@ -310,7 +365,7 @@ export default function AdminUsersPage() {
                   <TableCell className="text-right px-8">
                     <Dialog onOpenChange={(open) => {
                       if(open) {
-                        setSelectedUser(user);
+                        handleUserSelect(user);
                       }
                     }}>
                     <DialogTrigger 
@@ -321,7 +376,7 @@ export default function AdminUsersPage() {
                       }
                     />
                       {selectedUser?.uid === user.uid && (
-                        <DialogContent className="sm:max-w-[550px] rounded-[3rem] p-10 border-none shadow-2xl">
+                        <DialogContent className="sm:max-w-[700px] rounded-[3rem] p-10 border-none shadow-2xl">
                           <DialogHeader>
                             <div className="flex items-center gap-4 mb-4">
                               <div className="w-16 h-16 rounded-[2rem] bg-brand-rose/20 flex items-center justify-center text-xl font-heading text-brand-black border border-brand-rose/30">
@@ -334,43 +389,86 @@ export default function AdminUsersPage() {
                             </div>
                           </DialogHeader>
                           
-                          <div className="space-y-8 animate-in slide-in-from-left-2 duration-300">
+                          <div className="space-y-6 animate-in slide-in-from-left-2 duration-300">
                             <div className="grid grid-cols-2 gap-4">
                               <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100 text-left">
-                                <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><Award className="w-3 h-3" /> Current Role</p>
-                                <p className="text-sm font-bold text-zinc-900 capitalize">{selectedUser.role}</p>
+                                <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><ShieldCheck className="w-3 h-3" /> Account Designation</p>
+                                <select 
+                                  className="w-full bg-transparent text-sm font-bold text-zinc-900 outline-none"
+                                  value={editRole}
+                                  onChange={(e) => setEditRole(e.target.value as UserRole)}
+                                >
+                                  <option value="customer">Customer</option>
+                                  <option value="staff">Staff</option>
+                                  <option value="admin">Admin</option>
+                                </select>
                               </div>
-                              <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100 text-left">
-                                <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><History className="w-3 h-3" /> Joined</p>
-                                <p className="text-sm font-bold text-zinc-900">
-                                  {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}
-                                </p>
+                              <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100 text-left flex items-center justify-between">
+                                <div>
+                                  <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><ShieldAlert className="w-3 h-3 text-brand-gold" /> Super Admin</p>
+                                  <p className="text-[10px] text-zinc-400 font-medium italic">Full System Bypass</p>
+                                </div>
+                                <Switch 
+                                  checked={isSuperAdmin}
+                                  onCheckedChange={setIsSuperAdmin}
+                                />
                               </div>
                             </div>
 
-                            <div className="space-y-4">
-                              <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest flex items-center gap-2 ml-1">
-                                <ShieldAlert className="w-3 h-3 text-brand-gold" /> System Permissions
-                              </Label>
+                            {(editRole === 'staff' || editRole === 'admin') && !isSuperAdmin && (
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between ml-1">
+                                  <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest flex items-center gap-2">
+                                    <Layout className="w-3 h-3 text-brand-gold" /> Module Permissions
+                                  </Label>
+                                  <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-tighter">Granular Access Matrix</span>
+                                </div>
+                                
+                                <div className="max-h-[300px] overflow-y-auto rounded-2xl border border-zinc-100 bg-zinc-50/30">
+                                  <Table>
+                                    <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
+                                      <TableRow className="hover:bg-transparent">
+                                        <TableHead className="text-[9px] font-bold uppercase py-2">Module</TableHead>
+                                        <TableHead className="text-[9px] font-bold uppercase py-2 text-center">View</TableHead>
+                                        <TableHead className="text-[9px] font-bold uppercase py-2 text-center">Create</TableHead>
+                                        <TableHead className="text-[9px] font-bold uppercase py-2 text-center">Edit</TableHead>
+                                        <TableHead className="text-[9px] font-bold uppercase py-2 text-center">Del</TableHead>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {availableModules.map((mod) => (
+                                        <TableRow key={mod} className="hover:bg-white transition-colors">
+                                          <TableCell className="py-3">
+                                            <span className="text-[10px] font-bold uppercase tracking-tight text-zinc-600">{mod}</span>
+                                          </TableCell>
+                                          {['view', 'create', 'edit', 'delete'].map((action) => (
+                                            <TableCell key={action} className="text-center py-3">
+                                              <Checkbox 
+                                                checked={permissions[mod]?.[action as keyof ModulePermissions] || false}
+                                                onCheckedChange={() => togglePermission(mod, action as keyof ModulePermissions)}
+                                                className="rounded-sm border-zinc-200 data-[state=checked]:bg-brand-gold data-[state=checked]:border-brand-gold"
+                                              />
+                                            </TableCell>
+                                          ))}
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="pt-4 space-y-4">
                               <Button 
-                                className={`w-full h-14 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all duration-300 ${
-                                  selectedUser.role === 'admin' 
-                                    ? "bg-zinc-100 text-zinc-900 hover:bg-zinc-200" 
-                                    : "bg-brand-black text-white hover:bg-brand-gold"
-                                }`} 
-                                onClick={handleToggleRole}
-                                disabled={isLoading}
+                                className="w-full h-14 bg-brand-black hover:bg-brand-gold text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-zinc-900/10 transition-all active:scale-[0.98]"
+                                onClick={handleSavePermissions}
+                                disabled={isSubmitting}
                               >
-                                {isLoading ? "Updating..." : selectedUser.role === 'admin' ? "Demote to Customer" : "Promote to Administrator"}
+                                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Synchronize Permissions"}
                               </Button>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button variant="outline" className="flex-1 rounded-2xl h-12 text-[10px] font-black uppercase tracking-widest border-zinc-100 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all gap-2">
-                                <Ban className="w-3 h-3" /> Suspend Account
-                              </Button>
-                              <Button variant="outline" className="flex-1 rounded-2xl h-12 text-[10px] font-black uppercase tracking-widest border-zinc-100 gap-2">
-                                <Mail className="w-3 h-3" /> Professional Outbox
-                              </Button>
+                              <p className="text-[9px] text-center text-zinc-400 font-medium uppercase tracking-[0.2em]">
+                                Changes apply immediately to the user's active session.
+                              </p>
                             </div>
                           </div>
                         </DialogContent>
@@ -437,14 +535,14 @@ export default function AdminUsersPage() {
 
 function MetricCard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
   return (
-    <Card className="rounded-[2rem] border-zinc-100 shadow-sm overflow-hidden bg-white hover:border-brand-gold transition-colors group cursor-default p-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{title}</p>
-          <p className="text-2xl font-black text-zinc-900 group-hover:text-brand-gold transition-colors">{value}</p>
-        </div>
-        <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-brand-rose/20 group-hover:text-brand-black transition-all">
+    <Card className="rounded-[2.5rem] border-zinc-100 shadow-sm overflow-hidden bg-white hover:border-brand-gold transition-all duration-500 group cursor-default p-5">
+      <div className="flex items-center gap-5">
+        <div className="w-14 h-14 rounded-3xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-brand-rose/20 group-hover:text-brand-black transition-all duration-500 shrink-0">
           {icon}
+        </div>
+        <div className="space-y-0.5">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">{title}</p>
+          <p className="text-2xl font-black text-zinc-900 group-hover:text-brand-gold transition-colors">{value}</p>
         </div>
       </div>
     </Card>

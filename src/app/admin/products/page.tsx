@@ -21,6 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import { getProductsAction, deleteProductAction, toggleProductStatusAction } from "./actions";
 import { Pagination } from "@/components/ui/pagination";
 import CategoryManager from "./CategoryManager";
+import { useAuth } from "@/context/AuthContext";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -32,6 +33,13 @@ export default function AdminProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  
+  const { profile } = useAuth();
+  
+  // RBAC Helpers
+  const canCreate = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.products?.create;
+  const canEdit = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.products?.edit;
+  const canDelete = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.products?.delete;
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -137,11 +145,13 @@ export default function AdminProductsPage() {
             )}
           </div>
           <CategoryManager />
-          <Link href="/admin/products/new">
-            <Button className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-8 h-10 w-full sm:w-auto">
-              <Plus className="h-3.5 w-3.5 mr-2" /> Add Product
-            </Button>
-          </Link>
+          {canCreate && (
+            <Link href="/admin/products/new">
+              <Button className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-8 h-10 w-full sm:w-auto">
+                <Plus className="h-3.5 w-3.5 mr-2" /> Add Product
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -218,7 +228,7 @@ export default function AdminProductsPage() {
                         <Switch
                           checked={product.isActive !== false}
                           onCheckedChange={() => handleToggleStatus(product.id!, product.isActive !== false)}
-                          disabled={togglingId === product.id}
+                          disabled={togglingId === product.id || !canEdit}
                         />
                         <span className={`text-[10px] font-bold uppercase tracking-wider ${
                           product.isActive !== false ? "text-green-600" : "text-zinc-400"
@@ -240,30 +250,34 @@ export default function AdminProductsPage() {
                           </Button>
                         </Link>
                         
-                        <Link href={`/admin/products/${product.id}`}>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-9 w-9 rounded-full text-zinc-400 hover:text-brand-gold hover:bg-zinc-100"
-                            title="Edit Product"
-                          >
-                            <Pencil size={16} />
-                          </Button>
-                        </Link>
+                        {canEdit && (
+                          <Link href={`/admin/products/${product.id}`}>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-9 w-9 rounded-full text-zinc-400 hover:text-brand-gold hover:bg-zinc-100"
+                              title="Edit Product"
+                            >
+                              <Pencil size={16} />
+                            </Button>
+                          </Link>
+                        )}
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-9 w-9 rounded-full text-zinc-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(product.id!)}
-                          disabled={deletingId === product.id}
-                          title="Delete Product"
-                        >
-                          {deletingId === product.id
-                            ? <Loader2 size={16} className="animate-spin" />
-                            : <Trash2 size={16} />
-                          }
-                        </Button>
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-full text-zinc-400 hover:text-red-600 hover:bg-red-50"
+                            onClick={() => handleDelete(product.id!)}
+                            disabled={deletingId === product.id}
+                            title="Delete Product"
+                          >
+                            {deletingId === product.id
+                              ? <Loader2 size={16} className="animate-spin" />
+                              : <Trash2 size={16} />
+                            }
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

@@ -78,13 +78,13 @@ export async function setUserRoleAction(userId: string, role: 'admin' | 'custome
   }
 }
 
-export async function registerUserAction(data: { email: string; displayName: string; role: string }) {
+export async function registerUserAction(data: { email: string; displayName: string; password: string; role: string }) {
   try {
     const { adminAuth } = await import("@/lib/firebase-admin");
     const userRecord = await adminAuth.createUser({
       email: data.email,
       displayName: data.displayName,
-      password: "PMU" + Math.random().toString(36).slice(-8), // Temporary password
+      password: data.password,
     });
 
     await adminDb.collection("users").doc(userRecord.uid).set({

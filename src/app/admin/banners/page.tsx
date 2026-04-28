@@ -28,19 +28,29 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { 
-  getAllBannersAdminAction, 
+  getBannersAction, 
   addBannerAction, 
   updateBannerAction, 
   deleteBannerAction, 
   reorderBannersAction,
   type Banner 
 } from "./actions";
+import { useAuth } from "@/context/AuthContext";
 import { useImageUpload } from "@/hooks/useImageUpload";
 
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  
+  const { profile } = useAuth();
+  
+  // RBAC Helpers
+  const canCreate = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.banners?.create;
+  const canEdit = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.banners?.edit;
+  const canDelete = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.banners?.delete;
+
   const [currentBanner, setCurrentBanner] = useState<Partial<Banner>>({
     title: "",
     subtitle: "",
@@ -57,7 +67,7 @@ export default function AdminBannersPage() {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
 
-  const { uploadImage, isUploading, isProcessing, progress } = useImageUpload();
+  const { uploadImage, isUploading, progress } = useImageUpload();
 
   useEffect(() => {
     loadBanners();
@@ -65,7 +75,7 @@ export default function AdminBannersPage() {
 
   async function loadBanners() {
     setLoading(true);
-    const res = await getAllBannersAdminAction();
+    const res = await getBannersAction();
     if (res.success && res.banners) {
       setBanners(res.banners);
     }
@@ -116,12 +126,15 @@ export default function AdminBannersPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this banner?")) return;
+    setDeletingId(id);
     try {
       await deleteBannerAction(id);
       toast.success("Banner deleted");
       loadBanners();
     } catch (error) {
       toast.error("Delete failed");
+    } finally {
+      setDeletingId(null);
     }
   };
   
@@ -189,7 +202,7 @@ export default function AdminBannersPage() {
           <h1 className="text-2xl md:text-3xl font-heading font-bold text-zinc-900">Homepage Banners</h1>
           <p className="text-zinc-500 text-xs md:text-sm mt-1">Manage the large image banners displayed on your home page.</p>
         </div>
-        {!isEditing && (
+        {!isEditing && canCreate && (
           <Button onClick={() => { resetForm(); setIsEditing(true); }} className="bg-brand-black text-white gap-2 shrink-0 h-9 px-3 md:px-4 text-[10px] md:text-sm">
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Add New Banner</span>
@@ -473,14 +486,19 @@ export default function AdminBannersPage() {
                         <ArrowDown className="w-4 h-4" />
                       </Button>
                     </div>
-                    <Button variant="outline" size="icon" onClick={() => { setCurrentBanner(banner); setIsEditing(true); }}
-                      className="h-10 w-10 md:h-12 md:w-12 rounded-xl border-zinc-200 hover:border-brand-gold hover:text-brand-gold bg-white">
-                      <Pencil className="w-4 h-4 md:w-5 md:h-5" />
-                    </Button>
-                    <Button variant="outline" size="icon" onClick={() => banner.id && handleDelete(banner.id)}
-                      className="h-10 w-10 md:h-12 md:w-12 rounded-xl border-zinc-200 hover:border-red-500 hover:text-red-500 bg-white">
-                      <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
-                    </Button>
+                    {canEdit && (
+                      <Button variant="outline" size="icon" onClick={() => { setCurrentBanner(banner); setIsEditing(true); }}
+                        className="h-10 w-10 md:h-12 md:w-12 rounded-xl border-zinc-200 hover:border-brand-gold hover:text-brand-gold bg-white">
+                        <Pencil className="w-4 h-4 md:w-5 md:h-5" />
+                      </Button>
+                    )}
+                    {canDelete && (
+                      <Button variant="outline" size="icon" onClick={() => banner.id && handleDelete(banner.id)}
+                        className="h-10 w-10 md:h-12 md:w-12 rounded-xl border-zinc-200 hover:border-red-500 hover:text-red-500 bg-white"
+                        disabled={deletingId === banner.id}>
+                        {deletingId === banner.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4 md:w-5 md:h-5" />}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

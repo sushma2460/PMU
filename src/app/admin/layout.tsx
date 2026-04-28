@@ -59,7 +59,23 @@ export default function AdminLayout({
     { href: "/admin/coupons", icon: <Ticket size={20} />, label: "Coupons", active: pathname === "/admin/coupons" },
     { href: "/admin/users", icon: <Users size={20} />, label: "Users", active: pathname === "/admin/users" },
     { href: "/admin/design", icon: <LayoutTemplate size={20} />, label: "Design", active: pathname === "/admin/design" },
-  ];
+  ].filter(item => {
+    // Super Admins see everything
+    if (profile?.isSuperAdmin) return true;
+    
+    // Admins see everything by default
+    if ((profile?.role as string) === 'admin') return true;
+
+    const pathParts = item.href.split('/');
+    const moduleName = pathParts[2];
+    
+    // 1. Super Admins and full Admins see everything
+    if (profile?.isSuperAdmin || (profile?.role as string) === 'admin') return true;
+    
+    // 2. Dashboard is always visible to STAFF if you haven't hidden it
+    // Actually, user wants it to be optional. So we check permissions.
+    return profile?.permissions?.[moduleName]?.view === true;
+  });
 
   return (
     <AdminGuard>
@@ -147,7 +163,9 @@ export default function AdminLayout({
             <div className="flex items-center gap-3">
               <div className="hidden md:flex flex-col items-end mr-2">
                 <span className="text-[10px] font-bold text-zinc-900 leading-none">{adminName}</span>
-                <span className="text-[8px] font-bold text-brand-gold uppercase tracking-widest mt-1">Administrator</span>
+                <span className="text-[8px] font-bold text-brand-gold uppercase tracking-widest mt-1">
+                  {profile?.isSuperAdmin ? "Super Admin" : (profile?.role || "Administrator")}
+                </span>
               </div>
               <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-xs font-bold text-brand-gold border border-zinc-800 shadow-sm">
                 {initials}

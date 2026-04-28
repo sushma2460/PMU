@@ -54,11 +54,26 @@ export interface CartItem {
   quantity: number;
 }
 
+export type UserRole = 'admin' | 'staff' | 'customer';
+
+export interface ModulePermissions {
+  view: boolean;
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
+}
+
+export interface UserPermissions {
+  [moduleName: string]: ModulePermissions;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
-  role: 'admin' | 'customer';
+  role: UserRole;
+  permissions?: UserPermissions;
+  isSuperAdmin?: boolean;
   referralCode?: string;
   referralCount?: number;
   referredBy?: string; // UID of the person who referred them

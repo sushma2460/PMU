@@ -40,6 +40,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 
 import { getCouponsAction, createCouponAction, updateCouponAction, deleteCouponAction } from "./actions";
+import { useAuth } from "@/context/AuthContext";
 import { Coupon } from "@/lib/types";
 
 function formatDateForInput(ms?: number) {
@@ -71,6 +72,14 @@ export default function AdminCouponsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const { profile } = useAuth();
+  
+  // RBAC Helpers
+  const canCreate = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.coupons?.create;
+  const canEdit = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.coupons?.edit;
+  const canDelete = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.coupons?.delete;
 
   const [newCoupon, setNewCoupon] = useState<Partial<Coupon>>(defaultCoupon);
   const [editingCouponId, setEditingCouponId] = useState<string | null>(null);
@@ -135,6 +144,7 @@ export default function AdminCouponsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this coupon?")) return;
+    setDeletingId(id);
     try {
        const result = await deleteCouponAction(id);
        if (!result.success) throw new Error(result.error);
@@ -142,6 +152,8 @@ export default function AdminCouponsPage() {
        toast.success("Coupon Deleted");
     } catch (error) {
        toast.error("Failed to delete coupon");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -150,11 +162,13 @@ export default function AdminCouponsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-heading font-normal">Promotion Studio</h1>
-          <p className="text-zinc-500 text-sm mt-1">Design and launch high-conversion coupon campaigns.</p>
+          <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Driving Growth Through Rewards</p>
         </div>
-        <Button onClick={handleOpenCreate} className="bg-brand-gold hover:bg-brand-black text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-8 gap-2">
-          <Plus className="w-3 h-3" /> Create Campaign
-        </Button>
+        {canCreate && (
+          <Button onClick={handleOpenCreate} className="bg-brand-gold hover:bg-brand-black text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-8 gap-2">
+            <Plus className="w-3 h-3" /> Create Campaign
+          </Button>
+        )}
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogContent className="sm:max-w-[850px] max-h-[95vh] overflow-y-auto rounded-[2.5rem] p-8 sm:p-10 border-none shadow-2xl flex flex-col">
             <DialogHeader className="space-y-2 flex-shrink-0">
@@ -358,16 +372,20 @@ export default function AdminCouponsPage() {
                     })()}
                   </TableCell>
                   <TableCell className="text-right px-8">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex items-center justify-end gap-2">
                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 text-zinc-400">
                         <Copy className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" onClick={() => handleOpenEdit(coupon)} size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 text-zinc-400">
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button variant="ghost" onClick={() => handleDelete(coupon.id!)} size="icon" className="h-8 w-8 rounded-full hover:bg-red-50 text-red-400">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
+                      {canEdit && (
+                        <Button variant="ghost" onClick={() => handleOpenEdit(coupon)} size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 text-zinc-400">
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button variant="ghost" onClick={() => handleDelete(coupon.id!)} size="icon" className="h-8 w-8 rounded-full hover:bg-red-50 text-red-400" disabled={deletingId === coupon.id}>
+                          {deletingId === coupon.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

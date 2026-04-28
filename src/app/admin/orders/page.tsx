@@ -29,7 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { getOrdersAction, updateOrderStatusAction } from "./actions";
+import { getOrdersAction, deleteOrderAction, updateOrderStatusAction } from "./actions";
+import { useAuth } from "@/context/AuthContext";
 import { Order } from "@/lib/types";
 import { toast } from "sonner";
 import {
@@ -68,6 +69,15 @@ const VIEW_TABS = [
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+  
+  const { profile } = useAuth();
+  
+  // RBAC Helpers
+  const canEdit = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.orders?.edit;
+  const canDelete = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.orders?.delete;
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,7 +86,6 @@ export default function AdminOrdersPage() {
   const fetchOrders = async () => {
     setIsLoading(true);
     try {
-      // For "recent", we fetch all and filter client-side for now to include multiple statuses
       const statusParam = (filterStatus === "all" || filterStatus === "recent") ? undefined : filterStatus;
       const res = await getOrdersAction(statusParam);
       
@@ -115,6 +124,24 @@ export default function AdminOrdersPage() {
       }
     } catch (error) {
       toast.error("Failed to update order status");
+    }
+  };
+
+  const handleDelete = async (orderId: string) => {
+    if (!confirm("Are you sure you want to delete this order?")) return;
+    setDeletingId(orderId);
+    try {
+      const res = await deleteOrderAction(orderId);
+      if (res.success) {
+        toast.success("Order deleted successfully");
+        await fetchOrders();
+      } else {
+        toast.error(res.error || "Failed to delete order");
+      }
+    } catch (error) {
+      toast.error("Failed to delete order");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -220,7 +247,6 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* View Navigation Tabs */}
       <div className="flex border-b border-zinc-100 gap-8 overflow-x-auto no-scrollbar">
         {VIEW_TABS.map((tab) => (
           <button
@@ -240,7 +266,6 @@ export default function AdminOrdersPage() {
         ))}
       </div>
 
-      {/* Search Bar */}
       <div className="flex flex-col md:flex-row gap-4 p-4 bg-zinc-50/50 border border-zinc-100 rounded-[2.5rem]">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -253,10 +278,7 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* Orders — Card layout on mobile, Table on desktop */}
       <div className="bg-white border border-zinc-100 rounded-2xl md:rounded-[2.5rem] shadow-sm overflow-hidden">
-
-        {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
           <Table>
             <TableHeader className="bg-zinc-50/50">
@@ -321,9 +343,11 @@ export default function AdminOrdersPage() {
                             <Eye className="w-4 h-4" />
                           </Button>
                         </Link>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
+                        {canDelete && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-red-50 hover:text-red-600" onClick={() => handleDelete(order.id!)}>
+                            {deletingId === order.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -333,7 +357,6 @@ export default function AdminOrdersPage() {
           </Table>
         </div>
 
-        {/* Mobile Card List */}
         <div className="md:hidden">
           {isLoading ? (
             <div className="py-16 flex justify-center">
@@ -347,7 +370,6 @@ export default function AdminOrdersPage() {
             <div className="divide-y divide-zinc-100">
               {paginatedOrders.map((order) => (
                 <div key={order.id} className="p-4 space-y-3">
-                  {/* Top row: ID + Status */}
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-[10px] font-bold text-zinc-400 truncate max-w-[140px]">{order.id}</span>
                     <Select value={order.status} onValueChange={(val) => handleStatusUpdate(order.id!, val as Order["status"])}>
@@ -363,7 +385,6 @@ export default function AdminOrdersPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  {/* Middle row: Customer + details */}
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-bold text-zinc-900">
@@ -373,13 +394,24 @@ export default function AdminOrdersPage() {
                         {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · {order.items?.length ?? 0} items
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-black text-zinc-900">₹{order.total?.toLocaleString()}</span>
+                    <div className="flex items-center justify-end gap-1">
                       <Link href={`/admin/orders/${order.id}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-brand-gold hover:text-white transition-all">
-                          <Eye className="w-4 h-4" />
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-400 hover:text-brand-gold hover:bg-zinc-100">
+                          <Eye size={16} />
                         </Button>
                       </Link>
+                      {canEdit && (
+                        <Link href={`/admin/orders/${order.id}`}>
+                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-400 hover:text-brand-gold hover:bg-zinc-100">
+                            <Pencil size={16} />
+                          </Button>
+                        </Link>
+                      )}
+                      {canDelete && (
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-400 hover:text-red-600 hover:bg-red-50" onClick={() => handleDelete(order.id!)}>
+                          {deletingId === order.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -70,3 +70,13 @@ export async function getOrderByIdAction(id: string) {
     return { success: false, error: err.message };
   }
 }
+
+export async function deleteOrderAction(id: string) {
+  try {
+    await adminDb.collection("orders").doc(id).delete();
+    return { success: true };
+  } catch (err: any) {
+    console.error("deleteOrderAction error:", err);
+    return { success: false, error: err.message };
+  }
+}
