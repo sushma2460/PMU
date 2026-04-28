@@ -87,7 +87,8 @@ export default function ProfilePage() {
       try {
         const q = query(
           collection(db, "orders"), 
-          where("userId", "==", user.uid)
+          where("userId", "==", user.uid),
+          orderBy("createdAt", "desc")
         );
         const snapshot = await getDocs(q);
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
@@ -95,10 +96,7 @@ export default function ProfilePage() {
         // Only show successful orders
         const successfulStatuses = ['paid', 'processing', 'shipped', 'delivered'];
         const filteredData = data.filter(order => successfulStatuses.includes(order.status));
-        
-        // Manual sort to bypass composite index requirement
-        const sortedData = filteredData.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        setOrders(sortedData);
+        setOrders(filteredData);
       } catch (err) {
         console.error("Order fetch failed:", err);
       } finally {

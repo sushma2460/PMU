@@ -183,22 +183,24 @@ export default function AdminBannersPage() {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 md:space-y-8">
+      <div className="flex justify-between items-start gap-3">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-zinc-900">Homepage Banners</h1>
-          <p className="text-zinc-500 text-sm mt-1">Manage the large image banners displayed on your home page.</p>
+          <h1 className="text-2xl md:text-3xl font-heading font-bold text-zinc-900">Homepage Banners</h1>
+          <p className="text-zinc-500 text-xs md:text-sm mt-1">Manage the large image banners displayed on your home page.</p>
         </div>
         {!isEditing && (
-          <Button onClick={() => { resetForm(); setIsEditing(true); }} className="bg-brand-black text-white gap-2">
-            <Plus className="w-4 h-4" /> Add New Banner
+          <Button onClick={() => { resetForm(); setIsEditing(true); }} className="bg-brand-black text-white gap-2 shrink-0 h-9 px-3 md:px-4 text-[10px] md:text-sm">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Add New Banner</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         )}
       </div>
 
       {isEditing ? (
-        <div className="bg-white p-8 rounded-3xl border border-zinc-200 shadow-sm space-y-6 animate-in fade-in slide-in-from-top-4">
-          <div className="grid md:grid-cols-2 gap-8">
+        <div className="bg-white p-4 md:p-8 rounded-2xl md:rounded-3xl border border-zinc-200 shadow-sm space-y-6 animate-in fade-in slide-in-from-top-4">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8">
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
@@ -428,9 +430,9 @@ export default function AdminBannersPage() {
           </div>
         </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-zinc-100">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-zinc-100">
             <Button variant="ghost" onClick={() => setIsEditing(false)} className="rounded-xl px-8" disabled={isSaving}>Cancel</Button>
-            <Button onClick={handleSave} className="bg-brand-black text-white rounded-xl px-12 hover:bg-zinc-800 transition-all" disabled={isSaving}>
+            <Button onClick={handleSave} className="bg-brand-black text-white rounded-xl px-8 md:px-12 hover:bg-zinc-800 transition-all" disabled={isSaving}>
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               {currentBanner.id ? 'Update Banner' : 'Create Banner'}
             </Button>
@@ -445,62 +447,45 @@ export default function AdminBannersPage() {
             </div>
           ) : (
             banners.map((banner) => (
-              <div key={banner.id} className="group bg-white p-6 rounded-[2rem] border border-zinc-200 flex items-center gap-6 hover:shadow-xl transition-all duration-500">
-                <div className="w-48 aspect-video rounded-2xl overflow-hidden bg-zinc-100 flex-shrink-0 border border-zinc-100">
-                  <img src={banner.imageUrl} alt={banner.title} className="w-full h-full object-cover" />
-                </div>
-                
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
-                    {banner.subtitle && <span className="text-[9px] font-bold tracking-widest text-brand-gold uppercase">{banner.subtitle}</span>}
-                    <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${banner.isActive ? 'bg-green-100 text-green-700' : 'bg-zinc-100 text-zinc-400'}`}>
-                      {banner.isActive ? 'LIVE' : 'HIDDEN'}
-                    </span>
+              <div key={banner.id} className="group bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] border border-zinc-200 hover:shadow-xl transition-all duration-500">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="w-full sm:w-48 aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-zinc-100 shrink-0 border border-zinc-100">
+                    <img src={banner.imageUrl} alt={banner.title} className="w-full h-full object-cover" />
                   </div>
-                  <h3 className="text-xl font-heading font-bold text-zinc-900">{banner.title}</h3>
-                  <p className="text-sm text-zinc-500 line-clamp-1 italic">{banner.description}</p>
-                </div>
-
-                <div className="flex items-center gap-2 transition-all">
-                  <div className="flex flex-col gap-1 pr-4 border-r border-zinc-100">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 hover:bg-zinc-100 disabled:opacity-30"
-                      onClick={() => banner.id && handleReorder(banner.id, 'up')}
-                      disabled={banners.indexOf(banner) === 0}
-                    >
-                      <ArrowUp className="w-4 h-4" />
+                  <div className="flex-1 space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {banner.subtitle && <span className="text-[9px] font-bold tracking-widest text-brand-gold uppercase">{banner.subtitle}</span>}
+                      <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${banner.isActive ? 'bg-green-100 text-green-700' : 'bg-zinc-100 text-zinc-400'}`}>
+                        {banner.isActive ? 'LIVE' : 'HIDDEN'}
+                      </span>
+                    </div>
+                    <h3 className="text-lg md:text-xl font-heading font-bold text-zinc-900 truncate">{banner.title}</h3>
+                    <p className="text-xs md:text-sm text-zinc-500 line-clamp-1 italic">{banner.description}</p>
+                  </div>
+                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                    <div className="flex gap-1 pr-3 border-r border-zinc-100">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-100 disabled:opacity-30"
+                        onClick={() => banner.id && handleReorder(banner.id, 'up')} disabled={banners.indexOf(banner) === 0}>
+                        <ArrowUp className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-100 disabled:opacity-30"
+                        onClick={() => banner.id && handleReorder(banner.id, 'down')} disabled={banners.indexOf(banner) === banners.length - 1}>
+                        <ArrowDown className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <Button variant="outline" size="icon" onClick={() => { setCurrentBanner(banner); setIsEditing(true); }}
+                      className="h-10 w-10 md:h-12 md:w-12 rounded-xl border-zinc-200 hover:border-brand-gold hover:text-brand-gold bg-white">
+                      <Pencil className="w-4 h-4 md:w-5 md:h-5" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 hover:bg-zinc-100 disabled:opacity-30"
-                      onClick={() => banner.id && handleReorder(banner.id, 'down')}
-                      disabled={banners.indexOf(banner) === banners.length - 1}
-                    >
-                      <ArrowDown className="w-4 h-4" />
+                    <Button variant="outline" size="icon" onClick={() => banner.id && handleDelete(banner.id)}
+                      className="h-10 w-10 md:h-12 md:w-12 rounded-xl border-zinc-200 hover:border-red-500 hover:text-red-500 bg-white">
+                      <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                     </Button>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={() => { setCurrentBanner(banner); setIsEditing(true); }}
-                    className="h-12 w-12 rounded-xl border-zinc-200 hover:border-brand-gold hover:text-brand-gold transition-all bg-white"
-                  >
-                    <Pencil className="w-5 h-5" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={() => banner.id && handleDelete(banner.id)}
-                    className="h-12 w-12 rounded-xl border-zinc-200 hover:border-red-500 hover:text-red-500 transition-all bg-white"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </Button>
                 </div>
               </div>
             ))
+
           )}
         </div>
       )}

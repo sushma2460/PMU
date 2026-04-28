@@ -124,16 +124,11 @@ export const updateProductStock = async (productId: string, newStock: number) =>
 export const getOrders = async (status?: string): Promise<Order[]> => {
   const ordersRef = collection(db, "orders");
   const q = status 
-    ? query(ordersRef, where("status", "==", status))
+    ? query(ordersRef, where("status", "==", status), orderBy("createdAt", "desc"))
     : query(ordersRef, orderBy("createdAt", "desc"));
     
   const querySnapshot = await getDocs(q);
-  const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-  
-  // Apply manual sort if status filter was used to bypass composite index requirement
-  return status 
-    ? data.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-    : data;
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
 };
 
 export const updateOrderStatus = async (orderId: string, status: Order['status']) => {

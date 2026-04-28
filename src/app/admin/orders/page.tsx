@@ -176,37 +176,31 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-5 md:space-y-8 animate-in fade-in duration-700 pb-20">
+      <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
         <div>
-          <h1 className="text-3xl font-heading font-normal">Order Management</h1>
-          <p className="text-zinc-500 text-sm mt-1">Efficiently manage status, fulfillment, and customer inquiries.</p>
+          <h1 className="text-2xl md:text-3xl font-heading font-normal">Order Management</h1>
+          <p className="text-zinc-500 text-xs md:text-sm mt-1">Manage status, fulfillment, and customer inquiries.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {(searchTerm || filterStatus !== "all") && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={clearFilters}
-              className="rounded-full text-[10px] font-bold tracking-widest uppercase gap-2 text-zinc-400 hover:text-zinc-600"
-            >
+            <Button variant="ghost" size="sm" onClick={clearFilters}
+              className="rounded-full text-[10px] font-bold tracking-widest uppercase gap-2 text-zinc-400 hover:text-zinc-600 h-8 px-3">
               <RotateCcw className="w-3 h-3" /> Reset
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="rounded-full text-[10px] font-bold tracking-widest uppercase gap-2 px-6"
-            onClick={exportOrdersToCSV}
-            disabled={filteredOrders.length === 0}
-          >
-            <Download className="w-3 h-3" /> Export List
+          <Button variant="outline" size="sm"
+            className="rounded-full text-[10px] font-bold tracking-widest uppercase gap-2 px-4 h-8"
+            onClick={exportOrdersToCSV} disabled={filteredOrders.length === 0}>
+            <Download className="w-3 h-3" />
+            <span className="hidden sm:inline">Export List</span>
           </Button>
-          
           <Dialog>
             <DialogTrigger render={
-              <Button size="sm" className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-8 flex gap-2">
-                <Plus className="w-3 h-3" /> Create Manual Order
+              <Button size="sm" className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-4 md:px-8 h-8 flex gap-2">
+                <Plus className="w-3 h-3" />
+                <span className="hidden sm:inline">Create Manual Order</span>
+                <span className="sm:hidden">Manual</span>
               </Button>
             } />
             <DialogContent className="sm:max-w-[450px] rounded-[2.5rem] p-8">
@@ -259,9 +253,11 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white border border-zinc-100 rounded-[2.5rem] shadow-sm overflow-hidden">
-        <div className="overflow-x-auto no-scrollbar">
+      {/* Orders — Card layout on mobile, Table on desktop */}
+      <div className="bg-white border border-zinc-100 rounded-2xl md:rounded-[2.5rem] shadow-sm overflow-hidden">
+
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <Table>
             <TableHeader className="bg-zinc-50/50">
               <TableRow>
@@ -278,31 +274,23 @@ export default function AdminOrdersPage() {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={7} className="py-24 text-center">
-                    <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-gold" />
-                    </div>
+                    <div className="flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-gold" /></div>
                   </TableCell>
                 </TableRow>
               ) : filteredOrders.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="py-24 text-center">
-                    <p className="text-zinc-400 text-sm italic">
-                      {orders.length === 0 ? "No orders have been placed yet." : "No matching orders found."}
-                    </p>
+                    <p className="text-zinc-400 text-sm italic">{orders.length === 0 ? "No orders have been placed yet." : "No matching orders found."}</p>
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedOrders.map((order) => (
                   <TableRow key={order.id} className="hover:bg-zinc-50/50 transition-colors group">
-                    <TableCell className="px-8 font-mono text-[11px] font-bold text-zinc-400 group-hover:text-brand-gold transition-colors">
-                      {order.id}
-                    </TableCell>
+                    <TableCell className="px-8 font-mono text-[11px] font-bold text-zinc-400 group-hover:text-brand-gold transition-colors">{order.id}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="text-xs font-bold text-zinc-900">
-                          {order.shippingAddress 
-                            ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`
-                            : order.userId}
+                          {order.shippingAddress ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}` : order.userId}
                         </span>
                         <span className="text-[10px] text-zinc-400 font-light">{order.shippingAddress?.city || "—"}</span>
                       </div>
@@ -310,34 +298,17 @@ export default function AdminOrdersPage() {
                     <TableCell className="text-xs text-zinc-500">
                       {new Date(order.createdAt).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
                     </TableCell>
-                    <TableCell className="text-center font-bold text-xs">
-                      {order.items?.length ?? 0}
-                    </TableCell>
-                    <TableCell className="text-xs font-black text-zinc-900">
-                      ₹{order.total?.toLocaleString()}
-                    </TableCell>
+                    <TableCell className="text-center font-bold text-xs">{order.items?.length ?? 0}</TableCell>
+                    <TableCell className="text-xs font-black text-zinc-900">₹{order.total?.toLocaleString()}</TableCell>
                     <TableCell>
-                      <Select
-                        value={order.status}
-                        onValueChange={(val) => handleStatusUpdate(order.id!, val as Order["status"])}
-                      >
+                      <Select value={order.status} onValueChange={(val) => handleStatusUpdate(order.id!, val as Order["status"])}>
                         <SelectTrigger className={`h-8 rounded-full px-3 text-[9px] font-bold uppercase tracking-tighter border w-[120px] ${STATUS_CONFIG[order.status]?.color}`}>
-                          <div className="flex items-center gap-1.5">
-                            {STATUS_CONFIG[order.status]?.icon}
-                            <SelectValue placeholder="Status" />
-                          </div>
+                          <div className="flex items-center gap-1.5">{STATUS_CONFIG[order.status]?.icon}<SelectValue placeholder="Status" /></div>
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl border-zinc-100 shadow-xl p-1">
                           {Object.keys(STATUS_CONFIG).map((s) => (
-                            <SelectItem 
-                              key={s} 
-                              value={s}
-                              className="text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-zinc-50 cursor-pointer"
-                            >
-                              <div className="flex items-center gap-2">
-                                {STATUS_CONFIG[s].icon}
-                                {s}
-                              </div>
+                            <SelectItem key={s} value={s} className="text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-zinc-50 cursor-pointer">
+                              <div className="flex items-center gap-2">{STATUS_CONFIG[s].icon}{s}</div>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -361,49 +332,85 @@ export default function AdminOrdersPage() {
             </TableBody>
           </Table>
         </div>
-        
-        {/* Pagination Controls */}
+
+        {/* Mobile Card List */}
+        <div className="md:hidden">
+          {isLoading ? (
+            <div className="py-16 flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-gold" />
+            </div>
+          ) : paginatedOrders.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-zinc-400 text-sm italic">{orders.length === 0 ? "No orders yet." : "No matching orders."}</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-100">
+              {paginatedOrders.map((order) => (
+                <div key={order.id} className="p-4 space-y-3">
+                  {/* Top row: ID + Status */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[10px] font-bold text-zinc-400 truncate max-w-[140px]">{order.id}</span>
+                    <Select value={order.status} onValueChange={(val) => handleStatusUpdate(order.id!, val as Order["status"])}>
+                      <SelectTrigger className={`h-7 rounded-full px-3 text-[9px] font-bold uppercase tracking-tighter border w-[110px] shrink-0 ${STATUS_CONFIG[order.status]?.color}`}>
+                        <div className="flex items-center gap-1">{STATUS_CONFIG[order.status]?.icon}<SelectValue placeholder="Status" /></div>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl border-zinc-100 shadow-xl p-1">
+                        {Object.keys(STATUS_CONFIG).map((s) => (
+                          <SelectItem key={s} value={s} className="text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-zinc-50 cursor-pointer">
+                            <div className="flex items-center gap-2">{STATUS_CONFIG[s].icon}{s}</div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {/* Middle row: Customer + details */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-zinc-900">
+                        {order.shippingAddress ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}` : order.userId}
+                      </p>
+                      <p className="text-[10px] text-zinc-400">
+                        {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · {order.items?.length ?? 0} items
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black text-zinc-900">₹{order.total?.toLocaleString()}</span>
+                      <Link href={`/admin/orders/${order.id}`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-brand-gold hover:text-white transition-all">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Pagination — shared */}
         {totalPages > 1 && (
-          <div className="flex flex-col md:flex-row items-center justify-between px-8 py-6 bg-zinc-50/30 border-t border-zinc-100 gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between px-4 md:px-8 py-4 md:py-6 bg-zinc-50/30 border-t border-zinc-100 gap-3">
             <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-              Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)} of {filteredOrders.length} orders
+              {((currentPage - 1) * ITEMS_PER_PAGE) + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)} of {filteredOrders.length}
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="rounded-xl h-10 px-4 text-[10px] font-bold uppercase tracking-widest gap-2 border-zinc-200"
-              >
-                <ChevronLeft className="w-3 h-3" /> Previous
+              <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1} className="rounded-xl h-9 px-3 text-[10px] font-bold uppercase tracking-widest gap-1 border-zinc-200">
+                <ChevronLeft className="w-3 h-3" /> Prev
               </Button>
-              
               <div className="hidden sm:flex items-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "ghost"}
-                    size="sm"
+                  <Button key={page} variant={currentPage === page ? "default" : "ghost"} size="sm"
                     onClick={() => setCurrentPage(page)}
-                    className={`w-10 h-10 rounded-xl text-[10px] font-bold ${
-                      currentPage === page 
-                        ? 'bg-brand-gold text-white hover:bg-brand-gold/90 shadow-md shadow-brand-gold/20' 
-                        : 'text-zinc-400 hover:text-zinc-900 hover:bg-white'
-                    }`}
-                  >
-                    {page}
-                  </Button>
+                    className={`w-9 h-9 rounded-xl text-[10px] font-bold ${
+                      currentPage === page ? 'bg-brand-gold text-white hover:bg-brand-gold/90 shadow-md shadow-brand-gold/20' : 'text-zinc-400 hover:text-zinc-900 hover:bg-white'
+                    }`}>{page}</Button>
                 ))}
               </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="rounded-xl h-10 px-4 text-[10px] font-bold uppercase tracking-widest gap-2 border-zinc-200"
-              >
+              <span className="sm:hidden text-[10px] font-bold text-zinc-400">{currentPage}/{totalPages}</span>
+              <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages} className="rounded-xl h-9 px-3 text-[10px] font-bold uppercase tracking-widest gap-1 border-zinc-200">
                 Next <ChevronRight className="w-3 h-3" />
               </Button>
             </div>
