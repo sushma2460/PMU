@@ -95,7 +95,7 @@ export async function POST(req: Request) {
       taxAmount: tax,
       total: total,
       couponId: couponId,
-      couponCode: couponCode || null,
+      couponCode: couponCode ? couponCode.toUpperCase().trim() : null,
       status: 'pending',
       shippingAddress: shippingAddress,
       createdAt: Date.now(),

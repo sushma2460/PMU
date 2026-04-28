@@ -57,16 +57,20 @@ export async function POST(req: Request) {
           }
 
           // C. Increment Coupon Usage
-          if (orderData.couponCode) {
+          // Prefer couponId (direct doc ref) — avoids case-mismatch on code field
+          if (orderData.couponId) {
+            const couponRef = adminDb.collection("coupons").doc(orderData.couponId);
+            transaction.update(couponRef, { usageCount: FieldValue.increment(1) });
+          } else if (orderData.couponCode) {
+            // Fallback: query by code (normalised to uppercase)
+            const code = (orderData.couponCode as string).toUpperCase().trim();
             const couponSnapshot = await adminDb.collection("coupons")
-              .where("code", "==", orderData.couponCode.toUpperCase())
+              .where("code", "==", code)
               .limit(1)
               .get();
-            
             if (!couponSnapshot.empty) {
-              const couponRef = couponSnapshot.docs[0].ref;
-              transaction.update(couponRef, {
-                usageCount: FieldValue.increment(1)
+              transaction.update(couponSnapshot.docs[0].ref, {
+                usageCount: FieldValue.increment(1),
               });
             }
           }

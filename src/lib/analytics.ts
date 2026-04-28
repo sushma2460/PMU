@@ -1,7 +1,4 @@
-import { db } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
-
-// ── Session ID ─────────────────────────────────────────────
+// ── Session ID ─────────────────────────────────────────────────────────────────
 const SESSION_KEY = "pmu_session_id";
 
 function getSessionId(): string {
@@ -14,36 +11,40 @@ function getSessionId(): string {
   return id;
 }
 
-// ── Core event writer ──────────────────────────────────────
+// ── Core event writer (server API route — bypasses Firestore security rules) ───
 export async function trackEvent(
   event: string,
   userId: string = "guest",
   properties: Record<string, any> = {}
 ): Promise<void> {
   try {
-    await addDoc(collection(db, "analytics_events"), {
-      event,
-      userId,
-      sessionId: getSessionId(),
-      timestamp: Date.now(),
-      ...properties,
+    await fetch("/api/track-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event,
+        userId,
+        sessionId: getSessionId(),
+        timestamp: Date.now(),
+        ...properties,
+      }),
     });
   } catch {
     // Analytics must NEVER break the user experience
   }
 }
 
-// ── Typed event helpers ────────────────────────────────────
+// ── Typed event helpers ─────────────────────────────────────────────────────────
 
 export function trackProductView(
   userId: string = "guest",
   product: { id?: string; name: string; category: string; price: number }
 ) {
   return trackEvent("product_view", userId, {
-    productId: product.id ?? "",
+    productId:   product.id ?? "",
     productName: product.name,
-    category: product.category,
-    price: product.price,
+    category:    product.category,
+    price:       product.price,
   });
 }
 
@@ -54,9 +55,9 @@ export function trackAddToCart(
   value: number
 ) {
   return trackEvent("add_to_cart", userId, {
-    productId: product.id ?? "",
+    productId:   product.id ?? "",
     productName: product.name,
-    category: product.category,
+    category:    product.category,
     quantity,
     value,
   });
