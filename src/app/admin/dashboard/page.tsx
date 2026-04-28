@@ -1,20 +1,21 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   AreaChart,
   Area
 } from "recharts";
-import { 
-  TrendingUp, 
-  ShoppingCart, 
-  Users, 
-  DollarSign, 
+import {
+  TrendingUp,
+  ShoppingCart,
+  Users,
+  DollarSign,
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
@@ -34,22 +35,22 @@ import { seedDatabase, getProducts } from "@/lib/services/admin";
 import { toast } from "sonner";
 
 const PERIOD_OPTIONS: { label: string; short: string; value: DashboardPeriod }[] = [
-  { label: "Last Week",    short: "7D",  value: "7d"  },
-  { label: "Last Month",   short: "30D", value: "30d" },
+  { label: "Last Week", short: "7D", value: "7d" },
+  { label: "Last Month", short: "30D", value: "30d" },
   { label: "Last Quarter", short: "90D", value: "90d" },
-  { label: "Last Year",    short: "1Y",  value: "12m" },
-  { label: "All Time",     short: "All", value: "all" },
+  { label: "Last Year", short: "1Y", value: "12m" },
+  { label: "All Time", short: "All", value: "all" },
 ];
 
 export default function AdminDashboard() {
-  const [stats, setStats]                   = useState<any>(null);
-  const [hasProducts, setHasProducts]       = useState(true);
+  const [stats, setStats] = useState<any>(null);
+  const [hasProducts, setHasProducts] = useState(true);
   const [isInitializing, setIsInitializing] = useState(false);
-  const [isLoading, setIsLoading]           = useState(true);
-  const [period, setPeriod]                 = useState<DashboardPeriod>("30d");
+  const [isLoading, setIsLoading] = useState(true);
+  const [period, setPeriod] = useState<DashboardPeriod>("30d");
   const [isPeriodLoading, setIsPeriodLoading] = useState(false);
 
-  const [stockAlertPage, setStockAlertPage]         = useState(1);
+  const [stockAlertPage, setStockAlertPage] = useState(1);
   const [recentActivityPage, setRecentActivityPage] = useState(1);
   const ITEMS_PER_PAGE = 3;
 
@@ -92,11 +93,11 @@ export default function AdminDashboard() {
     if (stats.recentActivity?.length > 0) {
       csvContent += "Recent Activity\nType,Title,Details,Date\n";
       stats.recentActivity.forEach((r: any) => {
-        csvContent += `${r.type},"${(r.title||"").replace(/"/g,'""')}","${(r.subtitle||"").replace(/"/g,'""')}",${new Date(r.timestamp).toISOString()}\n`;
+        csvContent += `${r.type},"${(r.title || "").replace(/"/g, '""')}","${(r.subtitle || "").replace(/"/g, '""')}",${new Date(r.timestamp).toISOString()}\n`;
       });
     }
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url  = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
     link.setAttribute("download", `dashboard_export_${new Date().toISOString().split("T")[0]}.csv`);
@@ -137,7 +138,7 @@ export default function AdminDashboard() {
     fetchData();
     const interval = setInterval(() => fetchData(true), 30000);
     return () => { cancelled = true; clearInterval(interval); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [period]);
 
   const handlePeriodChange = (newPeriod: DashboardPeriod) => {
@@ -217,11 +218,10 @@ export default function AdminDashboard() {
               key={opt.value}
               onClick={() => handlePeriodChange(opt.value)}
               disabled={isPeriodLoading}
-              className={`shrink-0 px-3 md:px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${
-                period === opt.value
+              className={`shrink-0 px-3 md:px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${period === opt.value
                   ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
                   : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400 hover:text-zinc-800"
-              } ${isPeriodLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${isPeriodLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {isPeriodLoading && period === opt.value ? (
                 <span className="flex items-center gap-1">
@@ -295,8 +295,8 @@ export default function AdminDashboard() {
                 <AreaChart data={stats?.salesData || []}>
                   <defs>
                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#FF4D8D" stopOpacity={0.1} />
-                      <stop offset="95%" stopColor="#FF4D8D" stopOpacity={0}   />
+                      <stop offset="5%" stopColor="#FF4D8D" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#FF4D8D" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f5" />
@@ -376,8 +376,7 @@ export default function AdminDashboard() {
                 <div key={`${activity.type}-${activity.id}`}
                   className="flex items-center justify-between p-3 md:p-4 bg-zinc-50 rounded-xl md:rounded-2xl border border-zinc-100 hover:border-pink-200 hover:bg-pink-50/30 transition-all cursor-pointer gap-2">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className={`w-8 h-8 md:w-10 md:h-10 shrink-0 rounded-full bg-white flex items-center justify-center text-[10px] font-bold border border-zinc-200 uppercase ${
-                      activity.type === "order" ? "text-zinc-400" : "text-brand-gold"}`}>
+                    <div className={`w-8 h-8 md:w-10 md:h-10 shrink-0 rounded-full bg-white flex items-center justify-center text-[10px] font-bold border border-zinc-200 uppercase ${activity.type === "order" ? "text-zinc-400" : "text-brand-gold"}`}>
                       {activity.initials}
                     </div>
                     <div className="space-y-0.5 min-w-0">
@@ -390,8 +389,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-xs font-black text-zinc-900">{activity.subtitle.split(" - ")[0]}</p>
-                    <span className={`text-[9px] font-bold uppercase tracking-tighter ${
-                      activity.type === "order" ? "text-[#FF4D8D]" : "text-emerald-500"}`}>
+                    <span className={`text-[9px] font-bold uppercase tracking-tighter ${activity.type === "order" ? "text-[#FF4D8D]" : "text-emerald-500"}`}>
                       {activity.type === "order" ? activity.subtitle.split(" - ")[1] : "MEMBER"}
                     </span>
                   </div>
