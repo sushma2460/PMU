@@ -41,22 +41,43 @@ export default function AdminProductsPage() {
   const canEdit = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.products?.edit;
   const canDelete = profile?.isSuperAdmin || profile?.role === 'admin' || profile?.permissions?.products?.delete;
 
-  const fetchProducts = async () => {
-    setIsLoading(true);
-    try {
-      const result = await getProductsAction();
-      if (!result.success) throw new Error(result.error);
-      setProducts(result.products as Product[]);
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Failed to load products.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchProducts();
+    setIsLoading(true);
+    
+    let unsubscribe: () => void;
+    
+    const setupListener = async () => {
+      try {
+        const { collection, onSnapshot, query, orderBy } = await import("firebase/firestore");
+        const { db } = await import("@/lib/firebase");
+        
+        const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+        
+        unsubscribe = onSnapshot(q, (snapshot) => {
+          const productsData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as Product[];
+          
+          setProducts(productsData);
+          setIsLoading(false);
+        }, (error) => {
+          console.error("Firestore listener error:", error);
+          toast.error("Failed to sync catalog in real-time.");
+          setIsLoading(false);
+        });
+      } catch (err: any) {
+        console.error(err);
+        toast.error("Real-time sync setup failed.");
+        setIsLoading(false);
+      }
+    };
+
+    setupListener();
+    
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   // Debounce search term
@@ -166,20 +187,21 @@ export default function AdminProductsPage() {
                 <TableHead className="text-[10px] uppercase tracking-widest font-bold">Value</TableHead>
                 <TableHead className="text-[10px] uppercase tracking-widest font-bold">Supply</TableHead>
                 <TableHead className="hidden sm:table-cell text-[10px] uppercase tracking-widest font-bold">Status</TableHead>
+                <TableHead className="text-[10px] uppercase tracking-widest font-bold">Views</TableHead>
                 <TableHead className="text-right text-[10px] uppercase tracking-widest font-bold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-20">
+                  <TableCell colSpan={8} className="text-center py-20">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto text-brand-gold/40" />
                     <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-zinc-400 mt-4">Syncing Inventory...</p>
                   </TableCell>
                 </TableRow>
               ) : filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-24 text-zinc-400">
+                  <TableCell colSpan={8} className="text-center py-24 text-zinc-400">
                     <PackageOpen className="h-12 w-12 mx-auto mb-4 opacity-20" />
                     <p className="text-xs font-bold uppercase tracking-widest">No products found.</p>
                     <p className="text-[10px] mt-2 italic">Try a different search or add a product.</p>
@@ -236,6 +258,11 @@ export default function AdminProductsPage() {
                           {product.isActive !== false ? "Active" : "Inactive"}
                         </span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-[11px] font-bold text-zinc-500">
+                        {product.views || 0}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

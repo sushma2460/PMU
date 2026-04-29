@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Product } from "@/lib/types";
 import { trackProductView, trackAddToCart } from "@/lib/analytics";
 import { useAuth } from "@/context/AuthContext";
+import { ProductReviews } from "./ProductReviews";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -37,15 +38,22 @@ export function ProductDetailClient({ product, recommended }: ProductDetailClien
   const setIsOpen = useCartStore((state) => state.setIsOpen);
   const { user } = useAuth();
 
-  // Fire product_view once on mount
+  // Fire product_view once per session on mount
   useEffect(() => {
-    trackProductView(user?.uid ?? "guest", {
-      id: product.id,
-      name: product.name,
-      category: product.category,
-      price: product.salePrice && product.salePrice > 0 ? product.salePrice : product.price,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!product.id) return;
+    
+    const sessionKey = `viewed_${product.id}`;
+    const hasViewedInSession = sessionStorage.getItem(sessionKey);
+    
+    if (!hasViewedInSession) {
+      trackProductView(user?.uid ?? "guest", {
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        price: product.salePrice && product.salePrice > 0 ? product.salePrice : product.price,
+      });
+      sessionStorage.setItem(sessionKey, "true");
+    }
   }, [product.id]);
 
 
@@ -301,6 +309,11 @@ export function ProductDetailClient({ product, recommended }: ProductDetailClien
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="container mx-auto px-4 py-16 border-t border-zinc-100">
+        <ProductReviews product={product} />
       </div>
 
       {/* Recommended Rail */}

@@ -16,12 +16,15 @@ import {
   X,
   Image as ImageIcon,
   Grid3X3,
-  BarChart2
+  BarChart2,
+  MessageSquare,
+  Bell
 } from "lucide-react";
 import { AdminGuard } from "@/components/auth/AdminGuard";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { ReviewNotification } from "@/components/admin/ReviewNotification";
 
 export default function AdminLayout({
   children,
@@ -58,6 +61,7 @@ export default function AdminLayout({
     { href: "/admin/orders", icon: <ShoppingCart size={20} />, label: "Orders", active: pathname.startsWith("/admin/orders") },
     { href: "/admin/coupons", icon: <Ticket size={20} />, label: "Coupons", active: pathname === "/admin/coupons" },
     { href: "/admin/users", icon: <Users size={20} />, label: "Users", active: pathname === "/admin/users" },
+    { href: "/admin/reviews", icon: <MessageSquare size={20} />, label: "Reviews", active: pathname.startsWith("/admin/reviews") },
     { href: "/admin/design", icon: <LayoutTemplate size={20} />, label: "Design", active: pathname === "/admin/design" },
   ].filter(item => {
     // Super Admins see everything
@@ -82,7 +86,7 @@ export default function AdminLayout({
       <div className="flex h-screen overflow-hidden bg-zinc-50 font-sans">
         
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex w-64 border-r bg-white border-zinc-200 flex-col shrink-0">
+        <aside className="hidden lg:flex w-64 border-r bg-white border-zinc-200 flex-col shrink-0 no-scrollbar">
           <div className="h-16 flex items-center px-6 border-b border-zinc-200">
             <Link href="/admin" className="font-bold text-xl tracking-tight uppercase">
               PMU
@@ -90,7 +94,7 @@ export default function AdminLayout({
             </Link>
           </div>
           
-          <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+          <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 no-scrollbar">
             {navItems.map((item) => (
               <NavItem key={item.href} {...item} />
             ))}
@@ -114,7 +118,7 @@ export default function AdminLayout({
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <aside 
-              className="w-72 h-full bg-white flex flex-col animate-in slide-in-from-left duration-300"
+              className="w-72 h-full bg-white flex flex-col animate-in slide-in-from-left duration-300 no-scrollbar"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="h-16 flex items-center justify-between px-6 border-b border-zinc-200">
@@ -126,7 +130,7 @@ export default function AdminLayout({
                 </button>
               </div>
               
-              <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-2">
+              <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-2 no-scrollbar">
                 {navItems.map((item) => (
                   <NavItem key={item.href} {...item} onClick={() => setIsMobileMenuOpen(false)} />
                 ))}
@@ -161,6 +165,7 @@ export default function AdminLayout({
             </div>
             
             <div className="flex items-center gap-3">
+              <ReviewNotification />
               <div className="hidden md:flex flex-col items-end mr-2">
                 <span className="text-[10px] font-bold text-zinc-900 leading-none">{adminName}</span>
                 <span className="text-[8px] font-bold text-brand-gold uppercase tracking-widest mt-1">

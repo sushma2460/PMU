@@ -45,6 +45,7 @@ export interface Product {
   variants?: ProductVariant[];
   createdAt: number;
   updatedAt: number;
+  views?: number;
 }
 
 export interface CartItem {
@@ -209,4 +210,23 @@ export interface SocialLinks {
   facebook?: string;
   whatsapp?: string;
   youtube?: string;
+}
+
+export interface Review {
+  id?: string;
+  productId: string;
+  productName: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  rating: number;
+  comment: string;
+  status: 'pending' | 'approved' | 'declined';
+  isAdminPost: boolean;
+  isVerifiedPurchase?: boolean;
+  adminReply?: string;
+  adminReplyAt?: number;
+  helpfulCount?: number;
+  imageUrls?: string[];
+  createdAt: number;
 }

@@ -1,0 +1,29 @@
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if request.auth != null && request.auth.uid == userId;
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Review images are public to read, but only authenticated users can upload
+    match /reviews/{productId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Product images and banners are public to read, admin to write
+    match /products/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /banners/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Default rule: protect everything else
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

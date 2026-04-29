@@ -17,7 +17,8 @@ import {
   CheckCircle2, 
   Truck,
   ShieldCheck,
-  Receipt
+  Receipt,
+  MessageSquare
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -263,6 +264,12 @@ export default function OrderDetailsPage() {
                           <p className="text-[10px] font-bold text-brand-gold uppercase tracking-widest">{product?.category || "Professional Grade"}</p>
                           <h3 className="text-sm font-bold text-zinc-900 group-hover:text-brand-gold transition-colors">{item.productName}</h3>
                           <p className="text-xs text-zinc-400 font-light italic">Quantity: {item.quantity}</p>
+                          
+                          <Link href={`/products/${item.productId}#reviews`}>
+                            <Button variant="ghost" className="h-6 px-0 text-[8px] font-bold uppercase tracking-widest text-zinc-400 hover:text-brand-rose gap-1.5">
+                              <MessageSquare size={10} /> Leave a Review
+                            </Button>
+                          </Link>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-black text-zinc-900">₹{(item.priceAtPurchase * item.quantity).toFixed(2)}</p>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as admin from "firebase-admin";
 import { adminDb } from "@/lib/firebase-admin";
 
 // Server-side event tracking — uses Admin SDK, bypasses Firestore client rules
@@ -18,6 +19,17 @@ export async function POST(req: Request) {
       timestamp: timestamp ?? Date.now(),
       ...properties,
     });
+
+    // Automatically increment product views if it's a product_view event
+    if (event === "product_view" && properties.productId) {
+      try {
+        await adminDb.collection("products").doc(properties.productId).update({
+          views: admin.firestore.FieldValue.increment(1)
+        });
+      } catch (e) {
+        console.error("[track-event] failed to increment views:", e);
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err: any) {
