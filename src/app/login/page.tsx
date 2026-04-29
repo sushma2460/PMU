@@ -207,10 +207,10 @@ function LoginForm() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-zinc-200" />
+                <span className="w-full border-t border-[#FF4D6D]/20" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-zinc-500 font-medium">Or continue with</span>
+                <span className="bg-white px-2 text-[#FF4D6D] font-bold tracking-widest text-[10px]">Or continue with</span>
               </div>
             </div>
 
@@ -219,7 +219,7 @@ function LoginForm() {
               type="button"
               disabled={isLoading}
               onClick={handleGoogleLogin}
-              className="w-full h-12 border-zinc-200 hover:bg-zinc-50 transition-all font-semibold gap-3"
+              className="w-full h-12 border-[#FF4D6D] hover:bg-[#FF4D6D]/5 text-[#FF4D6D] transition-all font-bold tracking-widest uppercase text-xs gap-3"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -233,7 +233,7 @@ function LoginForm() {
           <CardFooter className="flex flex-col gap-4">
             <div className="text-center text-sm text-zinc-600">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-brand-gold hover:underline font-bold">
+              <Link href="/register" className="text-[#FF4D6D] hover:underline font-black uppercase tracking-widest text-xs">
                 Create Account
               </Link>
             </div>

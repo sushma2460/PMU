@@ -82,16 +82,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 if (user.uid !== BOOTSTRAP_ADMIN_UID) setIsAdmin(false);
               }
             }
+            setLoading(false);
           }, (error) => {
             console.error("Profile Listener Error:", error);
             setProfile(null);
             if (user.uid !== BOOTSTRAP_ADMIN_UID) setIsAdmin(false);
+            setLoading(false);
           });
 
         } catch (error: any) {
           console.error("Auth Setup Error:", error);
           setProfile(null);
           if (user.uid !== BOOTSTRAP_ADMIN_UID) setIsAdmin(false);
+          setLoading(false);
         }
       } else {
         if (unsubscribeProfile) unsubscribeProfile();
@@ -102,9 +105,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const cartStore = useCartStore.getState();
         cartStore.setUserId(null);
         cartStore.setItems([]);
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     return () => {
