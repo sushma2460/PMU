@@ -43,6 +43,7 @@ const STATUS_CONFIG: Record<string, { color: string; icon: any }> = {
   "shipped":    { color: "bg-purple-50 text-purple-600 border-purple-100", icon: <Truck className="w-3 h-3" /> },
   "delivered":  { color: "bg-green-50 text-green-600 border-green-100",  icon: <CheckCircle2 className="w-3 h-3" /> },
   "cancelled":  { color: "bg-red-50 text-red-600 border-red-100",        icon: <RotateCcw className="w-3 h-3" /> },
+  "refunded":   { color: "bg-orange-50 text-orange-600 border-orange-100", icon: <RotateCcw className="w-3 h-3" /> },
 };
 
 function RotateCcw(props: any) {
@@ -97,7 +98,7 @@ export default function ProfilePage() {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
         
         // Only show successful orders
-        const successfulStatuses = ['paid', 'processing', 'shipped', 'delivered'];
+        const successfulStatuses = ['paid', 'processing', 'shipped', 'delivered', 'refunded'];
         const filteredData = data.filter(order => successfulStatuses.includes(order.status));
         setOrders(filteredData);
       } catch (err) {

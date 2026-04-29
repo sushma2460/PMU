@@ -138,7 +138,7 @@ export interface Order {
   couponCode?: string;
   couponDiscountAmount?: number;
   referralCodeUsed?: string;
-  status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
   history?: OrderHistoryEvent[];
   shippingAddress: {
     firstName: string;

@@ -45,6 +45,7 @@ const STATUS_CONFIG: Record<string, { label: string, color: string, icon: React.
   "shipped": { label: "Shipped", color: "bg-brand-gold/10 text-brand-gold border-brand-gold/20", icon: <Truck className="w-3 h-3" /> },
   "delivered": { label: "Delivered", color: "bg-emerald-50 text-emerald-600 border-emerald-100", icon: <Check className="w-3 h-3" /> },
   "cancelled": { label: "Cancelled", color: "bg-red-50 text-red-600 border-red-100", icon: <AlertCircle className="w-3 h-3" /> },
+  "refunded": { label: "Refunded", color: "bg-orange-50 text-orange-600 border-orange-100", icon: <RotateCcw className="w-3 h-3" /> },
 };
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {

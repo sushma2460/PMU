@@ -59,6 +59,7 @@ const STATUS_CONFIG: Record<string, { color: string; icon: React.ReactNode }> = 
   "shipped":    { color: "bg-purple-50 text-purple-600 border-purple-100", icon: <Truck className="w-3 h-3" /> },
   "delivered":  { color: "bg-green-50 text-green-600 border-green-100",  icon: <CheckCircle2 className="w-3 h-3" /> },
   "cancelled":  { color: "bg-red-50 text-red-600 border-red-100",        icon: <XCircle className="w-3 h-3" /> },
+  "refunded":   { color: "bg-orange-50 text-orange-600 border-orange-100", icon: <RotateCcw className="w-3 h-3" /> },
 };
 
 const VIEW_TABS = [
@@ -67,6 +68,7 @@ const VIEW_TABS = [
   { id: "pending", label: "Pending" },
   { id: "shipped", label: "Shipped" },
   { id: "delivered", label: "Delivered" },
+  { id: "refunded", label: "Refunded" },
 ];
 
 export default function AdminOrdersPage() {

@@ -33,6 +33,7 @@ const STATUS_CONFIG: Record<string, { color: string; icon: any; label: string }>
   "shipped":    { color: "bg-purple-50 text-purple-600 border-purple-100", icon: <Truck className="w-4 h-4" />, label: "In Transit" },
   "delivered":  { color: "bg-green-50 text-green-600 border-green-100",  icon: <CheckCircle2 className="w-4 h-4" />, label: "Delivered" },
   "cancelled":  { color: "bg-red-50 text-red-600 border-red-100",        icon: <Package className="w-4 h-4" />, label: "Cancelled" },
+  "refunded":   { color: "bg-orange-50 text-orange-600 border-orange-100", icon: <Clock className="w-4 h-4" />, label: "Refund Processed" },
 };
 
 export default function OrderDetailsPage() {
