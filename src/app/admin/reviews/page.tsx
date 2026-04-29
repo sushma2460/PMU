@@ -378,23 +378,25 @@ export default function AdminReviewsPage() {
                           <X size={14} />
                         </Button>
                       )}
-                      <Dialog open={isReplyDialogOpen && selectedReview === review.id} onOpenChange={(open) => {
-                        setIsReplyDialogOpen(open);
-                        if (!open) setSelectedReview(null);
-                      }}>
-                        <DialogTrigger asChild>
-                          <Button 
-                            variant="ghost" size="icon"
-                            onClick={() => {
-                              setSelectedReview(review.id!);
-                              setReplyText(review.adminReply || "");
-                              setIsReplyDialogOpen(true);
-                            }}
-                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-blue-600 hover:bg-blue-50"
+                        <Dialog open={isReplyDialogOpen && selectedReview === review.id} onOpenChange={(open) => {
+                          setIsReplyDialogOpen(open);
+                          if (!open) setSelectedReview(null);
+                        }}>
+                          <DialogTrigger 
+                            render={
+                              <Button 
+                                variant="ghost" size="icon"
+                                onClick={() => {
+                                  setSelectedReview(review.id!);
+                                  setReplyText(review.adminReply || "");
+                                  setIsReplyDialogOpen(true);
+                                }}
+                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-blue-600 hover:bg-blue-50"
+                              />
+                            }
                           >
                             <Reply size={14} />
-                          </Button>
-                        </DialogTrigger>
+                          </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
                             <DialogTitle>Reply to {review.userName}</DialogTitle>
