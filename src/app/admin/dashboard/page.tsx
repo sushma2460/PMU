@@ -164,7 +164,7 @@ export default function AdminDashboard() {
   if (isLoading) {
     return (
       <div className="py-40 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-gold mx-auto" />
+        <div className="animate-spin rounded-none h-12 w-12 border-b-2 border-brand-gold mx-auto" />
         <p className="mt-4 text-zinc-400 font-bold uppercase tracking-widest text-[10px]">Syncing live analytics...</p>
       </div>
     );
@@ -190,19 +190,19 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-2 flex-wrap">
           {!hasProducts && (
             <Button onClick={handleSeed} disabled={isInitializing} variant="outline"
-              className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 rounded-full text-[10px] font-bold tracking-widest uppercase h-8 px-3">
+              className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 rounded-none text-[10px] font-bold tracking-widest uppercase h-8 px-3">
               {isInitializing ? "Seeding..." : "Bootstrap"}
             </Button>
           )}
           {/* Export — icon only on mobile, text on desktop */}
           <Button onClick={handleExportCSV} variant="outline" size="sm"
-            className="rounded-full text-[10px] font-bold tracking-widest uppercase h-8 px-3 gap-1.5">
+            className="rounded-none text-[10px] font-bold tracking-widest uppercase h-8 px-3 gap-1.5">
             <Download className="w-3 h-3" />
             <span className="hidden sm:inline">Export CSV</span>
           </Button>
           <Link href="/admin/orders">
             <Button size="sm"
-              className="bg-zinc-900 hover:bg-black text-white rounded-full text-[10px] font-bold tracking-widest uppercase h-8 px-4 gap-1.5">
+              className="bg-zinc-900 hover:bg-black text-white rounded-none text-[10px] font-bold tracking-widest uppercase h-8 px-4 gap-1.5">
               <Eye className="w-3 h-3" />
               <span className="hidden sm:inline">Live View</span>
             </Button>
@@ -219,14 +219,14 @@ export default function AdminDashboard() {
               key={opt.value}
               onClick={() => handlePeriodChange(opt.value)}
               disabled={isPeriodLoading}
-              className={`shrink-0 px-3 md:px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${period === opt.value
+              className={`shrink-0 px-3 md:px-4 py-1.5 rounded-none text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${period === opt.value
                 ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
                 : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400 hover:text-zinc-800"
                 } ${isPeriodLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {isPeriodLoading && period === opt.value ? (
                 <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full border border-white border-t-transparent animate-spin inline-block" />
+                  <span className="w-2 h-2 rounded-none border border-white border-t-transparent animate-spin inline-block" />
                   <span className="hidden sm:inline">{opt.label}</span>
                   <span className="sm:hidden">{opt.short}</span>
                 </span>
@@ -251,8 +251,8 @@ export default function AdminDashboard() {
       <div className={`relative transition-opacity duration-300 ${isPeriodLoading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
         {isPeriodLoading && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-full shadow-md border border-zinc-100">
-              <div className="w-3 h-3 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+            <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-none shadow-md border border-zinc-100">
+              <div className="w-3 h-3 rounded-none border-2 border-zinc-900 border-t-transparent animate-spin" />
               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Updating...</span>
             </div>
           </div>
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
 
       {/* ── Main Performance Chart: Full Width ── */}
       <div className="mt-6">
-        <Card className="border-zinc-200 shadow-sm rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white">
+        <Card className="border-zinc-200 shadow-sm rounded-none overflow-hidden bg-white">
           <CardHeader className="p-4 md:p-6 pb-2">
             <div className="flex justify-between items-center">
               <div>
@@ -305,7 +305,7 @@ export default function AdminDashboard() {
                     tick={{ fontSize: 8, fill: "#999", fontWeight: 600 }}
                     tickFormatter={(v) => `₹${v}`} width={45} />
                   <Tooltip
-                    contentStyle={{ borderRadius: "16px", border: "none", boxShadow: "0 10px 30px rgba(0,0,0,0.1)", padding: "10px 14px" }}
+                    contentStyle={{ borderRadius: "0px", border: "none", boxShadow: "0 10px 30px rgba(0,0,0,0.1)", padding: "10px 14px" }}
                     itemStyle={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase", color: "#FF4D8D" }}
                     labelStyle={{ fontSize: "10px", fontWeight: "bold", marginBottom: "4px", color: "#333" }}
                   />
@@ -322,7 +322,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         
         {/* Low Stock Alerts: Now Horizontal-Ready */}
-        <Card className="border-red-50 bg-red-50/10 rounded-2xl md:rounded-[2.5rem] overflow-hidden flex flex-col">
+        <Card className="border-red-50 bg-red-50/10 rounded-none overflow-hidden flex flex-col">
           <CardHeader className="p-6 md:p-8 pb-3 md:pb-4">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-500" />
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="p-6 md:p-8 pt-0 space-y-3 flex-1">
             {paginatedStockAlerts.length > 0 ? paginatedStockAlerts.map((item: any) => (
-              <div key={item.sku} className="flex items-center justify-between p-4 bg-white border border-red-50 rounded-2xl shadow-sm transition-all hover:border-red-200">
+              <div key={item.sku} className="flex items-center justify-between p-4 bg-white border border-red-50 rounded-none shadow-sm transition-all hover:border-red-200">
                 <div className="space-y-0.5 min-w-0 flex-1 mr-4">
                   <p className="text-sm font-bold text-zinc-900 truncate">{item.name}</p>
                   <p className="text-[10px] text-zinc-400 font-mono uppercase tracking-widest truncate">{item.sku}</p>
@@ -346,8 +346,8 @@ export default function AdminDashboard() {
                 </div>
               </div>
             )) : (
-              <div className="py-12 text-center bg-white border border-dashed border-zinc-200 rounded-2xl flex flex-col items-center justify-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+              <div className="py-12 text-center bg-white border border-dashed border-zinc-200 rounded-none flex flex-col items-center justify-center space-y-2">
+                <div className="w-10 h-10 rounded-none bg-green-50 flex items-center justify-center">
                   <Eye className="w-5 h-5 text-green-400" />
                 </div>
                 <p className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest">Inventory Healthy</p>
@@ -370,7 +370,7 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Recent Activity: Expanded View */}
-        <Card className="rounded-2xl md:rounded-[2.5rem] border-zinc-100 shadow-sm overflow-hidden bg-white flex flex-col">
+        <Card className="rounded-none border-zinc-100 shadow-sm overflow-hidden bg-white flex flex-col">
           <CardHeader className="p-6 md:p-8 pb-3 md:pb-4">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-brand-gold" />
@@ -380,9 +380,9 @@ export default function AdminDashboard() {
           <CardContent className="p-6 md:p-8 pt-0 space-y-3 flex-1">
             {paginatedRecentActivity.length > 0 ? paginatedRecentActivity.map((activity: any) => (
               <div key={`${activity.type}-${activity.id}`}
-                className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-100 hover:border-brand-gold/30 hover:bg-brand-cream/10 transition-all cursor-pointer gap-4">
+                className="flex items-center justify-between p-4 bg-zinc-50 rounded-none border border-zinc-100 hover:border-brand-gold/30 hover:bg-brand-cream/10 transition-all cursor-pointer gap-4">
                 <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <div className={`w-10 h-10 md:w-12 md:h-12 shrink-0 rounded-full bg-white shadow-sm flex items-center justify-center text-xs font-black border border-zinc-100 uppercase ${activity.type === "order" ? "text-zinc-400" : "text-brand-gold"}`}>
+                  <div className={`w-10 h-10 md:w-12 md:h-12 shrink-0 rounded-none bg-white shadow-sm flex items-center justify-center text-xs font-black border border-zinc-100 uppercase ${activity.type === "order" ? "text-zinc-400" : "text-brand-gold"}`}>
                     {activity.initials}
                   </div>
                   <div className="space-y-1 min-w-0">
@@ -395,7 +395,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-right shrink-0 flex flex-col items-end gap-1">
                   <p className="text-sm font-black text-zinc-900">{activity.subtitle.split(" - ")[0]}</p>
-                  <div className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest ${activity.type === "order" ? "bg-pink-50 text-[#FF4D8D]" : "bg-emerald-50 text-emerald-600"}`}>
+                  <div className={`px-2 py-0.5 rounded-none text-[9px] font-bold uppercase tracking-widest ${activity.type === "order" ? "bg-pink-50 text-[#FF4D8D]" : "bg-emerald-50 text-emerald-600"}`}>
                     {activity.type === "order" ? activity.subtitle.split(" - ")[1] : "NEW USER"}
                   </div>
                 </div>
@@ -431,12 +431,12 @@ export default function AdminDashboard() {
 
 function KPICard({ title, value, trend, trendUp, icon, description }: any) {
   return (
-    <Card className="border-none shadow-sm rounded-2xl md:rounded-[2rem] bg-zinc-50/50 hover:bg-zinc-50 transition-colors">
+    <Card className="border-none shadow-sm rounded-none bg-zinc-50/50 hover:bg-zinc-50 transition-colors">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-6 pb-1 md:pb-2">
         <CardTitle className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-zinc-400 leading-tight">
           {title}
         </CardTitle>
-        <div className="w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-full bg-white flex items-center justify-center border border-zinc-100 shadow-sm text-brand-gold">
+        <div className="w-7 h-7 md:w-8 md:h-8 shrink-0 rounded-none bg-white flex items-center justify-center border border-zinc-100 shadow-sm text-brand-gold">
           {icon}
         </div>
       </CardHeader>

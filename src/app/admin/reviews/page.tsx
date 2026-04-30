@@ -178,12 +178,12 @@ export default function AdminReviewsPage() {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <div className="flex bg-zinc-100 p-1 rounded-xl">
+          <div className="flex bg-zinc-100 p-1 rounded-none">
             {(["all", "pending", "approved", "declined"] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setFilter(s)}
-                className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+                className={`px-4 py-1.5 rounded-none text-[10px] font-bold uppercase tracking-widest transition-all ${
                   filter === s 
                     ? "bg-white text-zinc-900 shadow-sm" 
                     : "text-zinc-400 hover:text-zinc-600"
@@ -195,10 +195,10 @@ export default function AdminReviewsPage() {
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger className="bg-[#FF4D6D] hover:opacity-90 text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-8 h-10 inline-flex items-center justify-center">
+            <DialogTrigger className="bg-[#FF4D6D] hover:opacity-90 text-white rounded-none text-[10px] font-bold tracking-widest uppercase px-8 h-10 inline-flex items-center justify-center">
               <Plus className="h-3.5 w-3.5 mr-2" /> Add Manual Review
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] rounded-[2rem]">
+            <DialogContent className="sm:max-w-[500px] rounded-none">
               <DialogHeader>
                 <DialogTitle className="text-xl font-heading italic">Add Manual Review</DialogTitle>
                 <DialogDescription className="text-xs text-zinc-500">
@@ -211,7 +211,7 @@ export default function AdminReviewsPage() {
                   <select 
                     value={selectedProductId}
                     onChange={(e) => setSelectedProductId(e.target.value)}
-                    className="w-full h-12 px-4 rounded-xl border border-zinc-100 bg-zinc-50 text-sm focus:ring-2 focus:ring-[#FF4D6D]/10 outline-none"
+                    className="w-full h-12 px-4 rounded-none border border-zinc-100 bg-zinc-50 text-sm focus:ring-2 focus:ring-[#FF4D6D]/10 outline-none"
                     required
                   >
                     <option value="">Select a product...</option>
@@ -227,7 +227,7 @@ export default function AdminReviewsPage() {
                     placeholder="e.g. Sarah J. (Master Artist)" 
                     value={manualUserName}
                     onChange={(e) => setManualUserName(e.target.value)}
-                    className="h-12 rounded-xl border-zinc-100"
+                    className="h-12 rounded-none border-zinc-100"
                     required
                   />
                 </div>
@@ -258,7 +258,7 @@ export default function AdminReviewsPage() {
                     placeholder="Enter the artist's comment..." 
                     value={manualComment}
                     onChange={(e) => setManualComment(e.target.value)}
-                    className="min-h-[100px] rounded-xl border-zinc-100 italic font-light"
+                    className="min-h-[100px] rounded-none border-zinc-100 italic font-light"
                     required
                   />
                 </div>
@@ -266,7 +266,7 @@ export default function AdminReviewsPage() {
                 <Button 
                   type="submit" 
                   disabled={isActionLoading === "manual"}
-                  className="w-full h-12 bg-zinc-900 text-white rounded-xl font-bold tracking-widest text-[10px] uppercase hover:bg-[#FF4D6D] transition-all"
+                  className="w-full h-12 bg-zinc-900 text-white rounded-none font-bold tracking-widest text-[10px] uppercase hover:bg-[#FF4D6D] transition-all"
                 >
                   {isActionLoading === "manual" ? "Posting..." : "Post Official Review"}
                 </Button>
@@ -276,7 +276,7 @@ export default function AdminReviewsPage() {
         </div>
       </div>
 
-      <div className="border rounded-[2rem] bg-white overflow-hidden shadow-sm">
+      <div className="border rounded-none bg-white overflow-hidden shadow-sm">
         <Table>
           <TableHeader className="bg-zinc-50/50">
             <TableRow className="border-zinc-100 hover:bg-transparent">
@@ -327,7 +327,7 @@ export default function AdminReviewsPage() {
                       {review.imageUrls && review.imageUrls.length > 0 && (
                         <div className="flex flex-col gap-1 shrink-0 mt-1">
                           {review.imageUrls.map((url, i) => (
-                            <div key={i} className="w-8 h-8 rounded-lg overflow-hidden border border-zinc-100 shadow-sm">
+                            <div key={i} className="w-8 h-8 rounded-none overflow-hidden border border-zinc-100 shadow-sm">
                               <img src={url} alt="Review" className="w-full h-full object-cover" />
                             </div>
                           ))}
@@ -348,7 +348,7 @@ export default function AdminReviewsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={`rounded-full text-[8px] uppercase tracking-widest font-black px-3 ${
+                    <Badge variant="outline" className={`rounded-none px-3 py-1 font-bold text-[8px] uppercase tracking-widest font-black px-3 ${
                       review.status === "approved" ? "border-green-100 text-green-600 bg-green-50" :
                       review.status === "declined" ? "border-red-100 text-red-600 bg-red-50" :
                       "border-orange-100 text-orange-600 bg-orange-50"
@@ -363,7 +363,7 @@ export default function AdminReviewsPage() {
                           variant="ghost" size="icon"
                           onClick={() => handleStatusUpdate(review.id!, "approved")}
                           disabled={isActionLoading === review.id}
-                          className="h-8 w-8 rounded-full text-zinc-400 hover:text-green-600 hover:bg-green-50"
+                          className="h-8 w-8 rounded-none text-zinc-400 hover:text-green-600 hover:bg-green-50"
                         >
                           <Check size={14} />
                         </Button>
@@ -373,7 +373,7 @@ export default function AdminReviewsPage() {
                           variant="ghost" size="icon"
                           onClick={() => handleStatusUpdate(review.id!, "declined")}
                           disabled={isActionLoading === review.id}
-                          className="h-8 w-8 rounded-full text-zinc-400 hover:text-orange-600 hover:bg-orange-50"
+                          className="h-8 w-8 rounded-none text-zinc-400 hover:text-orange-600 hover:bg-orange-50"
                         >
                           <X size={14} />
                         </Button>
@@ -391,7 +391,7 @@ export default function AdminReviewsPage() {
                                   setReplyText(review.adminReply || "");
                                   setIsReplyDialogOpen(true);
                                 }}
-                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-blue-600 hover:bg-blue-50"
+                                className="h-8 w-8 rounded-none text-zinc-400 hover:text-blue-600 hover:bg-blue-50"
                               />
                             }
                           >
@@ -402,7 +402,7 @@ export default function AdminReviewsPage() {
                             <DialogTitle>Reply to {review.userName}</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4 py-4">
-                            <p className="text-xs text-zinc-500 italic bg-zinc-50 p-3 rounded-lg">"{review.comment}"</p>
+                            <p className="text-xs text-zinc-500 italic bg-zinc-50 p-3 rounded-none">"{review.comment}"</p>
                             <Textarea 
                               value={replyText}
                               onChange={(e) => setReplyText(e.target.value)}
@@ -413,7 +413,7 @@ export default function AdminReviewsPage() {
                             <Button 
                               onClick={handleReply} 
                               disabled={isReplying}
-                              className="w-full h-12 bg-[#FF4D6D] hover:opacity-90 text-white rounded-xl font-bold tracking-[0.2em] text-[10px] uppercase shadow-lg shadow-pink-500/10"
+                              className="w-full h-12 bg-[#FF4D6D] hover:opacity-90 text-white rounded-none font-bold tracking-[0.2em] text-[10px] uppercase shadow-lg shadow-pink-500/10"
                             >
                               {isReplying ? "Posting..." : <span className="flex items-center gap-2">Send Official Reply <Send size={12} /></span>}
                             </Button>
@@ -424,7 +424,7 @@ export default function AdminReviewsPage() {
                         variant="ghost" size="icon"
                         onClick={() => handleDelete(review.id!)}
                         disabled={isActionLoading === review.id}
-                        className="h-8 w-8 rounded-full text-zinc-400 hover:text-red-600 hover:bg-red-50"
+                        className="h-8 w-8 rounded-none text-zinc-400 hover:text-red-600 hover:bg-red-50"
                       >
                         <Trash2 size={14} />
                       </Button>

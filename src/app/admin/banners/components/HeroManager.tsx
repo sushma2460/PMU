@@ -99,7 +99,7 @@ export function HeroManager() {
 
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Editor Form */}
-        <div className="space-y-6 bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm">
+        <div className="space-y-6 bg-white p-8 rounded-none border border-zinc-100 shadow-sm">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-zinc-400">Main Title</label>
@@ -172,7 +172,7 @@ export function HeroManager() {
             <label className="text-xs font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
               <ImageIcon className="w-3 h-3" /> Background Image
             </label>
-            <div className="relative h-20 border-2 border-dashed border-zinc-100 rounded-2xl flex flex-col items-center justify-center hover:bg-zinc-50 transition-colors cursor-pointer group">
+            <div className="relative h-20 border-2 border-dashed border-zinc-100 rounded-none flex flex-col items-center justify-center hover:bg-zinc-50 transition-colors cursor-pointer group">
               {isUploading ? (
                 <div className="flex flex-col items-center gap-1">
                   <Loader2 className="w-4 h-4 animate-spin text-brand-gold" />
@@ -187,7 +187,7 @@ export function HeroManager() {
         </div>
 
         {/* Live Preview Card */}
-        <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border border-zinc-200 bg-brand-cream min-h-[500px]">
+        <div className="relative rounded-none overflow-hidden shadow-2xl border border-zinc-200 bg-brand-cream min-h-[500px]">
            {/* Background Mockup */}
            <div className="absolute inset-0 z-0">
               <img 

@@ -218,7 +218,7 @@ export default function AdminUsersPage() {
           <Button 
             variant="outline" 
             size="sm" 
-            className="rounded-full text-[10px] font-bold tracking-widest uppercase gap-2 px-6"
+            className="rounded-none text-[10px] font-bold tracking-widest uppercase gap-2 px-6"
             onClick={exportToCSV}
             disabled={filteredUsers.length === 0}
           >
@@ -228,12 +228,12 @@ export default function AdminUsersPage() {
           <Dialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
             <DialogTrigger 
               render={
-                <Button size="sm" className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-8 flex gap-2">
+                <Button size="sm" className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-none text-[10px] font-bold tracking-widest uppercase px-8 flex gap-2">
                   <UserPlus className="w-3 h-3" /> Register User
                 </Button>
               }
             />
-            <DialogContent className="sm:max-w-[450px] rounded-[2.5rem] p-8 border-none shadow-2xl">
+            <DialogContent className="sm:max-w-[450px] rounded-none p-8 border-none shadow-2xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-heading">New User Account</DialogTitle>
                 <DialogDescription className="text-xs font-bold tracking-widest uppercase text-zinc-400">Initialize a new user profile in the system.</DialogDescription>
@@ -243,7 +243,7 @@ export default function AdminUsersPage() {
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-500">Professional Name</Label>
                   <Input 
                     required
-                    className="h-12 rounded-2xl bg-zinc-50 border-zinc-100" 
+                    className="h-12 rounded-none bg-zinc-50 border-zinc-100" 
                     placeholder="e.g. Jane Doe"
                     value={regForm.displayName}
                     onChange={(e) => setRegForm({...regForm, displayName: e.target.value})}
@@ -254,7 +254,7 @@ export default function AdminUsersPage() {
                   <Input 
                     required
                     type="email"
-                    className="h-12 rounded-2xl bg-zinc-50 border-zinc-100" 
+                    className="h-12 rounded-none bg-zinc-50 border-zinc-100" 
                     placeholder="user@example.com"
                     value={regForm.email}
                     onChange={(e) => setRegForm({...regForm, email: e.target.value})}
@@ -265,7 +265,7 @@ export default function AdminUsersPage() {
                   <Input 
                     required
                     type="password"
-                    className="h-12 rounded-2xl bg-zinc-50 border-zinc-100" 
+                    className="h-12 rounded-none bg-zinc-50 border-zinc-100" 
                     placeholder="Min. 6 characters"
                     value={regForm.password}
                     onChange={(e) => setRegForm({...regForm, password: e.target.value})}
@@ -274,7 +274,7 @@ export default function AdminUsersPage() {
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-zinc-500">Initial Designation</Label>
                   <select 
-                    className="w-full h-12 rounded-2xl bg-zinc-50 border border-zinc-100 px-4 text-sm font-medium focus:ring-2 focus:ring-brand-gold outline-none"
+                    className="w-full h-12 rounded-none bg-zinc-50 border border-zinc-100 px-4 text-sm font-medium focus:ring-2 focus:ring-brand-gold outline-none"
                     value={regForm.role}
                     onChange={(e) => setRegForm({...regForm, role: e.target.value as UserRole})}
                   >
@@ -283,7 +283,7 @@ export default function AdminUsersPage() {
                     <option value="admin">Admin (Full Access)</option>
                   </select>
                 </div>
-                <Button type="submit" disabled={isSubmitting} className="w-full h-14 bg-brand-black hover:bg-brand-gold text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-zinc-900/10">
+                <Button type="submit" disabled={isSubmitting} className="w-full h-14 bg-brand-black hover:bg-brand-gold text-white rounded-none font-bold uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-zinc-900/10">
                   {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Finalize Registration"}
                 </Button>
               </form>
@@ -303,17 +303,17 @@ export default function AdminUsersPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <Input 
             placeholder="Search by name, email or UID..." 
-            className="pl-10 h-11 border-zinc-100 rounded-full focus:ring-brand-gold/20 focus:border-brand-gold bg-white"
+            className="pl-10 h-11 border-zinc-100 rounded-none focus:ring-brand-gold/20 focus:border-brand-gold bg-white"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="h-11 rounded-full px-6 text-[10px] font-bold tracking-widest uppercase border-zinc-100 gap-3">
+        <Button variant="outline" className="h-11 rounded-none px-6 text-[10px] font-bold tracking-widest uppercase border-zinc-100 gap-3">
           <Filter className="w-3 h-3" /> Advanced Filter
         </Button>
       </div>
 
-      <div className="bg-white border border-zinc-100 rounded-[2.5rem] shadow-sm overflow-hidden">
+      <div className="bg-white border border-zinc-100 rounded-none shadow-sm overflow-hidden">
         <Table>
           <TableHeader className="bg-zinc-50/50">
             <TableRow>
@@ -345,7 +345,7 @@ export default function AdminUsersPage() {
                 <TableRow key={user.uid} className="hover:bg-zinc-50/50 transition-colors group">
                   <TableCell className="px-8">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-2xl bg-zinc-50 flex items-center justify-center font-heading text-zinc-400 border border-zinc-100 group-hover:border-brand-gold group-hover:bg-brand-rose/10 group-hover:text-brand-black transition-all text-xs font-bold">
+                      <div className="w-10 h-10 rounded-none bg-zinc-50 flex items-center justify-center font-heading text-zinc-400 border border-zinc-100 group-hover:border-brand-gold group-hover:bg-brand-rose/10 group-hover:text-brand-black transition-all text-xs font-bold">
                         {initials(user.displayName || "Unknown")}
                       </div>
                       <div className="flex flex-col">
@@ -355,7 +355,7 @@ export default function AdminUsersPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className={`rounded-full px-3 py-1 font-bold text-[8px] uppercase tracking-tighter border ${user.role === "admin" ? "bg-brand-rose/10 text-brand-gold border-brand-rose/30" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`}>
+                    <Badge className={`rounded-none px-3 py-1 font-bold text-[8px] uppercase tracking-tighter border ${user.role === "admin" ? "bg-brand-rose/10 text-brand-gold border-brand-rose/30" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`}>
                       {user.role}
                     </Badge>
                   </TableCell>
@@ -370,16 +370,16 @@ export default function AdminUsersPage() {
                     }}>
                     <DialogTrigger 
                       render={
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 text-zinc-400">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none hover:bg-zinc-100 text-zinc-400">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       }
                     />
                       {selectedUser?.uid === user.uid && (
-                        <DialogContent className="sm:max-w-[700px] rounded-[3rem] p-10 border-none shadow-2xl">
+                        <DialogContent className="sm:max-w-[700px] rounded-none p-10 border-none shadow-2xl">
                           <DialogHeader>
                             <div className="flex items-center gap-4 mb-4">
-                              <div className="w-16 h-16 rounded-[2rem] bg-brand-rose/20 flex items-center justify-center text-xl font-heading text-brand-black border border-brand-rose/30">
+                              <div className="w-16 h-16 rounded-none bg-brand-rose/20 flex items-center justify-center text-xl font-heading text-brand-black border border-brand-rose/30">
                                 {initials(selectedUser.displayName || "Unknown")}
                               </div>
                               <div className="text-left">
@@ -391,7 +391,7 @@ export default function AdminUsersPage() {
                           
                           <div className="space-y-6 animate-in slide-in-from-left-2 duration-300">
                             <div className="grid grid-cols-2 gap-4">
-                              <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100 text-left">
+                              <div className="p-4 bg-zinc-50 rounded-none border border-zinc-100 text-left">
                                 <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><ShieldCheck className="w-3 h-3" /> Account Designation</p>
                                 <select 
                                   className="w-full bg-transparent text-sm font-bold text-zinc-900 outline-none"
@@ -403,7 +403,7 @@ export default function AdminUsersPage() {
                                   <option value="admin">Admin</option>
                                 </select>
                               </div>
-                              <div className="p-4 bg-zinc-50 rounded-3xl border border-zinc-100 text-left flex items-center justify-between">
+                              <div className="p-4 bg-zinc-50 rounded-none border border-zinc-100 text-left flex items-center justify-between">
                                 <div>
                                   <p className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1 flex items-center gap-2"><ShieldAlert className="w-3 h-3 text-brand-gold" /> Super Admin</p>
                                   <p className="text-[10px] text-zinc-400 font-medium italic">Full System Bypass</p>
@@ -424,7 +424,7 @@ export default function AdminUsersPage() {
                                   <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-tighter">Granular Access Matrix</span>
                                 </div>
                                 
-                                <div className="max-h-[300px] overflow-y-auto rounded-2xl border border-zinc-100 bg-zinc-50/30">
+                                <div className="max-h-[300px] overflow-y-auto rounded-none border border-zinc-100 bg-zinc-50/30">
                                   <Table>
                                     <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
                                       <TableRow className="hover:bg-transparent">
@@ -460,7 +460,7 @@ export default function AdminUsersPage() {
 
                             <div className="pt-4 space-y-4">
                               <Button 
-                                className="w-full h-14 bg-brand-black hover:bg-brand-gold text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-zinc-900/10 transition-all active:scale-[0.98]"
+                                className="w-full h-14 bg-brand-black hover:bg-brand-gold text-white rounded-none font-bold uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-zinc-900/10 transition-all active:scale-[0.98]"
                                 onClick={handleSavePermissions}
                                 disabled={isSubmitting}
                               >
@@ -493,7 +493,7 @@ export default function AdminUsersPage() {
                 size="sm"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="rounded-xl h-10 px-4 text-[10px] font-bold uppercase tracking-widest gap-2 border-zinc-200"
+                className="rounded-none h-10 px-4 text-[10px] font-bold uppercase tracking-widest gap-2 border-zinc-200"
               >
                 <ChevronLeft className="w-3 h-3" /> Previous
               </Button>
@@ -505,7 +505,7 @@ export default function AdminUsersPage() {
                     variant={currentPage === page ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setCurrentPage(page)}
-                    className={`w-10 h-10 rounded-xl text-[10px] font-bold ${
+                    className={`w-10 h-10 rounded-none text-[10px] font-bold ${
                       currentPage === page 
                         ? 'bg-brand-gold text-white hover:bg-brand-gold/90 shadow-md shadow-brand-gold/20' 
                         : 'text-zinc-400 hover:text-zinc-900 hover:bg-white'
@@ -521,7 +521,7 @@ export default function AdminUsersPage() {
                 size="sm"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="rounded-xl h-10 px-4 text-[10px] font-bold uppercase tracking-widest gap-2 border-zinc-200"
+                className="rounded-none h-10 px-4 text-[10px] font-bold uppercase tracking-widest gap-2 border-zinc-200"
               >
                 Next <ChevronRight className="w-3 h-3" />
               </Button>
@@ -535,9 +535,9 @@ export default function AdminUsersPage() {
 
 function MetricCard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
   return (
-    <Card className="rounded-[2.5rem] border-zinc-100 shadow-sm overflow-hidden bg-white hover:border-brand-gold transition-all duration-500 group cursor-default p-5">
+    <Card className="rounded-none border-zinc-100 shadow-sm overflow-hidden bg-white hover:border-brand-gold transition-all duration-500 group cursor-default p-5">
       <div className="flex items-center gap-5">
-        <div className="w-14 h-14 rounded-3xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-brand-rose/20 group-hover:text-brand-black transition-all duration-500 shrink-0">
+        <div className="w-14 h-14 rounded-none bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-brand-rose/20 group-hover:text-brand-black transition-all duration-500 shrink-0">
           {icon}
         </div>
         <div className="space-y-0.5">

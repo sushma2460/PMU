@@ -217,35 +217,35 @@ export default function AdminOrdersPage() {
         <div className="flex items-center gap-2 flex-wrap">
           {(searchTerm || filterStatus !== "all") && (
             <Button variant="ghost" size="sm" onClick={clearFilters}
-              className="rounded-full text-[10px] font-bold tracking-widest uppercase gap-2 text-zinc-400 hover:text-zinc-600 h-8 px-3">
+              className="rounded-none text-[10px] font-bold tracking-widest uppercase gap-2 text-zinc-400 hover:text-zinc-600 h-8 px-3">
               <RotateCcw className="w-3 h-3" /> Reset
             </Button>
           )}
           <Button variant="outline" size="sm"
-            className="rounded-full text-[10px] font-bold tracking-widest uppercase gap-2 px-4 h-8"
+            className="rounded-none text-[10px] font-bold tracking-widest uppercase gap-2 px-4 h-8"
             onClick={exportOrdersToCSV} disabled={filteredOrders.length === 0}>
             <Download className="w-3 h-3" />
             <span className="hidden sm:inline">Export List</span>
           </Button>
           <Dialog>
             <DialogTrigger render={
-              <Button size="sm" className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-4 md:px-8 h-8 flex gap-2">
+              <Button size="sm" className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-none text-[10px] font-bold tracking-widest uppercase px-4 md:px-8 h-8 flex gap-2">
                 <Plus className="w-3 h-3" />
                 <span className="hidden sm:inline">Create Manual Order</span>
                 <span className="sm:hidden">Manual</span>
               </Button>
             } />
-            <DialogContent className="sm:max-w-[450px] rounded-[2.5rem] p-8">
+            <DialogContent className="sm:max-w-[450px] rounded-none p-8">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-heading">Manual Order Entry</DialogTitle>
                 <DialogDescription className="text-xs font-bold tracking-widest uppercase text-zinc-400">Initialize a custom merchant order for specialized fulfillment.</DialogDescription>
               </DialogHeader>
               <div className="py-12 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-zinc-50 flex items-center justify-center mx-auto border border-zinc-100">
+                <div className="w-16 h-16 rounded-none bg-zinc-50 flex items-center justify-center mx-auto border border-zinc-100">
                   <Package className="w-8 h-8 text-zinc-300" />
                 </div>
                 <p className="text-xs text-zinc-500 font-light max-w-[250px] mx-auto leading-relaxed italic">The Manual Order interface is currently being optimized for professional use. Please contact system support for priority entries.</p>
-                <Button variant="outline" className="rounded-xl px-8 h-10 text-[10px] font-bold uppercase tracking-widest border-zinc-100">Contact Support</Button>
+                <Button variant="outline" className="rounded-none px-8 h-10 text-[10px] font-bold uppercase tracking-widest border-zinc-100">Contact Support</Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -271,19 +271,19 @@ export default function AdminOrdersPage() {
         ))}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 p-4 bg-zinc-50/50 border border-zinc-100 rounded-[2.5rem]">
+      <div className="flex flex-col md:flex-row gap-4 p-4 bg-zinc-50/50 border border-zinc-100 rounded-none">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <Input 
             placeholder="Search by Order ID, customer, or email..." 
-            className="pl-12 h-12 border-zinc-100 rounded-2xl focus:ring-brand-gold/10 focus:border-brand-gold/30 bg-white"
+            className="pl-12 h-12 border-zinc-100 rounded-none focus:ring-brand-gold/10 focus:border-brand-gold/30 bg-white"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="bg-white border border-zinc-100 rounded-2xl md:rounded-[2.5rem] shadow-sm overflow-hidden">
+      <div className="bg-white border border-zinc-100 rounded-none shadow-sm overflow-hidden">
         <div className="hidden md:block overflow-x-auto">
           <Table>
             <TableHeader className="bg-zinc-50/50">
@@ -329,12 +329,12 @@ export default function AdminOrdersPage() {
                     <TableCell className="text-xs font-black text-zinc-900">₹{order.total?.toLocaleString()}</TableCell>
                     <TableCell>
                       <Select value={order.status} onValueChange={(val) => handleStatusUpdate(order.id!, val as Order["status"])}>
-                        <SelectTrigger className={`h-8 rounded-full px-3 text-[9px] font-bold uppercase tracking-tighter border w-[120px] ${STATUS_CONFIG[order.status]?.color}`}>
+                        <SelectTrigger className={`h-8 rounded-none px-3 text-[9px] font-bold uppercase tracking-tighter border w-[120px] ${STATUS_CONFIG[order.status]?.color}`}>
                           <div className="flex items-center gap-1.5">{STATUS_CONFIG[order.status]?.icon}<SelectValue placeholder="Status" /></div>
                         </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-zinc-100 shadow-xl p-1">
+                        <SelectContent className="rounded-none border-zinc-100 shadow-xl p-1">
                           {Object.keys(STATUS_CONFIG).map((s) => (
-                            <SelectItem key={s} value={s} className="text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-zinc-50 cursor-pointer">
+                            <SelectItem key={s} value={s} className="text-[10px] font-bold uppercase tracking-widest rounded-none hover:bg-zinc-50 cursor-pointer">
                               <div className="flex items-center gap-2">{STATUS_CONFIG[s].icon}{s}</div>
                             </SelectItem>
                           ))}
@@ -344,12 +344,12 @@ export default function AdminOrdersPage() {
                     <TableCell className="text-right px-8">
                       <div className="flex justify-end gap-2">
                         <Link href={`/admin/orders/${order.id}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-brand-gold hover:text-white transition-all">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none hover:bg-brand-gold hover:text-white transition-all">
                             <Eye className="w-4 h-4" />
                           </Button>
                         </Link>
                         {canDelete && (
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-red-50 hover:text-red-600" onClick={() => handleDelete(order.id!)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none hover:bg-red-50 hover:text-red-600" onClick={() => handleDelete(order.id!)}>
                             {deletingId === order.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                           </Button>
                         )}
@@ -433,21 +433,21 @@ export default function AdminOrdersPage() {
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1} className="rounded-xl h-9 px-3 text-[10px] font-bold uppercase tracking-widest gap-1 border-zinc-200">
+                disabled={currentPage === 1} className="rounded-none h-9 px-3 text-[10px] font-bold uppercase tracking-widest gap-1 border-zinc-200">
                 <ChevronLeft className="w-3 h-3" /> Prev
               </Button>
               <div className="hidden sm:flex items-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <Button key={page} variant={currentPage === page ? "default" : "ghost"} size="sm"
                     onClick={() => setCurrentPage(page)}
-                    className={`w-9 h-9 rounded-xl text-[10px] font-bold ${
+                    className={`w-9 h-9 rounded-none text-[10px] font-bold ${
                       currentPage === page ? 'bg-brand-gold text-white hover:bg-brand-gold/90 shadow-md shadow-brand-gold/20' : 'text-zinc-400 hover:text-zinc-900 hover:bg-white'
                     }`}>{page}</Button>
                 ))}
               </div>
               <span className="sm:hidden text-[10px] font-bold text-zinc-400">{currentPage}/{totalPages}</span>
               <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages} className="rounded-xl h-9 px-3 text-[10px] font-bold uppercase tracking-widest gap-1 border-zinc-200">
+                disabled={currentPage === totalPages} className="rounded-none h-9 px-3 text-[10px] font-bold uppercase tracking-widest gap-1 border-zinc-200">
                 Next <ChevronRight className="w-3 h-3" />
               </Button>
             </div>

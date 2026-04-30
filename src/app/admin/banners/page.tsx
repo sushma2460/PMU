@@ -26,7 +26,7 @@ export default function AdminBannersPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 p-1.5 bg-zinc-100 rounded-2xl w-fit border border-zinc-200/50">
+        <div className="flex flex-wrap gap-2 p-1.5 bg-zinc-100 rounded-none w-fit border border-zinc-200/50">
           {[
             { id: 'banners', label: 'Main Banners', icon: Layout },
             { id: 'results', label: 'Healed Results', icon: ImageIcon },
@@ -35,7 +35,7 @@ export default function AdminBannersPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${
+              className={`flex items-center gap-2 px-4 md:px-6 py-2.5 rounded-none text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${
                 activeTab === tab.id 
                   ? 'bg-white text-brand-gold shadow-md scale-[1.02]' 
                   : 'text-zinc-400 hover:text-zinc-600 hover:bg-white/50'

@@ -166,12 +166,12 @@ export default function AdminCouponsPage() {
           <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Driving Growth Through Rewards</p>
         </div>
         {canCreate && (
-          <Button onClick={handleOpenCreate} className="bg-brand-gold hover:bg-brand-black text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-8 gap-2">
+          <Button onClick={handleOpenCreate} className="bg-brand-gold hover:bg-brand-black text-white rounded-none text-[10px] font-bold tracking-widest uppercase px-8 gap-2">
             <Plus className="w-3 h-3" /> Create Campaign
           </Button>
         )}
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogContent className="sm:max-w-[850px] max-h-[95vh] overflow-y-auto rounded-[2.5rem] p-8 sm:p-10 border-none shadow-2xl flex flex-col">
+          <DialogContent className="sm:max-w-[850px] max-h-[95vh] overflow-y-auto rounded-none p-8 sm:p-10 border-none shadow-2xl flex flex-col">
             <DialogHeader className="space-y-2 flex-shrink-0">
               <DialogTitle className="text-2xl font-heading">{editingCouponId ? 'Edit Campaign' : 'New Coupon Strategy'}</DialogTitle>
               <DialogDescription className="text-xs uppercase tracking-widest font-bold text-zinc-400"> Configure rules for your promotional broadcast </DialogDescription>
@@ -183,7 +183,7 @@ export default function AdminCouponsPage() {
                     <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Universal Code</Label>
                     <Input 
                       placeholder="e.g. SUMMER25" 
-                      className="rounded-2xl h-12 bg-zinc-50 border-zinc-100" 
+                      className="rounded-none h-12 bg-zinc-50 border-zinc-100" 
                       value={newCoupon.code}
                       onChange={e => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})}
                     />
@@ -191,7 +191,7 @@ export default function AdminCouponsPage() {
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Discount Type</Label>
                     <Select defaultValue="percentage" onValueChange={v => setNewCoupon({...newCoupon, type: v as any})}>
-                      <SelectTrigger className="rounded-2xl h-12 bg-zinc-50 border-zinc-100">
+                      <SelectTrigger className="rounded-none h-12 bg-zinc-50 border-zinc-100">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -208,7 +208,7 @@ export default function AdminCouponsPage() {
                     <Input 
                       type="number" 
                       placeholder="0" 
-                      className="rounded-2xl h-12 bg-zinc-50 border-zinc-100" 
+                      className="rounded-none h-12 bg-zinc-50 border-zinc-100" 
                       value={newCoupon.value || ""}
                       onChange={e => setNewCoupon({...newCoupon, value: Number(e.target.value)})}
                     />
@@ -218,7 +218,7 @@ export default function AdminCouponsPage() {
                     <Input 
                       type="number" 
                       placeholder="₹0" 
-                      className="rounded-2xl h-12 bg-zinc-50 border-zinc-100" 
+                      className="rounded-none h-12 bg-zinc-50 border-zinc-100" 
                       value={newCoupon.minimumOrderValue || ""}
                       onChange={e => setNewCoupon({...newCoupon, minimumOrderValue: Number(e.target.value)})}
                     />
@@ -233,7 +233,7 @@ export default function AdminCouponsPage() {
                     <Input 
                       type="number"
                       placeholder="e.g. 100 (Leave blank for ∞)" 
-                      className="rounded-2xl h-12 bg-zinc-50 border-zinc-100" 
+                      className="rounded-none h-12 bg-zinc-50 border-zinc-100" 
                       value={newCoupon.usageLimit || ""}
                       onChange={e => setNewCoupon({...newCoupon, usageLimit: Number(e.target.value) || undefined})}
                     />
@@ -242,7 +242,7 @@ export default function AdminCouponsPage() {
                     <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Expiration Date</Label>
                     <Input 
                       type="date"
-                      className="rounded-2xl h-12 bg-zinc-50 border-zinc-100" 
+                      className="rounded-none h-12 bg-zinc-50 border-zinc-100" 
                       value={(newCoupon.expiryDate as any) || ""}
                       onChange={e => setNewCoupon({...newCoupon, expiryDate: e.target.value as any})}
                     />
@@ -251,7 +251,7 @@ export default function AdminCouponsPage() {
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Target Segments</Label>
                   <Select defaultValue="all">
-                    <SelectTrigger className="rounded-2xl h-12 bg-zinc-50 border-zinc-100">
+                    <SelectTrigger className="rounded-none h-12 bg-zinc-50 border-zinc-100">
                       <SelectValue placeholder="Select target" />
                     </SelectTrigger>
                     <SelectContent>
@@ -265,7 +265,7 @@ export default function AdminCouponsPage() {
                   <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Scrolling Announcement / Description</Label>
                   <Input 
                     placeholder="e.g. Get 20% off all Mosha templates today!" 
-                    className="rounded-2xl h-12 bg-zinc-50 border-zinc-100" 
+                    className="rounded-none h-12 bg-zinc-50 border-zinc-100" 
                     value={newCoupon.description || ""}
                     onChange={e => setNewCoupon({...newCoupon, description: e.target.value})}
                   />
@@ -273,8 +273,8 @@ export default function AdminCouponsPage() {
               </div>
             </div>
             <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-zinc-50">
-               <Button variant="ghost" onClick={() => setIsCreateOpen(false)} className="rounded-full text-[10px] font-black uppercase tracking-widest">Cancel</Button>
-               <Button className="bg-brand-gold text-white rounded-full text-[10px] font-black uppercase tracking-widest px-8" onClick={handleLaunch}>{editingCouponId ? 'Save Changes' : 'Launch Strategy'}</Button>
+               <Button variant="ghost" onClick={() => setIsCreateOpen(false)} className="rounded-none text-[10px] font-black uppercase tracking-widest">Cancel</Button>
+               <Button className="bg-brand-gold text-white rounded-none text-[10px] font-black uppercase tracking-widest px-8" onClick={handleLaunch}>{editingCouponId ? 'Save Changes' : 'Launch Strategy'}</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -298,7 +298,7 @@ export default function AdminCouponsPage() {
          />
       </div>
 
-      <div className="bg-white border border-zinc-100 rounded-[2.5rem] shadow-sm overflow-hidden mt-8">
+      <div className="bg-white border border-zinc-100 rounded-none shadow-sm overflow-hidden mt-8">
         <Table>
           <TableHeader className="bg-zinc-50/50">
             <TableRow>
@@ -328,7 +328,7 @@ export default function AdminCouponsPage() {
                 <TableRow key={coupon.id} className="hover:bg-zinc-50/50 transition-colors group">
                   <TableCell className="px-8">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-zinc-950 flex items-center justify-center text-brand-gold shadow-lg">
+                      <div className="w-8 h-8 rounded-none bg-zinc-950 flex items-center justify-center text-brand-gold shadow-lg">
                         <Ticket className="w-4 h-4" />
                       </div>
                       <span className="text-xs font-black tracking-widest text-zinc-900 group-hover:text-brand-gold transition-colors">{coupon.code}</span>
@@ -346,7 +346,7 @@ export default function AdminCouponsPage() {
                         <span>Redeemed</span>
                         <span className="text-zinc-800">{coupon.usageCount} {coupon.usageLimit ? `/ ${coupon.usageLimit}` : "∞"}</span>
                       </div>
-                      <div className="h-1 bg-zinc-100 rounded-full overflow-hidden">
+                      <div className="h-1 bg-zinc-100 rounded-none overflow-hidden">
                         <div className="h-full bg-brand-gold" style={{ width: coupon.usageLimit ? `${Math.min((coupon.usageCount / coupon.usageLimit) * 100, 100)}%` : '0%' }} />
                       </div>
                     </div>
@@ -361,7 +361,7 @@ export default function AdminCouponsPage() {
                     {(() => {
                       const status = getCouponStatus(coupon);
                       return (
-                        <Badge className={`rounded-full px-3 py-1 font-bold text-[9px] uppercase tracking-tighter border ${
+                        <Badge className={`rounded-none px-3 py-1 font-bold text-[9px] uppercase tracking-tighter border ${
                           status === "Active" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : 
                           status === "Expired" ? "bg-red-50 text-red-600 border-red-100" :
                           status === "Max Usage" ? "bg-amber-50 text-amber-600 border-amber-100" :
@@ -374,16 +374,16 @@ export default function AdminCouponsPage() {
                   </TableCell>
                   <TableCell className="text-right px-8">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 text-zinc-400">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none hover:bg-zinc-100 text-zinc-400">
                         <Copy className="w-3.5 h-3.5" />
                       </Button>
                       {canEdit && (
-                        <Button variant="ghost" onClick={() => handleOpenEdit(coupon)} size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 text-zinc-400">
+                        <Button variant="ghost" onClick={() => handleOpenEdit(coupon)} size="icon" className="h-8 w-8 rounded-none hover:bg-zinc-100 text-zinc-400">
                           <Edit2 className="w-3.5 h-3.5" />
                         </Button>
                       )}
                       {canDelete && (
-                        <Button variant="ghost" onClick={() => handleDelete(coupon.id!)} size="icon" className="h-8 w-8 rounded-full hover:bg-red-50 text-red-400" disabled={deletingId === coupon.id}>
+                        <Button variant="ghost" onClick={() => handleDelete(coupon.id!)} size="icon" className="h-8 w-8 rounded-none hover:bg-red-50 text-red-400" disabled={deletingId === coupon.id}>
                           {deletingId === coupon.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                         </Button>
                       )}
@@ -401,13 +401,13 @@ export default function AdminCouponsPage() {
 
 function StatsPreview({ title, value, icon }: any) {
   return (
-    <Card className="rounded-[2rem] border-zinc-100 shadow-sm overflow-hidden bg-white hover:border-brand-gold transition-colors group cursor-default">
+    <Card className="rounded-none border-zinc-100 shadow-sm overflow-hidden bg-white hover:border-brand-gold transition-colors group cursor-default">
        <CardContent className="p-6 flex items-center justify-between">
           <div className="space-y-1">
              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{title}</p>
              <p className="text-2xl font-black text-zinc-900 group-hover:text-brand-gold transition-colors">{value}</p>
           </div>
-          <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-brand-rose/20 group-hover:text-brand-black transition-all">
+          <div className="w-10 h-10 rounded-none bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-brand-rose/20 group-hover:text-brand-black transition-all">
              {icon}
           </div>
        </CardContent>

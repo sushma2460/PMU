@@ -41,20 +41,27 @@ export async function createProductAction(data: any) {
 
     const docRef = await adminDb.collection("products").add(docData);
 
-    // Trigger Product Launch Email to all users
+    // Trigger Product Launch Email to all users if enabled
     try {
-      const usersSnapshot = await adminDb.collection("users").get();
-      const userEmails = usersSnapshot.docs
-        .map(doc => doc.data().email)
-        .filter(email => email && typeof email === 'string');
+      const settingsDoc = await adminDb.collection("settings").doc("global").get();
+      const isEmailEnabled = !settingsDoc.exists || settingsDoc.data()?.newArrivalsEmailEnabled !== false;
 
-      if (userEmails.length > 0) {
-        await sendNewProductLaunchEmail(userEmails, {
-          id: docRef.id,
-          name: docData.name,
-          description: docData.description,
-          image: docData.imageUrls[0] || null
-        });
+      if (isEmailEnabled) {
+        const usersSnapshot = await adminDb.collection("users").get();
+        const userEmails = usersSnapshot.docs
+          .map(doc => doc.data().email)
+          .filter(email => email && typeof email === 'string');
+
+        if (userEmails.length > 0) {
+          await sendNewProductLaunchEmail(userEmails, {
+            id: docRef.id,
+            name: docData.name,
+            description: docData.description,
+            image: docData.imageUrls[0] || null
+          });
+        }
+      } else {
+        console.log("New Arrival emails are disabled in settings. Skipping.");
       }
     } catch (emailErr) {
       console.error("Failed to send launch emails:", emailErr);

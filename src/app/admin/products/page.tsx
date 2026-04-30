@@ -154,7 +154,7 @@ export default function AdminProductsPage() {
               placeholder="Search catalog..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-10 rounded-full bg-zinc-50 border-zinc-100 focus:bg-white focus:ring-brand-gold/20 h-10 text-[11px] font-medium placeholder:text-zinc-400"
+              className="pl-10 pr-10 rounded-none bg-zinc-50 border-zinc-100 focus:bg-white focus:ring-brand-gold/20 h-10 text-[11px] font-medium placeholder:text-zinc-400"
             />
             {searchTerm && (
               <button 
@@ -168,7 +168,7 @@ export default function AdminProductsPage() {
           <CategoryManager />
           {canCreate && (
             <Link href="/admin/products/new">
-              <Button className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-full text-[10px] font-bold tracking-widest uppercase px-8 h-10 w-full sm:w-auto">
+              <Button className="bg-brand-gold hover:bg-brand-gold/90 text-white rounded-none text-[10px] font-bold tracking-widest uppercase px-8 h-10 w-full sm:w-auto">
                 <Plus className="h-3.5 w-3.5 mr-2" /> Add Product
               </Button>
             </Link>
@@ -176,7 +176,7 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      <div className="border rounded-[2rem] bg-white dark:bg-zinc-950 overflow-hidden shadow-sm">
+      <div className="border rounded-none bg-white dark:bg-zinc-950 overflow-hidden shadow-sm">
         <div className="overflow-x-auto no-scrollbar">
           <Table>
             <TableHeader className="bg-zinc-50/50">
@@ -211,7 +211,7 @@ export default function AdminProductsPage() {
                 paginatedProducts.map((product) => (
                   <TableRow key={product.id} className="border-zinc-50 hover:bg-zinc-50/50 transition-colors group">
                     <TableCell>
-                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-100 flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <div className="w-12 h-12 rounded-none overflow-hidden bg-zinc-100 border border-zinc-100 flex-shrink-0 group-hover:scale-105 transition-transform">
                         {product.imageUrls?.[0] ? (
                           <img
                             src={product.imageUrls[0]}
@@ -270,7 +270,7 @@ export default function AdminProductsPage() {
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-9 w-9 rounded-full text-zinc-400 hover:text-blue-600 hover:bg-blue-50"
+                            className="h-9 w-9 rounded-none text-zinc-400 hover:text-blue-600 hover:bg-blue-50"
                             title="View on Storefront"
                           >
                             <Eye size={16} />
@@ -282,7 +282,7 @@ export default function AdminProductsPage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-9 w-9 rounded-full text-zinc-400 hover:text-brand-gold hover:bg-zinc-100"
+                              className="h-9 w-9 rounded-none text-zinc-400 hover:text-brand-gold hover:bg-zinc-100"
                               title="Edit Product"
                             >
                               <Pencil size={16} />
@@ -293,8 +293,8 @@ export default function AdminProductsPage() {
                         {canDelete && (
                           <Button
                             variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 rounded-full text-zinc-400 hover:text-red-600 hover:bg-red-50"
+                            size="icon" 
+                            className="h-9 w-9 rounded-none text-zinc-400 hover:text-red-600 hover:bg-red-50"
                             onClick={() => handleDelete(product.id!)}
                             disabled={deletingId === product.id}
                             title="Delete Product"

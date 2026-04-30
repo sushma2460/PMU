@@ -34,6 +34,7 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const isAdminLogin = pathname === "/admin/login";
+  const isDevPage = pathname === "/admin/dev";
   const { logout, user, profile } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
@@ -50,7 +51,7 @@ export default function AdminLayout({
 
   if (isAdminLogin) return <>{children}</>;
 
-  const adminName = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "Admin";
+  const adminName = profile?.displayName || user?.displayName || user?.email?.split("@")[0] || "Dev User";
   const initials = adminName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
 
   const navItems = [
@@ -62,30 +63,36 @@ export default function AdminLayout({
     { href: "/admin/coupons", icon: <Ticket size={20} />, label: "Coupons", active: pathname === "/admin/coupons" },
     { href: "/admin/users", icon: <Users size={20} />, label: "Users", active: pathname === "/admin/users" },
     { href: "/admin/reviews", icon: <MessageSquare size={20} />, label: "Reviews", active: pathname.startsWith("/admin/reviews") },
-    { href: "/admin/campaigns", icon: <Mail size={20} />, label: "Campaigns", active: pathname.startsWith("/admin/campaigns") },
     { href: "/admin/design", icon: <LayoutTemplate size={20} />, label: "Design", active: pathname === "/admin/design" },
   ].filter(item => {
-    // Super Admins see everything
+    if (isDevPage) return true; // Allow dev page navigation visibility
     if (profile?.isSuperAdmin) return true;
-    
-    // Admins see everything by default
     if ((profile?.role as string) === 'admin') return true;
-
     const pathParts = item.href.split('/');
     const moduleName = pathParts[2];
-    
-    // 1. Super Admins and full Admins see everything
-    if (profile?.isSuperAdmin || (profile?.role as string) === 'admin') return true;
-    
-    // 2. Dashboard is always visible to STAFF if you haven't hidden it
-    // Actually, user wants it to be optional. So we check permissions.
     return profile?.permissions?.[moduleName]?.view === true;
   });
+
+  if (isDevPage) {
+    return (
+      <div className="min-h-screen bg-zinc-50 font-sans">
+        <header className="h-16 flex items-center justify-between px-8 border-b border-zinc-200 bg-white shadow-sm">
+          <div className="flex items-center gap-2">
+            <img src="/images/logo1.png" alt="PMU SUPPLY" className="h-10 w-auto object-contain mix-blend-multiply" />
+            <span className="font-bold text-sm tracking-tight uppercase text-brand-gold"> DEV CONSOLE</span>
+          </div>
+            <div className="w-8 h-8 rounded-none bg-zinc-900 flex items-center justify-center text-[10px] font-bold text-brand-gold">DEV</div>
+        </header>
+        <main className="p-4 md:p-12 max-w-7xl mx-auto">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <AdminGuard>
       <div className="flex h-screen overflow-hidden bg-zinc-50 font-sans">
-        
         {/* Desktop Sidebar */}
         <aside className="hidden lg:flex w-64 border-r bg-white border-zinc-200 flex-col shrink-0 no-scrollbar">
           <div className="h-20 flex items-center px-6 border-b border-zinc-200">
@@ -145,11 +152,10 @@ export default function AdminLayout({
                   <NavItem key={item.href} {...item} onClick={() => setIsMobileMenuOpen(false)} />
                 ))}
               </nav>
-              
               <div className="p-6 border-t border-zinc-200">
                 <button 
                   onClick={handleLogout}
-                  className="flex w-full items-center justify-center gap-3 rounded-xl px-3 py-4 text-sm font-bold uppercase tracking-widest text-white bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
+                  className="flex w-full items-center justify-center gap-3 rounded-none px-3 py-4 text-sm font-bold uppercase tracking-widest text-white bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
                 >
                   <LogOut size={20} />
                   Sign out
@@ -182,7 +188,7 @@ export default function AdminLayout({
                   {profile?.isSuperAdmin ? "Super Admin" : (profile?.role || "Administrator")}
                 </span>
               </div>
-              <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-xs font-bold text-brand-gold border border-zinc-800 shadow-sm">
+              <div className="w-9 h-9 rounded-none bg-zinc-900 flex items-center justify-center text-xs font-bold text-brand-gold border border-zinc-800 shadow-sm">
                 {initials}
               </div>
             </div>
@@ -204,7 +210,7 @@ function NavItem({ href, icon, label, active, onClick }: { href: string; icon: R
     <Link 
       href={href}
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-300 ${
+      className={`flex items-center gap-3 rounded-none px-4 py-3 text-sm font-bold transition-all duration-300 ${
         active 
           ? "bg-brand-rose text-white shadow-lg shadow-brand-rose/20 translate-x-1" 
           : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
