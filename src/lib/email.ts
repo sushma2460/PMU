@@ -179,7 +179,6 @@ export async function sendInvoiceEmail(order: any) {
   try {
     const doc = new jsPDF() as any;
     const date = new Date(paymentVerifiedAt || Date.now()).toLocaleDateString();
-    const invoiceNo = `INV-${id.slice(-8).toUpperCase()}`;
 
     // Header Branding
     doc.setFillColor(0, 0, 0);
@@ -192,6 +191,7 @@ export async function sendInvoiceEmail(order: any) {
     doc.text("ELITE PROFESSIONAL EQUIPMENT", 105, 28, { align: "center" });
 
     // Invoice Info
+    const invoiceNo = `INV-${id.substring(0, 8).toUpperCase()}`;
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(18);
     doc.text("INVOICE", 20, 55);
@@ -221,53 +221,67 @@ export async function sendInvoiceEmail(order: any) {
     doc.setTextColor(201, 168, 76);
     doc.text(`ID: ${razorpayPaymentId || 'N/A'}`, 120, 88);
 
-    // Manual Table (Node-safe)
-    let y = 110;
+    // Table Header
+    let yPos = 110;
     doc.setFillColor(0, 0, 0);
-    doc.rect(20, y - 7, 170, 10, 'F');
+    doc.rect(20, yPos - 7, 170, 10, 'F');
     doc.setTextColor(201, 168, 76);
     doc.setFontSize(10);
-    doc.text("Description", 25, y);
-    doc.text("Qty", 120, y);
-    doc.text("Price", 145, y);
-    doc.text("Total", 170, y);
+    doc.text("Description", 25, yPos);
+    doc.text("Qty", 120, yPos);
+    doc.text("Price", 145, yPos);
+    doc.text("Total", 170, yPos);
     
-    y += 15;
+    yPos += 15;
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(9);
     
     items.forEach((item: any) => {
-      doc.text(item.productName.substring(0, 45), 25, y);
-      doc.text(item.quantity.toString(), 122, y);
-      doc.text(`INR ${item.priceAtPurchase.toFixed(2)}`, 145, y);
-      doc.text(`INR ${(item.priceAtPurchase * item.quantity).toFixed(2)}`, 170, y);
-      y += 10;
+      const name = (item.productName || item.product?.name || "Product").substring(0, 45);
+      const qty = item.quantity.toString();
+      const price = `INR ${(item.priceAtPurchase || item.product?.price || 0).toFixed(2)}`;
+      const itemTotal = `INR ${((item.priceAtPurchase || item.product?.price || 0) * item.quantity).toFixed(2)}`;
+      
+      doc.text(name, 25, yPos);
+      doc.text(qty, 122, yPos);
+      doc.text(price, 145, yPos);
+      doc.text(itemTotal, 170, yPos);
+      yPos += 10;
     });
 
-    const finalY = y > 150 ? y : 150;
+    const finalY = yPos > 150 ? yPos : 150;
 
-    // Totals
+    // Totals Section (Re-aligned to prevent overlap)
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text("Subtotal:", 140, finalY + 15);
-    doc.text(`INR ${(order.subtotal || total).toFixed(2)}`, 190, finalY + 15, { align: "right" });
     
-    doc.text("Shipping:", 140, finalY + 22);
+    // Subtotal
+    const subtotalVal = order.subtotal || total - (order.shippingAmount || 0) - (order.taxAmount || 0);
+    doc.text("Subtotal:", 130, finalY + 15);
+    doc.text(`INR ${subtotalVal.toFixed(2)}`, 190, finalY + 15, { align: "right" });
+    
+    // Shipping
+    doc.text("Shipping:", 130, finalY + 22);
     doc.text(`INR ${(order.shippingAmount || 0).toFixed(2)}`, 190, finalY + 22, { align: "right" });
 
-    doc.text("Tax (GST):", 140, finalY + 29);
+    // Tax
+    doc.text("Tax (GST):", 130, finalY + 29);
     doc.text(`INR ${(order.taxAmount || 0).toFixed(2)}`, 190, finalY + 29, { align: "right" });
 
+    // Discounts
     if (order.discountAmount > 0) {
       doc.setTextColor(34, 197, 94);
-      doc.text("Incentives:", 140, finalY + 36);
+      doc.text("Incentives:", 130, finalY + 36);
       doc.text(`-INR ${order.discountAmount.toFixed(2)}`, 190, finalY + 36, { align: "right" });
     }
 
+    // Grand Total (Clearer spacing)
     doc.setTextColor(201, 168, 76);
     doc.setFontSize(12);
-    doc.text("GRAND TOTAL:", 140, finalY + 47);
+    doc.setFont("helvetica", "bold");
+    doc.text("GRAND TOTAL:", 125, finalY + 47);
     doc.text(`INR ${total.toFixed(2)}`, 190, finalY + 47, { align: "right" });
+    doc.setFont("helvetica", "normal");
 
     // Footer Note
     doc.setFontSize(8);

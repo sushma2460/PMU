@@ -160,25 +160,37 @@ export default function OrderDetailsPage() {
     // Totals
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text("Subtotal:", 140, finalY + 15);
-    doc.text(`INR ${order.subtotal?.toFixed(2)}`, 190, finalY + 15, { align: "right" });
+    // Totals Section (Re-aligned to prevent overlap)
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
     
-    doc.text("Shipping:", 140, finalY + 22);
+    // Subtotal
+    const subtotalVal = order.subtotal || order.total - (order.shippingAmount || 0) - (order.taxAmount || 0);
+    doc.text("Subtotal:", 130, finalY + 15);
+    doc.text(`INR ${subtotalVal.toFixed(2)}`, 190, finalY + 15, { align: "right" });
+    
+    // Shipping
+    doc.text("Shipping:", 130, finalY + 22);
     doc.text(`INR ${order.shippingAmount?.toFixed(2)}`, 190, finalY + 22, { align: "right" });
 
-    doc.text("Tax (GST):", 140, finalY + 29);
+    // Tax
+    doc.text("Tax (GST):", 130, finalY + 29);
     doc.text(`INR ${order.taxAmount?.toFixed(2)}`, 190, finalY + 29, { align: "right" });
 
+    // Discounts
     if (order.discountAmount > 0) {
       doc.setTextColor(34, 197, 94);
-      doc.text("Incentives:", 140, finalY + 36);
+      doc.text("Incentives:", 130, finalY + 36);
       doc.text(`-INR ${order.discountAmount?.toFixed(2)}`, 190, finalY + 36, { align: "right" });
     }
 
+    // Grand Total (Clearer spacing)
     doc.setTextColor(201, 168, 76);
     doc.setFontSize(12);
-    doc.text("GRAND TOTAL:", 140, finalY + 47);
+    doc.setFont("helvetica", "bold");
+    doc.text("GRAND TOTAL:", 125, finalY + 47);
     doc.text(`INR ${order.total?.toFixed(2)}`, 190, finalY + 47, { align: "right" });
+    doc.setFont("helvetica", "normal");
 
     // Footer Note
     doc.setFontSize(8);
