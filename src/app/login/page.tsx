@@ -22,6 +22,7 @@ import { Suspense } from "react";
 import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { resendVerificationAction } from "@/app/register/actions";
 
 const BOOTSTRAP_ADMIN_UID = "JFfgcLKDtTPDsHUxrmi5L7sLIom2";
 
@@ -55,12 +56,20 @@ function LoginForm() {
   // After login, once AuthContext resolves the role, redirect accordingly
   useEffect(() => {
     if (!loading && user) {
-      if (isAdmin) {
-        router.replace("/admin/dashboard");
-      } else if (returnUrl) {
-        router.replace(returnUrl);
-      } else {
-        router.replace("/products");
+      // Verification Policy Cutoff (April 30, 2026)
+      const POLICY_CUTOFF = new Date("2026-04-30T00:00:00Z").getTime();
+      const accountCreated = new Date(user.metadata.creationTime || "").getTime();
+      const isOldAccount = accountCreated < POLICY_CUTOFF;
+
+      // ONLY redirect if email is verified OR if it's an old account OR if it's a provider that doesn't require it (Google)
+      if (user.emailVerified || isOldAccount || user.providerData.some(p => p.providerId === 'google.com')) {
+        if (isAdmin) {
+          router.replace("/admin/dashboard");
+        } else if (returnUrl) {
+          router.replace(returnUrl);
+        } else {
+          router.replace("/products");
+        }
       }
     }
   }, [user, isAdmin, loading, returnUrl, router]);
@@ -70,6 +79,36 @@ function LoginForm() {
     setIsLoading(true);
     try {
       const { user: loggedInUser } = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Verification Policy Cutoff (April 30, 2026)
+      const POLICY_CUTOFF = new Date("2026-04-30T00:00:00Z").getTime();
+      const accountCreated = new Date(loggedInUser.metadata.creationTime || "").getTime();
+      const isOldAccount = accountCreated < POLICY_CUTOFF;
+
+      // Check for email verification (Only for new accounts or if not verified)
+      if (!loggedInUser.emailVerified && !isOldAccount) {
+        toast.error("Email not verified. Please check your inbox for the verification link.", {
+          action: {
+            label: "Resend Link",
+            onClick: async () => {
+              try {
+                const res = await resendVerificationAction(email);
+                if (res.success) {
+                  toast.success("Branded verification email sent via Resend!");
+                } else {
+                  throw new Error(res.error);
+                }
+              } catch (err) {
+                toast.error("Failed to resend link. Please try again later.");
+              }
+            }
+          }
+        });
+        await auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
       const redirectPath = await getRedirectForUser(loggedInUser.uid);
       
       if (redirectPath === "/admin/dashboard") {

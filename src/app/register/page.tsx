@@ -46,14 +46,19 @@ export default function RegisterPage() {
         console.error("Firestore Registry Error:", fsError.message);
       }
 
-      // Trigger Welcome Email
+      // Trigger Welcome Email & Verification
       try {
         await onUserRegisteredAction(email, name);
       } catch (emailError) {
         console.error("Failed to send welcome email:", emailError);
       }
 
-      toast.success("Account created successfully! Please sign in to continue.");
+      // 4. Force sign out so they must verify before logging in
+      await auth.signOut();
+
+      toast.success("Account created successfully! Please check your email to verify your account before signing in.", {
+        duration: 6000
+      });
       router.push("/login");
     } catch (error: any) {
       toast.error(error.message || "Failed to create account");

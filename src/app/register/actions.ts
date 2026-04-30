@@ -9,18 +9,24 @@ export async function onUserRegisteredAction(email: string, name: string) {
     await sendWelcomeEmail(email, name);
     
     // 2. Generate and Send Email Verification Link
-    try {
-      const link = await adminAuth.generateEmailVerificationLink(email, {
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://pmu-phi.vercel.app'}/login`
-      });
-      await sendEmailVerification(email, link);
-    } catch (verifErr) {
-      console.error("Failed to send verification email:", verifErr);
-    }
+    await resendVerificationAction(email);
     
     return { success: true };
   } catch (err: any) {
     console.error("onUserRegisteredAction error:", err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function resendVerificationAction(email: string) {
+  try {
+    const link = await adminAuth.generateEmailVerificationLink(email, {
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://pmu-phi.vercel.app'}/login`
+    });
+    await sendEmailVerification(email, link);
+    return { success: true };
+  } catch (err: any) {
+    console.error("resendVerificationAction error:", err);
     return { success: false, error: err.message };
   }
 }

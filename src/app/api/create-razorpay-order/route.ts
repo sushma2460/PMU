@@ -52,45 +52,63 @@ export async function POST(req: Request) {
     const lookupId = incomingCouponId || null;
     const lookupCode = couponCode ? (couponCode as string).toUpperCase().trim() : null;
 
+    console.log("[RazorpayAPI] Coupon Lookup:", { lookupId, lookupCode });
+
     if (lookupId) {
       // Fast path: direct doc lookup by Firestore doc ID
       const couponDoc = await adminDb.collection("coupons").doc(lookupId).get();
-      console.log("[coupon] doc exists:", couponDoc.exists, "id:", lookupId);
       if (couponDoc.exists) {
         const d = couponDoc.data()!;
+        console.log("[RazorpayAPI] Found coupon by ID:", d.code);
+        
         const expiryMs = typeof d.expiryDate === "number" ? d.expiryDate
           : d.expiryDate?.toMillis?.() ?? 0;
-        console.log("[coupon] isActive:", d.isActive, "expiryMs:", expiryMs, "now:", Date.now(), "type:", d.type, "value:", d.value);
-        if (d.isActive === true && (expiryMs === 0 || expiryMs > Date.now())) {
+        
+        const isCurrentlyActive = d.isActive === true || d.isActive === undefined; // Fallback for missing isActive
+        const isNotExpired = expiryMs === 0 || expiryMs > Date.now();
+
+        if (isCurrentlyActive && isNotExpired) {
           couponId = lookupId;
           resolvedCouponCode = (d.code as string) ?? lookupCode;
           couponDiscountAmount = d.type === "percentage"
-            ? subtotal * (d.value / 100)
+            ? subtotal * (Number(d.value) / 100)
             : Number(d.value);
+          console.log("[RazorpayAPI] Coupon Applied (ID):", { couponDiscountAmount, type: d.type, value: d.value });
+        } else {
+          console.log("[RazorpayAPI] Coupon ineligible:", { isCurrentlyActive, isNotExpired, expiryMs });
         }
+      } else {
+        console.log("[RazorpayAPI] Coupon doc not found for ID:", lookupId);
       }
     }
 
-    if (!couponId && lookupCode) {
+    if (couponDiscountAmount === 0 && lookupCode) {
       // Fallback: query by code
       const snap = await adminDb.collection("coupons").where("code", "==", lookupCode).limit(1).get();
-      console.log("[coupon] fallback query results:", snap.size, "for code:", lookupCode);
       if (!snap.empty) {
         const d = snap.docs[0].data();
+        console.log("[RazorpayAPI] Found coupon by Code:", lookupCode);
+        
         const expiryMs = typeof d.expiryDate === "number" ? d.expiryDate
           : d.expiryDate?.toMillis?.() ?? 0;
-        console.log("[coupon] fallback isActive:", d.isActive, "expiryMs:", expiryMs, "type:", d.type, "value:", d.value);
-        if (d.isActive === true && (expiryMs === 0 || expiryMs > Date.now())) {
+        
+        const isCurrentlyActive = d.isActive === true || d.isActive === undefined;
+        const isNotExpired = expiryMs === 0 || expiryMs > Date.now();
+
+        if (isCurrentlyActive && isNotExpired) {
           couponId = snap.docs[0].id;
           resolvedCouponCode = (d.code as string) ?? lookupCode;
           couponDiscountAmount = d.type === "percentage"
-            ? subtotal * (d.value / 100)
+            ? subtotal * (Number(d.value) / 100)
             : Number(d.value);
+          console.log("[RazorpayAPI] Coupon Applied (Code):", { couponDiscountAmount, type: d.type, value: d.value });
         }
+      } else {
+        console.log("[RazorpayAPI] Coupon not found for Code:", lookupCode);
       }
     }
 
-    console.log("[coupon] final: couponId=", couponId, "discount=", couponDiscountAmount);
+    console.log("[RazorpayAPI] Final Totals:", { subtotal, couponDiscountAmount, finalSubtotal: subtotal - couponDiscountAmount });
 
 
     // 3. Shipping & Tax

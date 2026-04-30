@@ -48,15 +48,15 @@ const slugify = (text: string) =>
 
 const CATEGORY_IMAGE_MAP: Record<string, string> = {
   "Practice Materials": "/images/landing/practice-skins.png",
-  "Machines & Power Supplies": "/images/landing/precision-machine.png",
-  Machines: "/images/landing/precision-machine.png",
-  Pigments: "/images/landing/collection-hero.png",
-  Needles: "/images/landing/v3-cartridges.png",
+  "Machines & Power Supplies": "/images/landing/mast-p40.png",
+  Machines: "/images/landing/mast-p40.png",
+  Pigments: "/images/landing/mast-p60.png",
+  Needles: "/images/landing/mast-tour.png",
   "Q Vision Pigments": "/images/landing/q-vision.png",
   "Etalon Hybrid & Mineral": "/images/landing/etalon.png",
   "Anesthetic/Numbing": "/images/landing/numbing.png",
   Numbing: "/images/landing/numbing.png",
-  Aftercare: "/images/landing/aftercare.png",
+  Aftercare: "/images/landing/mast-pro.png",
   "Shaping Tools": "/images/landing/shaping-tools.png",
 };
 

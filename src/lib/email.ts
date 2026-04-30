@@ -1,4 +1,6 @@
 import { Resend } from "resend";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM_EMAIL = "PMU SUPPLY <support@pmusupplies.in>";
@@ -172,77 +174,147 @@ export async function sendOrderConfirmationEmail(order: any) {
 export async function sendInvoiceEmail(order: any) {
   const { id, total, items, shippingAddress, razorpayPaymentId, paymentVerifiedAt } = order;
 
-  const itemsHtml = items.map((item: any) => `
-    <tr>
-      <td style="padding: 12px; border: 1px solid #eee; font-size: 12px;">${item.productName}</td>
-      <td style="padding: 12px; border: 1px solid #eee; font-size: 12px; text-align: center;">${item.quantity}</td>
-      <td style="padding: 12px; border: 1px solid #eee; font-size: 12px; text-align: right;">₹${item.priceAtPurchase.toFixed(2)}</td>
-      <td style="padding: 12px; border: 1px solid #eee; font-size: 12px; text-align: right;">₹${(item.priceAtPurchase * item.quantity).toFixed(2)}</td>
-    </tr>
-  `).join("");
+  // 1. Generate PDF Invoice
+  let pdfBase64 = "";
+  try {
+    const doc = new jsPDF() as any;
+    const date = new Date(paymentVerifiedAt || Date.now()).toLocaleDateString();
+    const invoiceNo = `INV-${id.slice(-8).toUpperCase()}`;
+
+    // Header Branding
+    doc.setFillColor(0, 0, 0);
+    doc.rect(0, 0, 210, 40, "F");
+    doc.setTextColor(201, 168, 76); // Brand Gold
+    doc.setFontSize(24);
+    doc.text("PMU SUPPLY", 105, 20, { align: "center" });
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text("ELITE PROFESSIONAL EQUIPMENT", 105, 28, { align: "center" });
+
+    // Invoice Info
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(18);
+    doc.text("INVOICE", 20, 55);
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Date: ${date}`, 190, 55, { align: "right" });
+    doc.text(`Invoice #: ${invoiceNo}`, 190, 60, { align: "right" });
+
+    // Billing Info
+    doc.setTextColor(150, 150, 150);
+    doc.text("BILL TO:", 20, 75);
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(11);
+    doc.text(`${shippingAddress.firstName} ${shippingAddress.lastName}`, 20, 82);
+    doc.setFontSize(9);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`${shippingAddress.address}`, 20, 88);
+    doc.text(`${shippingAddress.city}, ${shippingAddress.zipCode}`, 20, 93);
+    doc.text(`${shippingAddress.email}`, 20, 98);
+
+    // Payment Info
+    doc.setTextColor(150, 150, 150);
+    doc.text("PAYMENT METHOD:", 120, 75);
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text("Razorpay Online", 120, 82);
+    doc.setTextColor(201, 168, 76);
+    doc.text(`ID: ${razorpayPaymentId || 'N/A'}`, 120, 88);
+
+    // Manual Table (Node-safe)
+    let y = 110;
+    doc.setFillColor(0, 0, 0);
+    doc.rect(20, y - 7, 170, 10, 'F');
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(10);
+    doc.text("Description", 25, y);
+    doc.text("Qty", 120, y);
+    doc.text("Price", 145, y);
+    doc.text("Total", 170, y);
+    
+    y += 15;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9);
+    
+    items.forEach((item: any) => {
+      doc.text(item.productName.substring(0, 45), 25, y);
+      doc.text(item.quantity.toString(), 122, y);
+      doc.text(`INR ${item.priceAtPurchase.toFixed(2)}`, 145, y);
+      doc.text(`INR ${(item.priceAtPurchase * item.quantity).toFixed(2)}`, 170, y);
+      y += 10;
+    });
+
+    const finalY = y > 150 ? y : 150;
+
+    // Totals
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Subtotal:", 140, finalY + 15);
+    doc.text(`INR ${(order.subtotal || total).toFixed(2)}`, 190, finalY + 15, { align: "right" });
+    
+    doc.text("Shipping:", 140, finalY + 22);
+    doc.text(`INR ${(order.shippingAmount || 0).toFixed(2)}`, 190, finalY + 22, { align: "right" });
+
+    doc.text("Tax (GST):", 140, finalY + 29);
+    doc.text(`INR ${(order.taxAmount || 0).toFixed(2)}`, 190, finalY + 29, { align: "right" });
+
+    if (order.discountAmount > 0) {
+      doc.setTextColor(34, 197, 94);
+      doc.text("Incentives:", 140, finalY + 36);
+      doc.text(`-INR ${order.discountAmount.toFixed(2)}`, 190, finalY + 36, { align: "right" });
+    }
+
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(12);
+    doc.text("GRAND TOTAL:", 140, finalY + 47);
+    doc.text(`INR ${total.toFixed(2)}`, 190, finalY + 47, { align: "right" });
+
+    // Footer Note
+    doc.setFontSize(8);
+    doc.setTextColor(180, 180, 180);
+    doc.text("Precision in Every Stroke. Quality in Every Asset.", 105, 280, { align: "center" });
+    doc.text("© 2026 PMU SUPPLY. ALL RIGHTS RESERVED.", 105, 285, { align: "center" });
+
+    const pdfOutput = doc.output("arraybuffer");
+    pdfBase64 = Buffer.from(pdfOutput).toString("base64");
+  } catch (pdfErr) {
+    console.error("PDF Generation Error:", pdfErr);
+  }
 
   const content = `
-    <div style="text-align: right; margin-bottom: 40px;">
-      <h2 style="font-size: 32px; font-weight: 800; color: #eee; margin: 0; text-transform: uppercase; letter-spacing: 5px;">INVOICE</h2>
-      <p style="font-size: 11px; color: #999; margin: 5px 0 0 0;">Date: ${new Date(paymentVerifiedAt || Date.now()).toLocaleDateString()}</p>
-      <p style="font-size: 11px; color: #999; margin: 2px 0 0 0;">Invoice #: INV-${id.slice(-8).toUpperCase()}</p>
+    <h2 style="font-size: 22px; font-weight: 300; margin-bottom: 20px;">Your Official <span style="color: #C9A84C; font-weight: 700;">Invoice</span></h2>
+    <p style="font-size: 15px; color: #444; margin-bottom: 30px;">Thank you for your professional acquisition. Please find your official invoice attached to this email in PDF format for your records.</p>
+    
+    <div style="background-color: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 25px; text-align: center;">
+      <p style="margin: 0; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px;">Order Reference</p>
+      <h3 style="margin: 10px 0; font-size: 20px; color: #000; font-weight: 700;">#${id}</h3>
+      <p style="margin: 15px 0 0 0; font-size: 13px; color: #C9A84C; font-weight: 700;">📎 PDF Invoice Attached</p>
     </div>
 
-    <div style="margin-bottom: 40px; display: flex; justify-content: space-between;">
-      <div style="width: 45%;">
-        <h3 style="font-size: 10px; text-transform: uppercase; color: #999; margin-bottom: 10px;">Billing To:</h3>
-        <p style="font-size: 13px; font-weight: 700; margin: 0;">${shippingAddress.firstName} ${shippingAddress.lastName}</p>
-        <p style="font-size: 12px; color: #666; margin: 5px 0 0 0;">${shippingAddress.address}, ${shippingAddress.city}</p>
-        <p style="font-size: 12px; color: #666; margin: 2px 0 0 0;">${shippingAddress.email}</p>
-      </div>
-      <div style="width: 45%; text-align: right;">
-        <h3 style="font-size: 10px; text-transform: uppercase; color: #999; margin-bottom: 10px;">Payment Method:</h3>
-        <p style="font-size: 13px; font-weight: 700; margin: 0;">Razorpay Online</p>
-        <p style="font-size: 11px; color: #C9A84C; font-weight: 700; margin: 5px 0 0 0;">Transaction ID: ${razorpayPaymentId || 'N/A'}</p>
-      </div>
-    </div>
-
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-      <thead>
-        <tr style="background-color: #000; color: #fff;">
-          <th style="padding: 12px; text-align: left; font-size: 10px; text-transform: uppercase;">Description</th>
-          <th style="padding: 12px; text-align: center; font-size: 10px; text-transform: uppercase;">Qty</th>
-          <th style="padding: 12px; text-align: right; font-size: 10px; text-transform: uppercase;">Unit Price</th>
-          <th style="padding: 12px; text-align: right; font-size: 10px; text-transform: uppercase;">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${itemsHtml}
-      </tbody>
-    </table>
-
-    <div style="margin-left: auto; width: 250px;">
-      <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
-        <span style="font-size: 12px; color: #666;">Subtotal</span>
-        <span style="font-size: 12px; font-weight: 700;">₹${total.toFixed(2)}</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
-        <span style="font-size: 12px; color: #666;">Shipping</span>
-        <span style="font-size: 12px; font-weight: 700;">₹0.00</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; padding: 15px 0; color: #C9A84C;">
-        <span style="font-size: 14px; font-weight: 800; text-transform: uppercase;">Grand Total</span>
-        <span style="font-size: 18px; font-weight: 800;">₹${total.toFixed(2)}</span>
-      </div>
-    </div>
-
-    <div style="margin-top: 50px; padding: 20px; border: 1px solid #eee; text-align: center;">
-      <p style="margin: 0; font-size: 11px; color: #999; font-style: italic;">This is a computer generated invoice for your professional professional assets purchase from PMU SUPPLY. Thank you for your business.</p>
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="${BASE_URL}/profile" style="background-color: #000; color: #fff; padding: 15px 30px; text-decoration: none; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; display: inline-block; border-radius: 4px;">View Order in Studio</a>
     </div>
   `;
 
   try {
-    await resend.emails.send({
+    const emailOptions: any = {
       from: FROM_EMAIL,
       to: [shippingAddress.email],
       subject: `Official Invoice | PMU SUPPLY Order #${id}`,
-      html: ProfessionalEmailWrapper(content, `Invoice for your order #${id} from PMU SUPPLY.`)
-    });
+      html: ProfessionalEmailWrapper(content, `Invoice for your order #${id} from PMU SUPPLY.`),
+    };
+
+    if (pdfBase64) {
+      emailOptions.attachments = [
+        {
+          filename: `Invoice-PMU-${id.slice(-8).toUpperCase()}.pdf`,
+          content: Buffer.from(pdfBase64, 'base64'),
+          contentType: 'application/pdf',
+        }
+      ];
+    }
+
+    await resend.emails.send(emailOptions);
     return { success: true };
   } catch (error) {
     console.error("Resend Order Update Error:", error);

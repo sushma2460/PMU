@@ -5,7 +5,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, orderBy, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { Order, Product } from "@/lib/types";
 import { getProducts } from "@/lib/services/admin";
 import { 
@@ -18,7 +18,8 @@ import {
   ExternalLink,
   ShieldCheck,
   Award,
-  LogOut
+  LogOut,
+  RotateCcw
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +34,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { setDoc, updateDoc } from "firebase/firestore";
 import { toast } from "sonner";
 
 const STATUS_CONFIG: Record<string, { color: string; icon: any }> = {
@@ -46,9 +46,6 @@ const STATUS_CONFIG: Record<string, { color: string; icon: any }> = {
   "refunded":   { color: "bg-orange-50 text-orange-600 border-orange-100", icon: <RotateCcw className="w-3 h-3" /> },
 };
 
-function RotateCcw(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>;
-}
 
 export default function ProfilePage() {
   const { user, profile, logout } = useAuth();
@@ -416,11 +413,13 @@ export default function ProfilePage() {
                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Investment Total</p>
                                <p className="text-xl font-heading text-zinc-900">₹{order.total?.toFixed(2)}</p>
                              </div>
-                             <Link href={`/profile/orders/${order.id}`}>
-                               <button className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-zinc-400 hover:text-brand-gold transition-colors uppercase">
-                                 Detailed Audit <ChevronRight className="w-3 h-3" />
-                               </button>
-                             </Link>
+                             <div className="flex items-center gap-4">
+                               <Link href={`/profile/orders/${order.id}`}>
+                                 <button className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-zinc-400 hover:text-brand-gold transition-colors uppercase">
+                                   Detailed Audit <ChevronRight className="w-3 h-3" />
+                                 </button>
+                               </Link>
+                             </div>
                           </div>
                         </div>
                       </div>

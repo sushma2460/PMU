@@ -118,6 +118,10 @@ export async function POST(req: Request) {
           const emailData = {
             id: razorpay_order_id,
             total: orderData.total,
+            subtotal: orderData.subtotal,
+            taxAmount: orderData.taxAmount,
+            shippingAmount: orderData.shippingAmount,
+            discountAmount: orderData.discountAmount || orderData.couponDiscountAmount || 0,
             items: orderData.items,
             shippingAddress: orderData.shippingAddress,
             razorpayPaymentId: razorpay_payment_id,

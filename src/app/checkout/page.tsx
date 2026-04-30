@@ -5,14 +5,16 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, CheckCircle2, CreditCard, ShieldCheck, Truck, FileDown } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuth } from "@/context/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, CheckCircle2, CreditCard, ShieldCheck, Truck } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { trackCheckoutStart, trackCheckoutComplete } from "@/lib/analytics";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -28,6 +30,7 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [razorpayOrder, setRazorpayOrder] = useState<any>(null);
+  const [finalPaymentDetails, setFinalPaymentDetails] = useState<{orderId: string, paymentId: string} | null>(null);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
@@ -82,64 +85,8 @@ export default function CheckoutPage() {
 
   const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsProcessing(true);
-
-    try {
-      // ── Auto-apply coupon if user typed a code but didn't click Apply ──────
-      let resolvedCoupon = appliedCoupon;
-      if (!resolvedCoupon && couponCode.trim()) {
-        try {
-          const res = await fetch("/api/validate-coupon", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code: couponCode.trim(), cartTotal: subtotal, userId: user?.uid }),
-          });
-          const data = await res.json();
-          if (data.success) {
-            resolvedCoupon = data.coupon;
-            setAppliedCoupon(data.coupon);
-            toast.success(`Coupon "${data.coupon.code}" applied!`);
-          } else {
-            // Typed code is invalid — warn but don't block checkout
-            toast.error(`Coupon "${couponCode}" is invalid and was not applied.`);
-          }
-        } catch {
-          // Non-blocking — proceed without coupon if validate-coupon fails
-        }
-      }
-
-      const response = await fetch("/api/create-razorpay-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          items, 
-          userId: user?.uid,
-          couponCode: resolvedCoupon?.code ?? null,
-          couponId:   resolvedCoupon?.id   ?? null,
-          shippingAddress: formData
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (data.orderId) {
-        setRazorpayOrder(data);
-        setStep(2);
-        window.scrollTo(0, 0);
-        // Fire checkout_start event
-        trackCheckoutStart(user?.uid ?? "guest", {
-          itemCount: items.length,
-          subtotal,
-          hasCoupon: !!resolvedCoupon,
-        });
-      } else {
-        toast.error(data.error || "Unable to initialize secure payment. Please try again.");
-      }
-    } catch (err) {
-      toast.error("Connection error. Please check your internet.");
-    } finally {
-      setIsProcessing(false);
-    }
+    setStep(2);
+    window.scrollTo(0, 0);
   };
 
 
@@ -153,56 +100,94 @@ export default function CheckoutPage() {
     }, 3000);
   };
 
-  const initiatePayment = () => {
-    if (!razorpayOrder) return;
+  const initiatePayment = async () => {
+    setIsProcessing(true);
+    try {
+      // 1. Create the Razorpay Order right before payment to ensure totals are final
+      const response = await fetch("/api/create-razorpay-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          items, 
+          userId: user?.uid,
+          couponCode: appliedCoupon?.code ?? null,
+          couponId:   appliedCoupon?.id   ?? null,
+          shippingAddress: formData
+        }),
+      });
 
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
-      amount: razorpayOrder.amount,
-      currency: razorpayOrder.currency,
-      name: "PMU SUPPLY",
-      description: "Elite Professional Equipment",
-      order_id: razorpayOrder.orderId,
-      handler: async function (response: any) {
-        try {
-          const verifyRes = await fetch("/api/verify-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            }),
-          });
-          
-          const verifyData = await verifyRes.json();
-          if (verifyData.verified) {
-            // Track checkout_complete before clearing cart
-            trackCheckoutComplete(user?.uid ?? "guest", {
-              orderId: response.razorpay_order_id,
-              total,
-              itemCount: items.length,
-              couponCode: appliedCoupon?.code,
+      const orderData = await response.json();
+      if (!orderData.orderId) {
+        throw new Error(orderData.error || "Failed to initialize payment");
+      }
+
+      // 2. Open Razorpay Modal
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "PMU SUPPLY",
+        description: "Elite Professional Equipment",
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          try {
+            const verifyRes = await fetch("/api/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
             });
-            handlePaymentSuccess();
-          } else {
-            toast.error("Payment verification failed. Please contact support.");
+            
+            const verifyData = await verifyRes.json();
+            if (verifyData.verified) {
+              setFinalPaymentDetails({
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id
+              });
+              trackCheckoutComplete(user?.uid ?? "guest", {
+                orderId: response.razorpay_order_id,
+                total,
+                itemCount: items.length,
+                couponCode: appliedCoupon?.code,
+              });
+              handlePaymentSuccess();
+            } else {
+              toast.error("Payment verification failed.");
+            }
+          } catch (err) {
+            toast.error("Error verifying payment.");
           }
-        } catch (err) {
-          toast.error("Error verifying payment.");
+        },
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+        },
+        theme: {
+          color: "#C9A84C",
+        },
+        modal: {
+          ondismiss: () => setIsProcessing(false)
         }
-      },
-      prefill: {
-        name: `${formData.firstName} ${formData.lastName}`,
-        email: formData.email,
-      },
-      theme: {
-        color: "#C9A84C",
-      },
-    };
+      };
 
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+      
+      // Track checkout start
+      trackCheckoutStart(user?.uid ?? "guest", {
+        itemCount: items.length,
+        subtotal,
+        hasCoupon: !!appliedCoupon,
+      });
+
+    } catch (err: any) {
+      toast.error(err.message || "Failed to initiate secure payment.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (items.length === 0 && step !== 3) {
@@ -244,10 +229,92 @@ export default function CheckoutPage() {
                 <p className="text-lg text-zinc-500 max-w-xl mx-auto font-light leading-relaxed">
                   Your order is being prepared with clinical care. We appreciate your professional trust.
                 </p>
-                <div className="pt-10">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-10">
+                  <Button 
+                    onClick={() => {
+                      try {
+                        const doc = new jsPDF() as any;
+                        const date = new Date().toLocaleDateString();
+                        const invoiceNo = `INV-${finalPaymentDetails?.orderId?.slice(-8).toUpperCase() || 'SUCCESS'}`;
+
+                        // Header Branding
+                        doc.setFillColor(0, 0, 0);
+                        doc.rect(0, 0, 210, 40, "F");
+                        doc.setTextColor(201, 168, 76);
+                        doc.setFontSize(24);
+                        doc.text("PMU SUPPLY", 105, 20, { align: "center" });
+                        doc.setFontSize(8);
+                        doc.setTextColor(255, 255, 255);
+                        doc.text("ELITE PROFESSIONAL EQUIPMENT", 105, 28, { align: "center" });
+
+                        // Invoice Info
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(18);
+                        doc.text("INVOICE", 20, 55);
+                        doc.setFontSize(9);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`Date: ${date}`, 190, 55, { align: "right" });
+                        doc.text(`Invoice #: ${invoiceNo}`, 190, 60, { align: "right" });
+
+                        // Billing
+                        doc.setTextColor(150, 150, 150);
+                        doc.text("BILL TO:", 20, 75);
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(11);
+                        doc.text(`${formData.firstName} ${formData.lastName}`, 20, 82);
+                        doc.setFontSize(9);
+                        doc.text(`${formData.address}`, 20, 88);
+                        doc.text(`${formData.city}, ${formData.zipCode}`, 20, 93);
+
+                        // Manual Table drawing (Reliable & Consistent)
+                        let yPos = 110;
+                        doc.setFillColor(0, 0, 0);
+                        doc.rect(20, yPos - 7, 170, 10, 'F');
+                        doc.setTextColor(201, 168, 76);
+                        doc.setFontSize(10);
+                        doc.text("Description", 25, yPos);
+                        doc.text("Qty", 120, yPos);
+                        doc.text("Price", 145, yPos);
+                        doc.text("Total", 170, yPos);
+                        
+                        yPos += 15;
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(9);
+                        
+                        items.forEach((item: any) => {
+                          const name = item.product.name.substring(0, 45);
+                          const qty = item.quantity.toString();
+                          const price = (item.product.salePrice || item.product.price).toFixed(2);
+                          const itemTotal = ((item.product.salePrice || item.product.price) * item.quantity).toFixed(2);
+                          
+                          doc.text(name, 25, yPos);
+                          doc.text(qty, 122, yPos);
+                          doc.text(`INR ${price}`, 145, yPos);
+                          doc.text(`INR ${itemTotal}`, 170, yPos);
+                          yPos += 10;
+                        });
+
+                        const finalY = yPos > 150 ? yPos : 150;
+                        doc.setTextColor(201, 168, 76);
+                        doc.setFontSize(12);
+                        doc.text("GRAND TOTAL:", 140, finalY + 25);
+                        doc.text(`INR ${total.toFixed(2)}`, 190, finalY + 25, { align: "right" });
+
+                        doc.save(`Invoice-PMU-${invoiceNo}.pdf`);
+                        toast.success("Downloading your invoice...");
+                      } catch (err) {
+                        toast.error("Failed to generate PDF. Check profile for download.");
+                      }
+                    }}
+                    size="lg" 
+                    variant="outline"
+                    className="w-full sm:w-auto h-14 px-8 rounded-none border-brand-gold text-brand-gold font-bold tracking-widest uppercase hover:bg-brand-gold hover:text-white"
+                  >
+                    <FileDown className="w-4 h-4 mr-2" /> DOWNLOAD INVOICE
+                  </Button>
                   <Link href="/products">
-                    <Button size="lg" className="bg-brand-black text-white hover:bg-brand-gold px-12 h-14 rounded-none font-bold tracking-[0.2em] transition-all">
-                      CONTINUE YOUR JOURNEY
+                    <Button size="lg" className="w-full sm:w-auto bg-brand-black text-white hover:bg-brand-gold px-12 h-14 rounded-none font-bold tracking-[0.2em] transition-all">
+                      CONTINUE JOURNEY
                     </Button>
                   </Link>
                 </div>
@@ -354,15 +421,14 @@ export default function CheckoutPage() {
                         REVISE DETAILS
                       </button>
                       
-                      {razorpayOrder && (
-                        <Button 
-                          onClick={initiatePayment}
-                          size="lg" 
-                          className="w-full sm:w-auto bg-brand-black text-white hover:bg-brand-gold px-4 md:px-12 h-14 rounded-none font-bold tracking-[0.2em] uppercase transition-all shadow-xl shadow-brand-gold/10 order-1 sm:order-2 text-[8px] md:text-[10px]"
-                        >
-                          PROCEED TO SECURE PAYMENT
-                        </Button>
-                      )}
+                      <Button 
+                        onClick={initiatePayment}
+                        disabled={isProcessing}
+                        size="lg" 
+                        className="w-full sm:w-auto bg-brand-black text-white hover:bg-brand-gold px-4 md:px-12 h-14 rounded-none font-bold tracking-[0.2em] uppercase transition-all shadow-xl shadow-brand-gold/10 order-1 sm:order-2 text-[8px] md:text-[10px]"
+                      >
+                        {isProcessing ? "INITIALIZING SECURE GATEWAY..." : "PROCEED TO SECURE PAYMENT"}
+                      </Button>
                     </div>
                   </div>
                 )}

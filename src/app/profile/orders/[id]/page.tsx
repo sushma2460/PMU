@@ -82,103 +82,111 @@ export default function OrderDetailsPage() {
   const generateInvoice = async () => {
     if (!order) return;
     const { default: jsPDF } = await import("jspdf");
-    const doc = new jsPDF();
+    await import("jspdf-autotable");
+    const doc = new jsPDF() as any;
+    const date = new Date(order.createdAt).toLocaleDateString();
+    const invoiceNo = `INV-${(order.id || "ORDER").slice(-8).toUpperCase()}`;
 
-    
-    // Header
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("PMU SUPPLY", 20, 25);
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text("Premium PMU Tools & Equipment", 20, 32);
-    
-    // Invoice Info
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("INVOICE", 140, 25);
-    
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Reference: ${order.id}`, 140, 32);
-    doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, 140, 37);
-    
-    doc.line(20, 45, 190, 45);
-    
-    // Billing Info
-    doc.setFont("helvetica", "bold");
-    doc.text("Billed To:", 20, 55);
-    doc.setFont("helvetica", "normal");
-    doc.text(`${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`, 20, 62);
-    doc.text(order.shippingAddress.address, 20, 67);
-    doc.text(`${order.shippingAddress.city}, ${order.shippingAddress.zipCode}`, 20, 72);
-    doc.text(order.shippingAddress.country, 20, 77);
-    
-    // Items Header
-    let y = 95;
-    doc.setFillColor(245, 245, 245);
-    doc.rect(20, y - 7, 170, 10, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.text("Item Description", 25, y);
-    doc.text("Qty", 120, y);
-    doc.text("Price", 145, y);
-    doc.text("Total", 170, y);
-    
-    y += 15;
-    doc.setFont("helvetica", "normal");
-    
-    order.items.forEach(item => {
-      // Check if we need a new page
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
-      
-      doc.text(item.productName, 25, y, { maxWidth: 90 });
-      doc.text(item.quantity.toString(), 122, y);
-      doc.text(`₹${item.priceAtPurchase.toFixed(2)}`, 145, y);
-      doc.text(`₹${(item.priceAtPurchase * item.quantity).toFixed(2)}`, 170, y);
-      y += 10;
-    });
-    
-    doc.line(20, y, 190, y);
-    y += 10;
-    
-    // Totals
-    const rightAlign = 190;
-    doc.text("Subtotal:", 140, y);
-    doc.text(`₹${order.subtotal?.toFixed(2)}`, rightAlign, y, { align: "right" });
-    y += 7;
-    
-    doc.text("Shipping:", 140, y);
-    doc.text(`₹${order.shippingAmount?.toFixed(2)}`, rightAlign, y, { align: "right" });
-    y += 7;
-    
-    doc.text("Tax (GST):", 140, y);
-    doc.text(`₹${order.taxAmount?.toFixed(2)}`, rightAlign, y, { align: "right" });
-    y += 7;
-    
-    if (order.discountAmount > 0) {
-      doc.setTextColor(34, 197, 94); // Green
-      doc.text("Discounts:", 140, y);
-      doc.text(`-₹${order.discountAmount?.toFixed(2)}`, rightAlign, y, { align: "right" });
-      doc.setTextColor(0, 0, 0);
-      y += 7;
-    }
-    
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Total Amount:", 140, y + 5);
-    doc.text(`₹${order.total?.toFixed(2)}`, rightAlign, y + 5, { align: "right" });
-    
-    // Footer
+    // Header Branding
+    doc.setFillColor(0, 0, 0);
+    doc.rect(0, 0, 210, 40, "F");
+    doc.setTextColor(201, 168, 76); // Brand Gold
+    doc.setFontSize(24);
+    doc.text("PMU SUPPLY", 105, 20, { align: "center" });
     doc.setFontSize(8);
-    doc.setFont("helvetica", "italic");
+    doc.setTextColor(255, 255, 255);
+    doc.text("ELITE PROFESSIONAL EQUIPMENT", 105, 28, { align: "center" });
+
+    // Invoice Info
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(18);
+    doc.text("INVOICE", 20, 55);
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Date: ${date}`, 190, 55, { align: "right" });
+    doc.text(`Invoice #: ${invoiceNo}`, 190, 60, { align: "right" });
+
+    // Billing Info
     doc.setTextColor(150, 150, 150);
-    doc.text("Thank you for choosing PMU SUPPLY. Your artistry is our priority.", 105, 285, { align: "center" });
+    doc.text("BILL TO:", 20, 75);
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(11);
+    doc.text(`${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`, 20, 82);
+    doc.setFontSize(9);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`${order.shippingAddress.address}`, 20, 88);
+    doc.text(`${order.shippingAddress.city}, ${order.shippingAddress.zipCode}`, 20, 93);
+    doc.text(`${order.shippingAddress.email}`, 20, 98);
+
+    // Payment Info
+    doc.setTextColor(150, 150, 150);
+    doc.text("PAYMENT METHOD:", 120, 75);
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text("Razorpay Online", 120, 82);
+    doc.setTextColor(201, 168, 76);
+    doc.text(`ID: ${order.razorpayPaymentId || 'N/A'}`, 120, 88);
+
+    // Manual Table (Node-safe & Identical to Email)
+    let yPos = 110;
+    doc.setFillColor(0, 0, 0);
+    doc.rect(20, yPos - 7, 170, 10, 'F');
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(10);
+    doc.text("Description", 25, yPos);
+    doc.text("Qty", 120, yPos);
+    doc.text("Price", 145, yPos);
+    doc.text("Total", 170, yPos);
     
-    doc.save(`Invoice_${order.id}.pdf`);
+    yPos += 15;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9);
+    
+    order.items.forEach((item: any) => {
+      // Handle page overflow if many items
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(item.productName.substring(0, 45), 25, yPos);
+      doc.text(item.quantity.toString(), 122, yPos);
+      doc.text(`INR ${item.priceAtPurchase.toFixed(2)}`, 145, yPos);
+      doc.text(`INR ${(item.priceAtPurchase * item.quantity).toFixed(2)}`, 170, yPos);
+      yPos += 10;
+    });
+
+    const finalY = yPos > 150 ? yPos : 150;
+
+    // Totals
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Subtotal:", 140, finalY + 15);
+    doc.text(`INR ${order.subtotal?.toFixed(2)}`, 190, finalY + 15, { align: "right" });
+    
+    doc.text("Shipping:", 140, finalY + 22);
+    doc.text(`INR ${order.shippingAmount?.toFixed(2)}`, 190, finalY + 22, { align: "right" });
+
+    doc.text("Tax (GST):", 140, finalY + 29);
+    doc.text(`INR ${order.taxAmount?.toFixed(2)}`, 190, finalY + 29, { align: "right" });
+
+    if (order.discountAmount > 0) {
+      doc.setTextColor(34, 197, 94);
+      doc.text("Incentives:", 140, finalY + 36);
+      doc.text(`-INR ${order.discountAmount?.toFixed(2)}`, 190, finalY + 36, { align: "right" });
+    }
+
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(12);
+    doc.text("GRAND TOTAL:", 140, finalY + 47);
+    doc.text(`INR ${order.total?.toFixed(2)}`, 190, finalY + 47, { align: "right" });
+
+    // Footer Note
+    doc.setFontSize(8);
+    doc.setTextColor(180, 180, 180);
+    doc.text("Precision in Every Stroke. Quality in Every Asset.", 105, 280, { align: "center" });
+    doc.text("© 2026 PMU SUPPLY. ALL RIGHTS RESERVED.", 105, 285, { align: "center" });
+
+    doc.save(`Invoice-PMU-${invoiceNo}.pdf`);
   };
 
   if (isLoading) {

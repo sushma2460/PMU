@@ -22,20 +22,24 @@ export async function POST(req: Request) {
     const couponData = couponSnapshot.docs[0].data();
     const couponId = couponSnapshot.docs[0].id;
 
-    // 1. Check Expiry
-    if (couponData.expiryDate && couponData.expiryDate < Date.now()) {
+    // 1. Check Expiry - Handle both number and Firestore Timestamp
+    const expiryDate = couponData.expiryDate;
+    const expiryMs = typeof expiryDate === "number" ? expiryDate 
+      : expiryDate?.toMillis?.() ?? 0;
+
+    if (expiryMs !== 0 && expiryMs < Date.now()) {
       return NextResponse.json({ error: "Coupon has expired" }, { status: 400 });
     }
 
     // 2. Check Usage Limit
-    if (couponData.usageLimit && couponData.usageCount >= couponData.usageLimit) {
+    if (couponData.usageLimit && (couponData.usageCount || 0) >= couponData.usageLimit) {
       return NextResponse.json({ error: "Coupon usage limit reached" }, { status: 400 });
     }
 
     // 3. Check Minimum Order Value
-    if (couponData.minimumOrderValue && cartTotal < couponData.minimumOrderValue) {
+    if (couponData.minimumOrderValue && cartTotal < Number(couponData.minimumOrderValue)) {
       return NextResponse.json({ 
-        error: `Minimum order of $${couponData.minimumOrderValue} required for this coupon` 
+        error: `Minimum order of ₹${couponData.minimumOrderValue} required for this coupon` 
       }, { status: 400 });
     }
 
