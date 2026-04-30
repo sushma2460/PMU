@@ -109,8 +109,9 @@ export default function AdminLoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white border border-brand-rose/30 shadow-xl mb-4 group transition-all duration-500 hover:border-brand-gold/50">
             <ShieldCheck className="w-8 h-8 text-brand-gold group-hover:scale-110 transition-transform" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-brand-black flex items-center justify-center gap-3 font-heading italic">
-             PMU <span className="text-zinc-400 font-light not-italic font-sans">SYSTEM ACCESS</span>
+          <h1 className="text-2xl font-bold tracking-tight text-brand-black flex items-center justify-center gap-3">
+             <img src="/images/logo1.png" alt="PMU SUPPLY" className="h-48 w-auto object-contain mix-blend-multiply brightness-[1.02]" />
+             <span className="text-zinc-400 font-light font-sans uppercase tracking-[0.1em] text-lg">SYSTEM ACCESS</span>
           </h1>
           <p className="text-zinc-400 text-xs tracking-[0.2em] uppercase font-medium">Secured Administrative Gateway</p>
         </div>

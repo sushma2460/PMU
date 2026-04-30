@@ -19,7 +19,7 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
+  const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
   const [announcement, setAnnouncement] = useState("");
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export function Navbar() {
             })
             .map((c: any) => c.description.trim())
         ));
-        
+
         if (descriptions.length > 0) {
           setAnnouncement(descriptions.join(' • '));
         } else {
@@ -71,8 +71,8 @@ export function Navbar() {
   const slugify = (text: string) => {
     return text
       .toLowerCase()
-      .replace(/[\s/&_-]+/g, '-') 
-      .replace(/[^\w-]/g, '')    
+      .replace(/[\s/&_-]+/g, '-')
+      .replace(/[^\w-]/g, '')
       .replace(/^-+|-+$/g, '');
   };
 
@@ -85,7 +85,7 @@ export function Navbar() {
       toast.error(error.message || "Failed to logout");
     }
   };
-  
+
   return (
     <>
       <header className="relative w-full bg-white border-b">
@@ -96,13 +96,13 @@ export function Navbar() {
             </span>
           </div>
         )}
-        
+
         <div className="w-full px-4 md:px-12">
           {/* Row 1: Logo and Action Icons */}
           <div className="flex items-center justify-between h-16 md:h-20 relative">
             {/* Mobile Toggler */}
             <div className="flex-1 lg:hidden">
-              <button 
+              <button
                 onClick={() => setMobileMenuOpen(true)}
                 className="p-2 hover:bg-zinc-100 rounded-md transition-colors text-brand-black"
               >
@@ -110,10 +110,13 @@ export function Navbar() {
               </button>
             </div>
 
-            {/* Logo - Centered for Premium Look */}
-            <div className="flex-shrink-0 flex justify-center lg:absolute lg:left-1/2 lg:-translate-x-1/2">
-              <Link href={user ? "/products" : "/"} className="font-heading font-bold text-lg md:text-4xl tracking-tighter text-brand-black uppercase">
-                PMU<span className="text-brand-gold pl-1">SUPPLY</span>
+            <div className="flex-shrink-0 flex justify-center lg:absolute lg:left-1/2 lg:-translate-x-1/2 z-20">
+              <Link href={user ? "/products" : "/"} className="block group transition-all duration-300 hover:scale-105">
+                <img
+                  src="/images/logo1.png"
+                  alt="PMU SUPPLY"
+                  className="h-32 md:h-52 w-auto object-contain mix-blend-multiply brightness-[1.02] contrast-[1.05] drop-shadow-md transition-all duration-500"
+                />
               </Link>
             </div>
 
@@ -146,7 +149,7 @@ export function Navbar() {
           <nav className="hidden lg:flex flex-wrap items-center justify-center gap-x-8 gap-y-4 py-4 border-t border-zinc-50">
             <Link href="/products" className="text-[11px] font-bold tracking-[0.2em] text-zinc-800 hover:text-brand-gold transition-colors whitespace-nowrap uppercase">Shop All</Link>
             {categories.map((cat: any) => (
-              <Link 
+              <Link
                 key={cat.id}
                 href={`/products?category=${slugify(cat.name)}`}
                 className="text-[11px] font-bold tracking-[0.2em] text-zinc-800 hover:text-brand-gold transition-colors whitespace-nowrap uppercase"
@@ -164,9 +167,13 @@ export function Navbar() {
         <div className="fixed inset-0 z-[200] lg:hidden bg-brand-cream animate-in slide-in-from-left duration-300 overflow-y-auto">
           <div className="container mx-auto px-4 py-6 flex flex-col gap-8 pb-20">
             <div className="flex items-center justify-between border-b border-brand-gold/10 pb-4">
-              <span className="font-heading font-bold text-xl tracking-tighter text-brand-black uppercase">
-                PMU<span className="text-brand-gold pl-1">SUPPLY</span>
-              </span>
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block">
+                <img
+                  src="/images/logo1.png"
+                  alt="PMU SUPPLY"
+                  className="h-28 w-auto object-contain mix-blend-multiply brightness-[1.02]"
+                />
+              </Link>
               <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-zinc-100 rounded-full transition-colors text-brand-black">
                 <X className="h-6 w-6" />
               </button>
@@ -176,7 +183,7 @@ export function Navbar() {
               <p className="text-[10px] font-black tracking-[0.4em] uppercase text-zinc-400">Product Categories</p>
               <div className="grid grid-cols-1 gap-6 pl-2">
                 {categories.map((cat: any) => (
-                  <Link 
+                  <Link
                     key={cat.id}
                     onClick={() => setMobileMenuOpen(false)}
                     href={`/products?category=${slugify(cat.name)}`}

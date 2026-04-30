@@ -357,9 +357,8 @@ export function ProductGridClient({ initialProducts, initialCategories }: Produc
                 <img
                   src={product.imageUrls[0]}
                   alt={product.name}
-                  className="w-full h-full transition-transform duration-700 group-hover:scale-105"
-                  style={{ objectFit: "cover" }}
                   loading="lazy"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-zinc-200">

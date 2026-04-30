@@ -130,7 +130,7 @@ export function ProductDetailClient({ product, recommended }: ProductDetailClien
                   <img
                     src={product.imageUrls[activeImage] || product.imageUrls[0]}
                     alt={product.name}
-                    className="w-full h-full object-cover select-none"
+                    className="w-full h-full object-contain select-none p-1"
                   />
                 </motion.div>
               </AnimatePresence>
@@ -330,7 +330,7 @@ export function ProductDetailClient({ product, recommended }: ProductDetailClien
                 <Link key={item.id} href={`/products/${item.id}`} className="group block space-y-4">
                   <div className="relative aspect-square rounded-none overflow-hidden bg-zinc-50 border border-zinc-100 transition-all duration-700 group-hover:shadow-lg">
                     <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-[3s] group-hover:scale-105"
+                      className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-[3s] group-hover:scale-105"
                       style={{ backgroundImage: `url("${item.imageUrls[0]}")` }}
                     />
                   </div>

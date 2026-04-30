@@ -335,7 +335,7 @@ export default function AdminAnalyticsPage() {
                   {coupons.map(c => (
                     <tr key={c.code} className="hover:bg-zinc-50 transition-colors">
                       <td className="py-3 pr-4 font-black text-zinc-900 font-mono tracking-widest text-[11px]">{c.code}</td>
-                      <td className="py-3 pr-4 capitalize text-zinc-500">{c.type.replace("_", " ")}</td>
+                      <td className="py-3 pr-4 capitalize text-zinc-500">{c.type?.replace("_", " ") ?? "—"}</td>
                       <td className="py-3 pr-4 font-bold text-zinc-700">{c.usageCount}</td>
                       <td className="py-3 pr-4 font-bold text-red-500">{fmtRs(c.discountGiven)}</td>
                       <td className="py-3 pr-4 font-bold text-emerald-600">{fmtRs(c.influencedRevenue)}</td>

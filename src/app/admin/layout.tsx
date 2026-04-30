@@ -88,10 +88,14 @@ export default function AdminLayout({
         
         {/* Desktop Sidebar */}
         <aside className="hidden lg:flex w-64 border-r bg-white border-zinc-200 flex-col shrink-0 no-scrollbar">
-          <div className="h-16 flex items-center px-6 border-b border-zinc-200">
-            <Link href="/admin" className="font-bold text-xl tracking-tight uppercase">
-              PMU
-              <span className="text-brand-gold font-normal"> ADMIN</span>
+          <div className="h-20 flex items-center px-6 border-b border-zinc-200">
+            <Link href="/admin" className="flex items-center gap-2 group">
+              <img 
+                src="/images/logo1.png" 
+                alt="PMU SUPPLY" 
+                className="h-14 w-auto object-contain mix-blend-multiply brightness-[1.02]"
+              />
+              <span className="font-bold text-lg tracking-tight uppercase text-brand-gold font-normal"> ADMIN</span>
             </Link>
           </div>
           
@@ -122,10 +126,15 @@ export default function AdminLayout({
               className="w-72 h-full bg-white flex flex-col animate-in slide-in-from-left duration-300 no-scrollbar"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="h-16 flex items-center justify-between px-6 border-b border-zinc-200">
-                <span className="font-bold text-xl tracking-tight uppercase">
-                  PMU<span className="text-brand-gold font-normal"> ADMIN</span>
-                </span>
+              <div className="h-20 flex items-center justify-between px-6 border-b border-zinc-200">
+                <div className="flex items-center gap-2">
+                  <img 
+                    src="/images/logo1.png" 
+                    alt="PMU SUPPLY" 
+                    className="h-12 w-auto object-contain mix-blend-multiply brightness-[1.02]"
+                  />
+                  <span className="font-bold text-lg tracking-tight uppercase text-brand-gold font-normal"> ADMIN</span>
+                </div>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-zinc-500">
                   <X size={24} />
                 </button>

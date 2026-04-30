@@ -238,6 +238,11 @@ export default async function Home() {
 
       <SectionDivider />
 
+      {/* Featured Products — server rendered */}
+      <FeaturedProducts products={featuredProducts} />
+
+      <SectionDivider />
+
       {/* Featured Collections */}
       <section className="py-24 container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
@@ -270,10 +275,6 @@ export default async function Home() {
       </section>
 
       <SectionDivider />
-
-      {/* Featured Products — server rendered */}
-      <FeaturedProducts products={featuredProducts} />
-
       <SectionDivider />
       
       {/* Dynamic Banners — ALL banners now appear together above results */}
