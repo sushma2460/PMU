@@ -14,13 +14,13 @@ export const metadata: Metadata = {
     description: "Get in touch with our team for product inquiries, shipping, and support.",
     type: "website",
     siteName: "PMU Supply",
-    images: [{ url: "/images/landing/collection-hero.png", width: 1200, height: 630, alt: "Contact PMU Supply" }],
+    images: [{ url: "/images/landing/master-studio.png", width: 1200, height: 630, alt: "Contact PMU Supply" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Contact PMU Supply",
     description: "Get in touch with our team for product inquiries, shipping, and support.",
-    images: ["/images/landing/collection-hero.png"],
+    images: ["/images/landing/master-studio.png"],
   },
 };
 
@@ -34,7 +34,7 @@ export default function ContactPage() {
         <div className="absolute inset-0 z-0">
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-20"
-            style={{ backgroundImage: 'url("/images/landing/collection-hero.png")' }}
+            style={{ backgroundImage: 'url("/images/landing/master-studio.png")' }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-rose via-transparent to-transparent z-10" />
         </div>
