@@ -14,13 +14,13 @@ export const metadata: Metadata = {
     description: "Get in touch with our team for product inquiries, shipping, and support.",
     type: "website",
     siteName: "PMU Supply",
-    images: [{ url: "/images/landing/collection-hero.png", width: 1200, height: 630, alt: "Contact PMU Supply" }],
+    images: [{ url: "/images/landing/master-studio.png", width: 1200, height: 630, alt: "Contact PMU Supply" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Contact PMU Supply",
     description: "Get in touch with our team for product inquiries, shipping, and support.",
-    images: ["/images/landing/collection-hero.png"],
+    images: ["/images/landing/master-studio.png"],
   },
 };
 
@@ -34,7 +34,7 @@ export default function ContactPage() {
         <div className="absolute inset-0 z-0">
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-20"
-            style={{ backgroundImage: 'url("/images/landing/collection-hero.png")' }}
+            style={{ backgroundImage: 'url("/images/landing/master-studio.png")' }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-rose via-transparent to-transparent z-10" />
         </div>
@@ -43,7 +43,7 @@ export default function ContactPage() {
             <span className="text-brand-black text-[10px] font-bold tracking-[0.5em] uppercase">Connect With Us</span>
             <h1 className="text-5xl md:text-7xl font-heading text-brand-black">Contact <span className="italic text-white">Hub</span></h1>
             <p className="text-brand-black/70 font-light italic max-w-lg">
-              Our master support team is here to assist with product inquiries, technical specifications, and shipping details.
+              Our support team is here to assist with product inquiries, order status, shipping, returns, and technical specifications. Business hours: Monday to Saturday, 10:00 AM to 7:00 PM IST.
             </p>
           </div>
         </div>
@@ -65,22 +65,28 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-8">
-                   <ContactItem 
-                    icon={<Mail className="w-5 h-5" />} 
-                    label="Email Inquiry" 
-                    value="info@pmusupply.com" 
-                    href="mailto:info@pmusupply.com"
+                   <ContactItem
+                    icon={<Mail className="w-5 h-5" />}
+                    label="Email Support"
+                    value="support@pmusupply.in"
+                    href="mailto:support@pmusupply.in"
                   />
-                  <ContactItem 
-                    icon={<MessageCircle className="w-5 h-5" />} 
-                    label="WhatsApp Support" 
-                    value="+1 (555) 000-0000" 
-                    href="tel:+15550000000"
+                  <ContactItem
+                    icon={<Phone className="w-5 h-5" />}
+                    label="Customer Care"
+                    value="+91 00000 00000"
+                    href="tel:+910000000000"
                   />
-                  <ContactItem 
-                    icon={<MapPin className="w-5 h-5" />} 
-                    label="USA Logistics" 
-                    value="Distributing Excellence from USA & Canada" 
+                  <ContactItem
+                    icon={<MessageCircle className="w-5 h-5" />}
+                    label="WhatsApp"
+                    value="+91 00000 00000"
+                    href="https://wa.me/910000000000"
+                  />
+                  <ContactItem
+                    icon={<MapPin className="w-5 h-5" />}
+                    label="Registered Address"
+                    value="PMU SUPPLY, [Registered Business Address], India"
                   />
                 </div>
               </div>
