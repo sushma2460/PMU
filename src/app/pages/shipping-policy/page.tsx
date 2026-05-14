@@ -85,7 +85,7 @@ export default function ShippingPolicyPage() {
 
             <Block icon={<Mail className="text-brand-gold w-8 h-8" />} title="Shipping Support">
               <p>
-                For any shipping or delivery question, write to <strong>support@pmusupply.in</strong> with your order number. Our team responds within 1&ndash;2 business days.
+                For any shipping or delivery question, write to <strong>pmusuppliesindia@gmail.com</strong> or WhatsApp <strong>+91 73309 09977</strong> with your order number. Our team responds within 1&ndash;2 business days.
               </p>
             </Block>
 

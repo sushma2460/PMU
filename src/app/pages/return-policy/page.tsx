@@ -35,7 +35,7 @@ export default function ReturnPolicyPage() {
             {/* Order Cancellation */}
             <Block icon={<XCircle className="text-brand-gold w-8 h-8" />} title="Order Cancellation">
               <p>
-                Orders may be cancelled free of charge any time before they are dispatched from our warehouse. To cancel, email <strong>support@pmusupply.in</strong> with your order number as soon as possible. Once an order has been handed over to the courier it can no longer be cancelled, but a return may still be requested under the conditions below.
+                Orders may be cancelled free of charge any time before they are dispatched from our warehouse. To cancel, email <strong>pmusuppliesindia@gmail.com</strong> or WhatsApp <strong>+91 73309 09977</strong> with your order number as soon as possible. Once an order has been handed over to the courier it can no longer be cancelled, but a return may still be requested under the conditions below.
               </p>
             </Block>
 
@@ -70,7 +70,7 @@ export default function ReturnPolicyPage() {
             {/* Damaged / Wrong */}
             <Block icon={<ShieldCheck className="text-brand-gold w-8 h-8" />} title="Damaged, Defective or Incorrect Items">
               <p>
-                If you receive a damaged, defective, or incorrect item, please notify us within <strong>24 hours</strong> of delivery at <strong>support@pmusupply.in</strong> with your order number and clear photographs of the product and packaging. After verification, we will arrange a free replacement or, if a replacement is not possible, a full refund.
+                If you receive a damaged, defective, or incorrect item, please notify us within <strong>24 hours</strong> of delivery at <strong>pmusuppliesindia@gmail.com</strong> or WhatsApp <strong>+91 73309 09977</strong> with your order number and clear photographs of the product and packaging. After verification, we will arrange a free replacement or, if a replacement is not possible, a full refund.
               </p>
             </Block>
 
@@ -92,7 +92,7 @@ export default function ReturnPolicyPage() {
             {/* How to Initiate */}
             <Block icon={<Mail className="text-brand-gold w-8 h-8" />} title="How to Initiate a Return">
               <ol className="list-decimal pl-6 space-y-2">
-                <li>Email <strong>support@pmusupply.in</strong> within the eligible window with your order number (e.g. INV-XXXXXX) and the reason for return.</li>
+                <li>Email <strong>pmusuppliesindia@gmail.com</strong> or WhatsApp <strong>+91 73309 09977</strong> within the eligible window with your order number (e.g. INV-XXXXXX) and the reason for return.</li>
                 <li>Our team will respond within 1&ndash;2 business days with return instructions and a return address.</li>
                 <li>Pack the item securely in its original packaging and ship it via a trackable courier.</li>
                 <li>Once received and inspected, your refund will be initiated as described above.</li>

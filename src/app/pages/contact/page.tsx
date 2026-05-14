@@ -68,20 +68,20 @@ export default function ContactPage() {
                    <ContactItem
                     icon={<Mail className="w-5 h-5" />}
                     label="Email Support"
-                    value="support@pmusupply.in"
-                    href="mailto:support@pmusupply.in"
+                    value="pmusuppliesindia@gmail.com"
+                    href="mailto:pmusuppliesindia@gmail.com"
                   />
                   <ContactItem
                     icon={<Phone className="w-5 h-5" />}
                     label="Customer Care"
-                    value="+91 00000 00000"
-                    href="tel:+910000000000"
+                    value="+91 73309 09977"
+                    href="tel:+917330909977"
                   />
                   <ContactItem
                     icon={<MessageCircle className="w-5 h-5" />}
                     label="WhatsApp"
-                    value="+91 00000 00000"
-                    href="https://wa.me/910000000000"
+                    value="+91 73309 09977"
+                    href="https://wa.me/917330909977"
                   />
                   <ContactItem
                     icon={<MapPin className="w-5 h-5" />}

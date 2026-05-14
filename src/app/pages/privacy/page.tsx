@@ -104,8 +104,8 @@ export default function PrivacyPolicyPage() {
                 For any privacy-related question, request, or grievance, please contact:
               </p>
               <ul className="list-none pl-0 space-y-1">
-                <li><strong>Email:</strong> support@pmusupply.in</li>
-                <li><strong>Address:</strong> PMU SUPPLY, [Registered Business Address], India</li>
+                <li><strong>Email:</strong> pmusuppliesindia@gmail.com</li>
+                <li><strong>Phone / WhatsApp:</strong> +91 73309 09977</li>
               </ul>
               <p>
                 We aim to respond to all valid requests within 30 days.

@@ -74,7 +74,7 @@ export default function TermsPage() {
 
             <Block icon={<Mail className="text-brand-gold w-8 h-8" />} title="8. Contact">
               <p>
-                Questions about these Terms can be sent to <strong>support@pmusupply.in</strong>, or by post to PMU SUPPLY, [Registered Business Address], India.
+                Questions about these Terms can be sent to <strong>pmusuppliesindia@gmail.com</strong> or call/WhatsApp <strong>+91 73309 09977</strong>.
               </p>
             </Block>
 

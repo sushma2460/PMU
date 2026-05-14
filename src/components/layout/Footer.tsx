@@ -6,7 +6,7 @@ import Image from "next/image";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { SocialLinks } from "@/lib/types";
-import { MessageCircle, X, Phone, Globe } from "lucide-react";
+import { MessageCircle, X, Phone, Globe, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const SocialIcons = {
@@ -81,6 +81,22 @@ export function Footer() {
                   "The ultimate destination for elite permanent makeup artists in India. We curate only the most precise, medical-grade tools to empower your creative vision."
                 </p>
               </div>
+            </div>
+
+            {/* Contact Info */}
+            <div className="space-y-2 pt-2">
+              <a href="mailto:pmusuppliesindia@gmail.com" className="flex items-center gap-2 text-zinc-700 hover:text-brand-gold transition-colors text-[11px] font-bold tracking-widest">
+                <Mail size={14} />
+                pmusuppliesindia@gmail.com
+              </a>
+              <a href="tel:+917330909977" className="flex items-center gap-2 text-zinc-700 hover:text-brand-gold transition-colors text-[11px] font-bold tracking-widest">
+                <Phone size={14} />
+                +91 73309 09977
+              </a>
+              <a href="https://wa.me/917330909977" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-zinc-700 hover:text-brand-gold transition-colors text-[11px] font-bold tracking-widest">
+                <MessageCircle size={14} />
+                WhatsApp
+              </a>
             </div>
 
             {/* Social Presence - Now under description */}
